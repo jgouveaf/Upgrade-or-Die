@@ -45,6 +45,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     create() {
+        console.log("GameScene: Creating...");
         this.player = new Player(this, 400, 300);
 
         this.enemies = this.physics.add.group({
@@ -121,9 +122,14 @@ export class GameScene extends Phaser.Scene {
     }
 
     spawnWave() {
+        console.log(`Starting Wave ${this.wave}`);
         this.enemiesKilled = 0;
         this.enemiesSpawned = 0;
         this.enemiesPerWave = 1 + (this.wave * 2);
+
+        // Spawn first enemy immediately
+        this.spawnEnemy();
+        this.enemiesSpawned++;
 
         this.time.addEvent({
             delay: 1500,
@@ -134,7 +140,7 @@ export class GameScene extends Phaser.Scene {
                 }
             },
             callbackScope: this,
-            repeat: this.enemiesPerWave - 1
+            repeat: this.enemiesPerWave - 2 // -2 because we already spawned 1
         });
     }
 
