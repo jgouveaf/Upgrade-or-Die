@@ -21,10 +21,18 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
 
     update(player) {
+        if (this.scene.isWavePaused) {
+            this.setVelocity(0);
+            return;
+        }
+
         const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
 
         // Move towards player
         if (distance < 2000) {
+            if (this.body.velocity.x === 0 && this.body.velocity.y === 0) {
+                console.log("Enemy starting movement towards player");
+            }
             this.scene.physics.moveToObject(this, player, this.speed);
             this.setRotation(Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y) + Math.PI / 2);
 
@@ -66,6 +74,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     die() {
         // Drop coins
         this.scene.spawnCoin(this.x, this.y);
+        this.scene.enemiesKilled++;
         this.destroy();
     }
 }

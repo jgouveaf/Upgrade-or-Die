@@ -175,10 +175,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     spawnWave() {
-        console.log(`Starting Wave ${this.wave}`);
+        console.log(`Starting Wave ${this.wave}. Target: ${this.enemiesPerWave} enemies.`);
         this.enemiesKilled = 0;
         this.enemiesSpawned = 0;
-        this.enemiesPerWave = 1 + (this.wave * 2);
 
         // Spawn first enemy immediately
         this.spawnEnemy();
