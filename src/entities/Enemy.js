@@ -3,6 +3,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         super(scene, x, y, 'enemy');
         scene.add.existing(this);
         scene.physics.add.existing(this);
+        console.log("Enemy instance created at", x, y);
 
         // Scale stats by wave
         this.health = 20 * (1 + (wave * 0.15));

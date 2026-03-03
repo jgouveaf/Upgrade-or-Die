@@ -145,10 +145,13 @@ export class GameScene extends Phaser.Scene {
     }
 
     spawnEnemy() {
-        const side = Phaser.Math.Between(0, 3); // 0-Top, 1-Right, 2-Bottom, 3-Left
+        // FOR DEBUG: Spawn at center alternating with borders
+        const side = Phaser.Math.Between(0, 4);
         let x, y;
 
-        if (side === 0) { x = Phaser.Math.Between(0, 800); y = -50; }
+        if (side === 4) { // Debug spawn
+            x = 400; y = 100;
+        } else if (side === 0) { x = Phaser.Math.Between(0, 800); y = -50; }
         else if (side === 1) { x = 850; y = Phaser.Math.Between(0, 600); }
         else if (side === 2) { x = Phaser.Math.Between(0, 800); y = 650; }
         else { x = -50; y = Phaser.Math.Between(0, 600); }
