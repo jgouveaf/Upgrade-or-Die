@@ -110,13 +110,6 @@ export class GameScene extends Phaser.Scene {
         this.keys = this.input.keyboard.addKeys('W,A,S,D');
         this.input.on('pointerdown', () => this.shoot());
 
-        // Wave logic
-        this.wave = 1;
-        this.enemiesPerWave = 3;
-        this.enemiesSpawned = 0;
-        this.enemiesKilled = 0;
-        this.isWavePaused = false;
-
         this.spawnWave();
 
         // Overlap/Collisions
@@ -166,9 +159,7 @@ export class GameScene extends Phaser.Scene {
 
         this.player.update({ ...this.cursors, ...this.keys }, this.input.activePointer);
 
-        this.enemies.getChildren().forEach(enemy => {
-            enemy.update(this.player);
-        });
+        // Enemies are updated automatically by Group(runChildUpdate: true)
 
         // Check wave complete
         if (this.enemiesKilled >= this.enemiesPerWave && !this.isWavePaused) {
@@ -276,65 +267,6 @@ export class GameScene extends Phaser.Scene {
         document.getElementById('health-pct').innerText = Math.max(0, Math.floor(this.player.health));
     }
 
-    showShop() {
-        const ui = document.getElementById('ui-layer');
-        const shop = document.createElement('div');
-        shop.className = 'shop-overlay';
-
-        const upgrades = [
-            { id: 'health', name: 'Nano-Armor', desc: '+20 Max HP & Restore HP', cost: 50 * (this.wave) },
-            { id: 'damage', name: 'Power Cells', desc: '+15% Damage Multiplier', cost: 75 * (this.wave) },
-            { id: 'speed', name: 'Rocket Boots', desc: '+10% Movement Speed', cost: 40 * (this.wave) }
-        ];
-
-        // Pick 3 random (well, we only have 3 for now, but in future it could be random)
-        const selected = upgrades.sort(() => 0.5 - Math.random());
-
-        shop.innerHTML = `
-            <h2 class="shop-title">WAVE ${this.wave - 1} CLEAR</h2>
-            <p style="margin-bottom: 20px;">Choose an Upgrade</p>
-            <div class="upgrade-container">
-                ${selected.map(up => `
-                    <div class="upgrade-card" data-id="${up.id}" data-cost="${up.cost}">
-                        <h3>${up.name}</h3>
-                        <p>${up.desc}</p>
-                        <div class="cost">${up.cost} Coins</div>
-                    </div>
-                `).join('')}
-            </div>
-            <button id="skip-shop" style="margin-top: 30px; background: none; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Continue to Next Wave</button>
-        `;
-
-        ui.appendChild(shop);
-
-        shop.querySelectorAll('.upgrade-card').forEach(card => {
-            card.onclick = () => {
-                const cost = parseInt(card.dataset.cost);
-                if (this.player.coins >= cost) {
-                    this.player.coins -= cost;
-                    this.applyUpgrade(card.dataset.id);
-                    this.nextWave();
-                } else {
-                    card.style.borderColor = 'red';
-                    setTimeout(() => card.style.borderColor = 'rgba(255,255,255,0.1)', 500);
-                }
-            };
-        });
-
-        shop.querySelector('#skip-shop').onclick = () => this.nextWave();
-    }
-
-    applyUpgrade(id) {
-        if (id === 'health') {
-            this.player.maxHealth += 20;
-            this.player.health = this.player.maxHealth;
-        } else if (id === 'damage') {
-            this.player.damageMultiplier += 0.15;
-        } else if (id === 'speed') {
-            this.player.speedMultiplier += 0.10;
-        }
-        this.updateUI();
-    }
 
     nextWave() {
         this.isWavePaused = false;
