@@ -6,6 +6,7 @@ export class UpgradeScene extends Phaser.Scene {
     init(data) {
         this.playerData = data.player;
         this.wave = data.wave;
+        this.difficulty = data.difficulty || 'normal';
     }
 
     create() {
@@ -15,13 +16,14 @@ export class UpgradeScene extends Phaser.Scene {
         this.add.rectangle(0, 0, width, height, 0x0a0a0c, 0.9).setOrigin(0);
 
         this.add.text(width / 2, 50, `WAVE ${this.wave} COMPLETE`, {
-            fontSize: '48px',
-            fill: '#ff0055',
-            fontWeight: 'bold'
+            fontSize: '28px',
+            fontFamily: '"Press Start 2P"',
+            fill: '#ff0055'
         }).setOrigin(0.5);
 
-        this.add.text(width / 2, 100, `Coins: ${this.playerData.coins}`, {
-            fontSize: '24px',
+        this.add.text(width / 2, 100, `$ ${this.playerData.coins}`, {
+            fontSize: '18px',
+            fontFamily: '"Press Start 2P"',
             fill: '#ffda00'
         }).setOrigin(0.5);
 
@@ -51,7 +53,11 @@ export class UpgradeScene extends Phaser.Scene {
             card.on('pointerdown', () => {
                 if (this.playerData.coins >= up.cost) {
                     this.applyUpgrade(up.id, up.cost);
-                    this.scene.start('GameScene', { player: this.playerData, wave: this.wave + 1 });
+                    this.scene.start('GameScene', {
+                        player: this.playerData,
+                        wave: this.wave + 1,
+                        difficulty: this.difficulty
+                    });
                 } else {
                     this.cameras.main.shake(100, 0.01);
                     costText.setFill('#ff0000');
@@ -66,7 +72,11 @@ export class UpgradeScene extends Phaser.Scene {
             .setInteractive({ useHandCursor: true });
 
         skip.on('pointerdown', () => {
-            this.scene.start('GameScene', { player: this.playerData, wave: this.wave + 1 });
+            this.scene.start('GameScene', {
+                player: this.playerData,
+                wave: this.wave + 1,
+                difficulty: this.difficulty
+            });
         });
     }
 

@@ -8,12 +8,22 @@ export class GameScene extends Phaser.Scene {
 
     init(data) {
         this.wave = data.wave || 1;
+        this.difficulty = data.difficulty || 'normal';
         this.enemiesPerWave = 3 + (this.wave - 1) * 5;
         this.enemiesSpawned = 0;
         this.enemiesKilled = 0;
         this.isWavePaused = false;
 
-        console.log(`GameScene Init: Wave ${this.wave}, Total Enemies: ${this.enemiesPerWave}`);
+        // Difficulty Settings
+        const config = {
+            easy: { hpMult: 0.8, coinMult: 2.0 },
+            normal: { hpMult: 1.0, coinMult: 1.0 },
+            hard: { hpMult: 1.5, coinMult: 0.5 }
+        };
+
+        this.difficultyConfig = config[this.difficulty] || config.normal;
+
+        console.log(`GameScene Init: Wave ${this.wave}, Difficulty: ${this.difficulty}`);
 
         // If data.player exists, it's a transition from UpgradeScene
         this.persistedPlayer = data.player || null;
@@ -117,6 +127,12 @@ export class GameScene extends Phaser.Scene {
         console.log("GameScene: Creating 2D Pixel Art...");
         this.player = new Player(this, 400, 300);
 
+        // Apply difficulty to base stats if starting fresh
+        if (!this.persistedPlayer) {
+            this.player.health *= this.difficultyConfig.hpMult;
+            this.player.maxHealth *= this.difficultyConfig.hpMult;
+        }
+
         // Apply persisted stats
         if (this.persistedPlayer) {
             this.player.health = this.persistedPlayer.health;
@@ -171,7 +187,8 @@ export class GameScene extends Phaser.Scene {
         });
 
         this.physics.add.overlap(this.player, this.coins, (player, coin) => {
-            player.coins += 5;
+            const baseValue = 5;
+            player.coins += Math.floor(baseValue * (coin.coinMult || 1));
             this.updateUI();
             coin.destroy();
         });
@@ -349,6 +366,8 @@ export class GameScene extends Phaser.Scene {
     spawnCoin(x, y) {
         const coin = this.coins.create(x, y, 'coin');
         coin.setBounce(0.5);
+        // Store multiplier for collection
+        coin.coinMult = this.difficultyConfig.coinMult;
     }
 
     shoot() {
@@ -373,6 +392,7 @@ export class GameScene extends Phaser.Scene {
 
         // Pass data to UpgradeScene
         this.scene.start('UpgradeScene', {
+            difficulty: this.difficulty,
             player: {
                 health: this.player.health,
                 maxHealth: this.player.maxHealth,
