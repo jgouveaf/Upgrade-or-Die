@@ -33,6 +33,12 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillCircle(6, 6, 6);
         this.graphics.generateTexture('coin', 12, 12);
 
+        // Enemy Bullet texture (Orange/Red)
+        this.graphics.clear();
+        this.graphics.fillStyle(0xff4400, 1);
+        this.graphics.fillCircle(4, 4, 4);
+        this.graphics.generateTexture('enemyBullet', 8, 8);
+
         // Wall texture
         this.graphics.clear();
         this.graphics.fillStyle(0x333333, 1);
@@ -64,6 +70,11 @@ export class GameScene extends Phaser.Scene {
         this.bullets = this.physics.add.group({
             defaultKey: 'bullet',
             maxSize: 50
+        });
+
+        this.enemyBullets = this.physics.add.group({
+            defaultKey: 'enemyBullet',
+            maxSize: 100
         });
 
         this.coins = this.physics.add.group();
@@ -108,6 +119,15 @@ export class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.enemies, this.walls);
         this.physics.add.collider(this.bullets, this.walls, (bullet) => {
             bullet.destroy();
+        });
+        this.physics.add.collider(this.enemyBullets, this.walls, (bullet) => {
+            bullet.destroy();
+        });
+        this.physics.add.collider(this.player, this.enemyBullets, (player, bullet) => {
+            player.health -= 10;
+            bullet.destroy();
+            this.updateUI();
+            if (player.health <= 0) this.scene.restart();
         });
         this.physics.add.collider(this.enemies, this.enemies); // Enemies don't stack
 
@@ -307,10 +327,10 @@ export class GameScene extends Phaser.Scene {
 
         // Add Spawners (Portals)
         const portalPositions = [
-            { x: 100, y: 100 },
-            { x: 700, y: 100 },
-            { x: 100, y: 500 },
-            { x: 700, y: 500 }
+            { x: 50, y: 50 },
+            { x: 750, y: 50 },
+            { x: 50, y: 550 },
+            { x: 750, y: 550 }
         ];
 
         portalPositions.forEach(pos => {
