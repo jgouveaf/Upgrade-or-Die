@@ -8,10 +8,12 @@ export class GameScene extends Phaser.Scene {
 
     init(data) {
         this.wave = data.wave || 1;
-        this.enemiesPerWave = 3 + (this.wave - 1) * 2;
+        this.enemiesPerWave = 3 + (this.wave - 1) * 5; // Much more aggressive scaling
         this.enemiesSpawned = 0;
         this.enemiesKilled = 0;
         this.isWavePaused = false;
+
+        console.log(`GameScene Init: Wave ${this.wave}, Total Enemies: ${this.enemiesPerWave}`);
 
         // If data.player exists, it's a transition from UpgradeScene
         this.persistedPlayer = data.player || null;
@@ -169,7 +171,8 @@ export class GameScene extends Phaser.Scene {
         });
 
         // Check wave complete
-        if (this.enemiesKilled >= this.enemiesPerWave) {
+        if (this.enemiesKilled >= this.enemiesPerWave && !this.isWavePaused) {
+            console.log("Wave Complete Triggered");
             this.completeWave();
         }
     }

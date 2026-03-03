@@ -21,7 +21,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
 
     update(player) {
-        if (this.scene.isWavePaused) {
+        if (this.scene.isWavePaused || !player || !player.body) {
             this.setVelocity(0);
             return;
         }
@@ -30,11 +30,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
         // Move towards player
         if (distance < 2000) {
-            if (this.body.velocity.x === 0 && this.body.velocity.y === 0) {
-                console.log("Enemy starting movement towards player");
-            }
-            this.scene.physics.moveToObject(this, player, this.speed);
-            this.setRotation(Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y) + Math.PI / 2);
+            const angle = Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y);
+            this.scene.physics.velocityFromRotation(angle, this.speed, this.body.velocity);
+            this.setRotation(angle + Math.PI / 2);
 
             // Try to shoot if in range
             if (distance < 400 && this.scene.time.now > this.nextFire) {
