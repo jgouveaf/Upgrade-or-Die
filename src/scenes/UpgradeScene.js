@@ -26,9 +26,9 @@ export class UpgradeScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         const upgrades = [
-            { id: 'health', name: 'NANO-ARMOR', desc: '+20 Max HP & Full Heal', cost: 50 * (this.wave + 1) },
-            { id: 'damage', name: 'POWER CELLS', desc: '+15% Damage Power', cost: 75 * (this.wave + 1) },
-            { id: 'speed', name: 'ROCKET BOOTS', desc: '+10% Move Speed', cost: 40 * (this.wave + 1) }
+            { id: 'health', name: 'NANO-ARMOR', desc: '+20 Max HP & Full Heal', cost: 20 * (this.wave + 1) },
+            { id: 'damage', name: 'POWER CELLS', desc: '+15% Damage Power', cost: 30 * (this.wave + 1) },
+            { id: 'speed', name: 'ROCKET BOOTS', desc: '+10% Move Speed', cost: 15 * (this.wave + 1) }
         ];
 
         const selected = upgrades.sort(() => 0.5 - Math.random());
@@ -50,7 +50,7 @@ export class UpgradeScene extends Phaser.Scene {
 
             card.on('pointerdown', () => {
                 if (this.playerData.coins >= up.cost) {
-                    this.applyUpgrade(up.id);
+                    this.applyUpgrade(up.id, up.cost);
                     this.scene.start('GameScene', { player: this.playerData, wave: this.wave + 1 });
                 } else {
                     this.cameras.main.shake(100, 0.01);
@@ -70,8 +70,8 @@ export class UpgradeScene extends Phaser.Scene {
         });
     }
 
-    applyUpgrade(id) {
-        this.playerData.coins -= (id === 'health' ? 50 : id === 'damage' ? 75 : 40) * (this.wave + 1);
+    applyUpgrade(id, cost) {
+        this.playerData.coins -= cost;
         if (id === 'health') {
             this.playerData.maxHealth += 20;
             this.playerData.health = this.playerData.maxHealth;
