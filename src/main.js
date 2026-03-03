@@ -9,6 +9,10 @@ const config = {
     height: 600,
     parent: 'game-container',
     backgroundColor: '#0a0a0c',
+    render: {
+        pixelArt: true,
+        antialias: false,
+    },
     physics: {
         default: 'arcade',
         arcade: {

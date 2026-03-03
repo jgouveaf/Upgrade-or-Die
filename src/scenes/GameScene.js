@@ -20,52 +20,60 @@ export class GameScene extends Phaser.Scene {
     }
 
     preload() {
-        // Create simple graphics since we don't have assets yet
         this.graphics = this.add.graphics();
 
-        // Player texture
+        // Pixel Player (Blocky Robot)
         this.graphics.fillStyle(0x00f2ff, 1);
-        this.graphics.fillCircle(16, 16, 16);
+        this.graphics.fillRect(4, 4, 24, 24);
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillRect(8, 8, 4, 4); // Eye 1
+        this.graphics.fillRect(20, 8, 4, 4); // Eye 2
         this.graphics.generateTexture('player', 32, 32);
 
-        // Enemy texture
+        // Pixel Enemy (Blocky Invader)
         this.graphics.clear();
         this.graphics.fillStyle(0xff0055, 1);
-        this.graphics.fillTriangle(0, 32, 16, 0, 32, 32);
+        this.graphics.fillRect(0, 8, 32, 16);
+        this.graphics.fillRect(8, 0, 16, 32);
+        this.graphics.fillStyle(0x000000, 1);
+        this.graphics.fillRect(8, 8, 4, 4); // Eye 1
+        this.graphics.fillRect(20, 8, 4, 4); // Eye 2
         this.graphics.generateTexture('enemy', 32, 32);
 
-        // Bullet texture
+        // Pixel Bullet (Square)
         this.graphics.clear();
         this.graphics.fillStyle(0xffda00, 1);
-        this.graphics.fillCircle(4, 4, 4);
+        this.graphics.fillRect(0, 0, 8, 8);
         this.graphics.generateTexture('bullet', 8, 8);
 
-        // Coin texture
+        // Pixel Coin (Diamond)
         this.graphics.clear();
         this.graphics.fillStyle(0xffda00, 1);
-        this.graphics.fillCircle(6, 6, 6);
+        this.graphics.fillRect(3, 0, 6, 12);
+        this.graphics.fillRect(0, 3, 12, 6);
         this.graphics.generateTexture('coin', 12, 12);
 
-        // Enemy Bullet texture (Orange/Red)
+        // Pixel Enemy Bullet (Square)
         this.graphics.clear();
         this.graphics.fillStyle(0xff4400, 1);
-        this.graphics.fillCircle(4, 4, 4);
+        this.graphics.fillRect(0, 0, 8, 8);
         this.graphics.generateTexture('enemyBullet', 8, 8);
 
-        // Wall texture
+        // Pixel Wall (Brick-like)
         this.graphics.clear();
-        this.graphics.fillStyle(0x333333, 1);
+        this.graphics.fillStyle(0x444444, 1);
         this.graphics.fillRect(0, 0, 32, 32);
-        this.graphics.lineStyle(2, 0xffffff, 0.1);
-        this.graphics.strokeRect(0, 0, 32, 32);
+        this.graphics.fillStyle(0x666666, 1);
+        this.graphics.fillRect(2, 2, 28, 12);
+        this.graphics.fillRect(2, 16, 28, 14);
         this.graphics.generateTexture('wall', 32, 32);
 
-        // Portal texture (Solid Glowing Circles)
+        // Pixel Portal (Rotating Square)
         this.graphics.clear();
-        this.graphics.fillStyle(0xff00ff, 0.3);
-        this.graphics.fillCircle(24, 24, 20);
-        this.graphics.lineStyle(3, 0x00ffff, 1);
-        this.graphics.strokeCircle(24, 24, 20);
+        this.graphics.lineStyle(4, 0x00ffff, 1);
+        this.graphics.strokeRect(4, 4, 40, 40);
+        this.graphics.lineStyle(2, 0xff00ff, 1);
+        this.graphics.strokeRect(12, 12, 24, 24);
         this.graphics.generateTexture('portal', 48, 48);
 
         this.graphics.destroy();
@@ -109,6 +117,9 @@ export class GameScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys('W,A,S,D');
         this.input.on('pointerdown', () => this.shoot());
+
+        // Player Health Bar Graphics
+        this.healthBar = this.add.graphics();
 
         this.spawnWave();
 
@@ -155,17 +166,41 @@ export class GameScene extends Phaser.Scene {
     }
 
     update() {
-        if (this.isWavePaused) return;
+        if (this.isWavePaused) {
+            this.healthBar.clear();
+            return;
+        }
 
         this.player.update({ ...this.cursors, ...this.keys }, this.input.activePointer);
 
-        // Enemies are updated automatically by Group(runChildUpdate: true)
+        // Update Health Bar above player
+        this.updateHealthBar();
 
         // Check wave complete
         if (this.enemiesKilled >= this.enemiesPerWave && !this.isWavePaused) {
             console.log("Wave Complete Triggered");
             this.completeWave();
         }
+    }
+
+    updateHealthBar() {
+        this.healthBar.clear();
+
+        const x = this.player.x - 20;
+        const y = this.player.y - 30;
+        const width = 40;
+        const height = 6;
+
+        // Background
+        this.healthBar.fillStyle(0x000000, 0.5);
+        this.healthBar.fillRect(x, y, width, height);
+
+        // Health fill
+        const healthPct = Math.max(0, this.player.health / this.player.maxHealth);
+        const color = healthPct > 0.5 ? 0x00ff00 : (healthPct > 0.25 ? 0xffff00 : 0xff0000);
+
+        this.healthBar.fillStyle(color, 1);
+        this.healthBar.fillRect(x + 1, y + 1, (width - 2) * healthPct, height - 2);
     }
 
     spawnWave() {
@@ -252,8 +287,10 @@ export class GameScene extends Phaser.Scene {
     setupUI() {
         const ui = document.getElementById('ui-layer');
         ui.innerHTML = `
+            <div id="wave-container" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none;">
+                <div style="font-size: 24px; color: var(--secondary); text-transform: uppercase; letter-spacing: 2px; font-weight: 800; text-shadow: 0 0 10px var(--secondary);">Wave <span id="wave-count">1</span></div>
+            </div>
             <div id="game-stats" style="position: absolute; top: 10px; left: 10px; font-weight: bold; text-shadow: 2px 2px #000;">
-                <div>Wave: <span id="wave-count">1</span></div>
                 <div>Coins: <span id="coin-count">0</span></div>
                 <div>Health: <span id="health-pct">100</span>%</div>
             </div>
