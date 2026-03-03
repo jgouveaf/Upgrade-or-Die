@@ -58,7 +58,7 @@ export class GameScene extends Phaser.Scene {
 
         // Wave logic
         this.wave = 1;
-        this.enemiesPerWave = 5;
+        this.enemiesPerWave = 3;
         this.enemiesSpawned = 0;
         this.enemiesKilled = 0;
         this.isWavePaused = false;
@@ -104,7 +104,7 @@ export class GameScene extends Phaser.Scene {
     spawnWave() {
         this.enemiesKilled = 0;
         this.enemiesSpawned = 0;
-        this.enemiesPerWave = 5 + (this.wave * 2);
+        this.enemiesPerWave = 1 + (this.wave * 2);
 
         this.time.addEvent({
             delay: 1500,
