@@ -19,6 +19,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.nextFire = scene.time.now + Phaser.Math.Between(0, 1000);
         this.maxHealth = this.health;
         this.isBoss = false;
+        this.isBat = false;
         this.setTint(0xff0055);
     }
 
@@ -43,7 +44,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.setRotation(angle + Math.PI / 2);
 
             // Try to shoot if in range
-            if (distance < 400 && this.scene.time.now > this.nextFire) {
+            if (distance < 400 && this.scene.time.now > this.nextFire && !this.isBat) {
                 this.shoot(player);
             }
         } else {
@@ -81,7 +82,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             const originalTint = this.isBoss ? 0xffffff : 0xff0055;
             this.setTint(0xffffff);
             this.scene.time.delayedCall(100, () => {
-                if (this.active) this.setTint(originalTint);
+                if (this.active) {
+                    if (this.isBoss || this.isBat) this.clearTint();
+                    else this.setTint(originalTint);
+                }
             });
         }
     }

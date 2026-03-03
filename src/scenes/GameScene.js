@@ -120,6 +120,19 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(10, 2, 4, 6);
         this.graphics.generateTexture('bossBullet', 24, 24);
 
+        // Pixel Poison Bat - 24x24
+        this.graphics.clear();
+        this.graphics.fillStyle(0x00ff00, 1); // Green body
+        this.graphics.fillRect(8, 8, 8, 8); // main body
+        this.graphics.fillRect(0, 4, 8, 4); // left wing top
+        this.graphics.fillRect(4, 8, 4, 4); // left wing mid
+        this.graphics.fillRect(16, 4, 8, 4); // right wing top
+        this.graphics.fillRect(16, 8, 4, 4); // right wing mid
+        this.graphics.fillStyle(0xff0000, 1); // Red eyes
+        this.graphics.fillRect(10, 10, 2, 2);
+        this.graphics.fillRect(14, 10, 2, 2);
+        this.graphics.generateTexture('poisonBat', 24, 24);
+
         this.graphics.destroy();
     }
 
@@ -181,6 +194,11 @@ export class GameScene extends Phaser.Scene {
 
         this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
             player.health -= enemy.damage / 60;
+
+            if (enemy.isBat) {
+                player.applyPoison(this);
+            }
+
             if (player.health <= 0) {
                 this.scene.start('GameOverScene', { wave: this.wave });
             }
@@ -352,6 +370,18 @@ export class GameScene extends Phaser.Scene {
 
         const portal = portalList[Phaser.Math.Between(0, portalList.length - 1)];
         const enemy = new Enemy(this, portal.x, portal.y, this.wave);
+
+        // 30% chance for a poison bat in wave 5+
+        if (this.wave >= 5 && Math.random() < 0.3) {
+            enemy.setTexture('poisonBat');
+            enemy.clearTint();
+            enemy.health = enemy.health * 0.5;
+            enemy.maxHealth = enemy.health;
+            enemy.damage = enemy.damage * 0.5;
+            enemy.speed = enemy.speed * 1.5;
+            enemy.isBat = true;
+        }
+
         this.enemies.add(enemy);
 
         // Simple scale effect on portal when spawning
