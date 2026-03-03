@@ -188,6 +188,7 @@ export class GameScene extends Phaser.Scene {
         // UI Setup
         this.setupUI();
         this.setupPauseUIListeners();
+        this.events.on('shutdown', this.shutdown, this);
     }
 
     setupPauseUIListeners() {
@@ -222,6 +223,11 @@ export class GameScene extends Phaser.Scene {
             this.tweens.resumeAll();
             if (overlay) overlay.style.display = 'none';
         }
+    }
+
+    shutdown() {
+        const overlay = document.getElementById('pause-overlay');
+        if (overlay) overlay.style.display = 'none';
     }
 
     showControls(show) {
