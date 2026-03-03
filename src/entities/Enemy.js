@@ -14,7 +14,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     update(player) {
         const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
-        if (distance < 500) {
+        if (distance < 2000) {
             this.scene.physics.moveToObject(this, player, this.speed);
             this.setRotation(Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y) + Math.PI / 2);
         } else {
