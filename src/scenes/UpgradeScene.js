@@ -1,0 +1,84 @@
+export class UpgradeScene extends Phaser.Scene {
+    constructor() {
+        super('UpgradeScene');
+    }
+
+    init(data) {
+        this.playerData = data.player;
+        this.wave = data.wave;
+    }
+
+    create() {
+        const { width, height } = this.scale;
+
+        // Overlay background
+        this.add.rectangle(0, 0, width, height, 0x0a0a0c, 0.9).setOrigin(0);
+
+        this.add.text(width / 2, 50, `WAVE ${this.wave} COMPLETE`, {
+            fontSize: '48px',
+            fill: '#ff0055',
+            fontWeight: 'bold'
+        }).setOrigin(0.5);
+
+        this.add.text(width / 2, 100, `Coins: ${this.playerData.coins}`, {
+            fontSize: '24px',
+            fill: '#ffda00'
+        }).setOrigin(0.5);
+
+        const upgrades = [
+            { id: 'health', name: 'NANO-ARMOR', desc: '+20 Max HP & Full Heal', cost: 50 * (this.wave + 1) },
+            { id: 'damage', name: 'POWER CELLS', desc: '+15% Damage Power', cost: 75 * (this.wave + 1) },
+            { id: 'speed', name: 'ROCKET BOOTS', desc: '+10% Move Speed', cost: 40 * (this.wave + 1) }
+        ];
+
+        const selected = upgrades.sort(() => 0.5 - Math.random());
+
+        selected.forEach((up, index) => {
+            const x = width / 2 - 200 + (index * 200);
+            const y = height / 2;
+
+            const card = this.add.rectangle(x, y, 180, 250, 0x141419)
+                .setStrokeStyle(2, 0x333333)
+                .setInteractive({ useHandCursor: true });
+
+            this.add.text(x, y - 80, up.name, { fontSize: '20px', fill: '#00f2ff', fontWeight: 'bold' }).setOrigin(0.5);
+            this.add.text(x, y - 20, up.desc, { fontSize: '14px', fill: '#ffffff', align: 'center', wordWrap: { width: 150 } }).setOrigin(0.5);
+            const costText = this.add.text(x, y + 80, `${up.cost} COINS`, { fontSize: '18px', fill: '#ffda00', fontWeight: 'bold' }).setOrigin(0.5);
+
+            card.on('pointerover', () => card.setStrokeStyle(4, 0xff0055));
+            card.on('pointerout', () => card.setStrokeStyle(2, 0x333333));
+
+            card.on('pointerdown', () => {
+                if (this.playerData.coins >= up.cost) {
+                    this.applyUpgrade(up.id);
+                    this.scene.start('GameScene', { player: this.playerData, wave: this.wave + 1 });
+                } else {
+                    this.cameras.main.shake(100, 0.01);
+                    costText.setFill('#ff0000');
+                    this.time.delayedCall(500, () => costText.setFill('#ffda00'));
+                }
+            });
+        });
+
+        // Skip button
+        const skip = this.add.text(width / 2, height - 50, 'Skip to next wave', { fontSize: '18px', fill: '#ffffff', alpha: 0.5 })
+            .setOrigin(0.5)
+            .setInteractive({ useHandCursor: true });
+
+        skip.on('pointerdown', () => {
+            this.scene.start('GameScene', { player: this.playerData, wave: this.wave + 1 });
+        });
+    }
+
+    applyUpgrade(id) {
+        this.playerData.coins -= (id === 'health' ? 50 : id === 'damage' ? 75 : 40) * (this.wave + 1);
+        if (id === 'health') {
+            this.playerData.maxHealth += 20;
+            this.playerData.health = this.playerData.maxHealth;
+        } else if (id === 'damage') {
+            this.playerData.damageMultiplier += 0.15;
+        } else if (id === 'speed') {
+            this.playerData.speedMultiplier += 0.10;
+        }
+    }
+}

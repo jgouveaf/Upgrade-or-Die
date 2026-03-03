@@ -1,5 +1,6 @@
 import { StartScene } from './scenes/StartScene.js';
 import { GameScene } from './scenes/GameScene.js';
+import { UpgradeScene } from './scenes/UpgradeScene.js';
 import { GameOverScene } from './scenes/GameOverScene.js';
 
 const config = {
@@ -15,7 +16,7 @@ const config = {
             debug: false
         }
     },
-    scene: [StartScene, GameScene, GameOverScene]
+    scene: [StartScene, GameScene, UpgradeScene, GameOverScene]
 };
 
 const game = new Phaser.Game(config);

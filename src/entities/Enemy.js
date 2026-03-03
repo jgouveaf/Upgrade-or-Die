@@ -3,6 +3,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         super(scene, x, y, 'enemy');
         scene.add.existing(this);
         scene.physics.add.existing(this);
+
+        // Fix collision box (smaller than visual to prevent sticking)
+        this.body.setCircle(12, 4, 4);
+
         console.log("Enemy instance created at", x, y);
 
         // Scale stats by wave
