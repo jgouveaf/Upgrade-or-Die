@@ -33,6 +33,14 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillCircle(6, 6, 6);
         this.graphics.generateTexture('coin', 12, 12);
 
+        // Wall texture
+        this.graphics.clear();
+        this.graphics.fillStyle(0x333333, 1);
+        this.graphics.fillRect(0, 0, 32, 32);
+        this.graphics.lineStyle(2, 0xffffff, 0.1);
+        this.graphics.strokeRect(0, 0, 32, 32);
+        this.graphics.generateTexture('wall', 32, 32);
+
         this.graphics.destroy();
     }
 
@@ -50,6 +58,9 @@ export class GameScene extends Phaser.Scene {
         });
 
         this.coins = this.physics.add.group();
+
+        this.walls = this.physics.add.staticGroup();
+        this.createMap();
 
         // Input
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -81,6 +92,14 @@ export class GameScene extends Phaser.Scene {
             this.updateUI();
             coin.destroy();
         });
+
+        // Wall Collisions
+        this.physics.add.collider(this.player, this.walls);
+        this.physics.add.collider(this.enemies, this.walls);
+        this.physics.add.collider(this.bullets, this.walls, (bullet) => {
+            bullet.destroy();
+        });
+        this.physics.add.collider(this.enemies, this.enemies); // Enemies don't stack
 
         // UI
         this.setupUI();
@@ -242,5 +261,25 @@ export class GameScene extends Phaser.Scene {
         document.querySelector('.shop-overlay').remove();
         this.isWavePaused = false;
         this.spawnWave();
+    }
+
+    createMap() {
+        // Simple procedural obstacles
+        const wallPositions = [
+            // Corners/Edges to keep play area interesting
+            { x: 200, y: 200, w: 4, h: 1 },
+            { x: 600, y: 200, w: 1, h: 4 },
+            { x: 200, y: 400, w: 1, h: 4 },
+            { x: 500, y: 450, w: 4, h: 1 },
+            { x: 400, y: 100, w: 2, h: 2 }
+        ];
+
+        wallPositions.forEach(pos => {
+            for (let i = 0; i < pos.w; i++) {
+                for (let j = 0; j < pos.h; j++) {
+                    this.walls.create(pos.x + (i * 32), pos.y + (j * 32), 'wall').refreshBody();
+                }
+            }
+        });
     }
 }
