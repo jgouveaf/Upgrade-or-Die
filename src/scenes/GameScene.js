@@ -103,9 +103,11 @@ export class GameScene extends Phaser.Scene {
             bullet.destroy();
         });
 
-        this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
+        this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
             player.health -= enemy.damage / 60; // Continuous damage
-            if (player.health <= 0) this.scene.restart();
+            if (player.health <= 0) {
+                this.scene.start('GameOverScene', { wave: this.wave });
+            }
         });
 
         this.physics.add.overlap(this.player, this.coins, (player, coin) => {
@@ -127,7 +129,9 @@ export class GameScene extends Phaser.Scene {
             player.health -= 10;
             bullet.destroy();
             this.updateUI();
-            if (player.health <= 0) this.scene.restart();
+            if (player.health <= 0) {
+                this.scene.start('GameOverScene', { wave: this.wave });
+            }
         });
         this.physics.add.collider(this.enemies, this.enemies); // Enemies don't stack
 
