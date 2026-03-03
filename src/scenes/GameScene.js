@@ -97,6 +97,19 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(8, 28, 8, 12);
         this.graphics.generateTexture('boss', 64, 64);
 
+        // Pixel Piggy Bank (Boss Bullet) - 24x24
+        this.graphics.clear();
+        this.graphics.fillStyle(0xffaaff, 1); // Pink body
+        this.graphics.fillRect(4, 8, 16, 12);
+        this.graphics.fillRect(6, 6, 12, 16);
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillRect(14, 10, 2, 2); // Eye
+        this.graphics.fillStyle(0x000000, 1);
+        this.graphics.fillRect(15, 11, 1, 1); // Pupil
+        this.graphics.fillStyle(0xffda00, 1); // Coin on top
+        this.graphics.fillRect(10, 2, 4, 6);
+        this.graphics.generateTexture('bossBullet', 24, 24);
+
         this.graphics.destroy();
     }
 
@@ -375,20 +388,21 @@ export class GameScene extends Phaser.Scene {
         const ui = document.getElementById('ui-layer');
         ui.innerHTML = `
             <div id="wave-container" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none;">
-                <div style="font-size: 24px; color: var(--secondary); text-transform: uppercase; letter-spacing: 2px; font-weight: 800; text-shadow: 0 0 10px var(--secondary);">Wave <span id="wave-count">1</span></div>
+                <div style="font-size: 18px; color: var(--secondary); text-transform: uppercase; letter-spacing: 2px; font-weight: 800; text-shadow: 0 0 10px var(--secondary);">Wave <span id="wave-count">1</span></div>
             </div>
-            <div id="game-stats" style="position: absolute; top: 10px; left: 10px; font-weight: bold; text-shadow: 2px 2px #000;">
-                <div>Coins: <span id="coin-count">0</span></div>
-                <div>Health: <span id="health-pct">100</span>%</div>
+            <div id="game-stats" style="position: absolute; top: 20px; right: 20px; font-size: 14px; text-shadow: 2px 2px #000; color: #ffda00;">
+                <div>$ <span id="coin-count">0</span></div>
             </div>
         `;
     }
 
     updateUI() {
-        if (!document.getElementById('wave-count')) return;
-        document.getElementById('wave-count').innerText = this.wave;
-        document.getElementById('coin-count').innerText = this.player.coins;
-        document.getElementById('health-pct').innerText = Math.max(0, Math.floor(this.player.health));
+        const waveCount = document.getElementById('wave-count');
+        const coinCount = document.getElementById('coin-count');
+        if (!waveCount || !coinCount) return;
+
+        waveCount.innerText = this.wave;
+        coinCount.innerText = this.player.coins;
     }
 
     createMap() {

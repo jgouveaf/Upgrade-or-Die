@@ -53,11 +53,17 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     shoot(player) {
         this.nextFire = this.scene.time.now + this.fireRate;
-        const bullet = this.scene.enemyBullets.get(this.x, this.y);
+
+        const bulletKey = this.isBoss ? 'bossBullet' : 'enemyBullet';
+        const bullet = this.scene.enemyBullets.get(this.x, this.y, bulletKey);
+
         if (bullet) {
             bullet.setActive(true);
             bullet.setVisible(true);
-            this.scene.physics.moveToObject(bullet, player, 300);
+            bullet.setTexture(bulletKey);
+
+            const bulletSpeed = this.isBoss ? 400 : 300;
+            this.scene.physics.moveToObject(bullet, player, bulletSpeed);
 
             // Auto destroy after life
             this.scene.time.delayedCall(3000, () => {
@@ -83,8 +89,12 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     die() {
         // Drop coins
         if (this.isBoss) {
-            for (let i = 0; i < 10; i++) {
-                this.scene.spawnCoin(this.x + Phaser.Math.Between(-20, 20), this.y + Phaser.Math.Between(-20, 20));
+            // Drop 20 coins of 5 value = 100 coins total
+            for (let i = 0; i < 20; i++) {
+                this.scene.spawnCoin(
+                    this.x + Phaser.Math.Between(-40, 40),
+                    this.y + Phaser.Math.Between(-40, 40)
+                );
             }
         } else {
             this.scene.spawnCoin(this.x, this.y);
