@@ -17,6 +17,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.fireRate = Math.max(500, this.fireRate);
 
         this.nextFire = scene.time.now + Phaser.Math.Between(0, 1000);
+        this.maxHealth = this.health;
+        this.isBoss = false;
         this.setTint(0xff0055);
     }
 
@@ -70,14 +72,23 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.die();
         } else {
             // Flash effect
+            const originalTint = this.isBoss ? 0xffffff : 0xff0055;
             this.setTint(0xffffff);
-            this.scene.time.delayedCall(100, () => this.setTint(0xff0055));
+            this.scene.time.delayedCall(100, () => {
+                if (this.active) this.setTint(originalTint);
+            });
         }
     }
 
     die() {
         // Drop coins
-        this.scene.spawnCoin(this.x, this.y);
+        if (this.isBoss) {
+            for (let i = 0; i < 10; i++) {
+                this.scene.spawnCoin(this.x + Phaser.Math.Between(-20, 20), this.y + Phaser.Math.Between(-20, 20));
+            }
+        } else {
+            this.scene.spawnCoin(this.x, this.y);
+        }
         this.scene.enemiesKilled++;
         this.destroy();
     }

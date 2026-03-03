@@ -76,6 +76,27 @@ export class GameScene extends Phaser.Scene {
         this.graphics.strokeRect(12, 12, 24, 24);
         this.graphics.generateTexture('portal', 48, 48);
 
+        // Pixel Boss (Rafael Rosseti) - 64x64
+        this.graphics.clear();
+        // Body (White Shirt)
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillRect(16, 32, 32, 32);
+        // Head (Skin)
+        this.graphics.fillStyle(0xffdbac, 1);
+        this.graphics.fillRect(20, 8, 24, 24);
+        // Beard/Goatee
+        this.graphics.fillStyle(0x331a00, 1);
+        this.graphics.fillRect(24, 24, 16, 8);
+        this.graphics.fillRect(28, 20, 8, 4);
+        // Eyes
+        this.graphics.fillStyle(0x000000, 1);
+        this.graphics.fillRect(26, 14, 4, 4);
+        this.graphics.fillRect(34, 14, 4, 4);
+        // Hand (Rock Sign)
+        this.graphics.fillStyle(0xffdbac, 1);
+        this.graphics.fillRect(8, 28, 8, 12);
+        this.graphics.generateTexture('boss', 64, 64);
+
         this.graphics.destroy();
     }
 
@@ -185,41 +206,113 @@ export class GameScene extends Phaser.Scene {
     updateHealthBar() {
         this.healthBar.clear();
 
-        const x = this.player.x - 20;
-        const y = this.player.y - 30;
-        const width = 40;
-        const height = 6;
-
-        // Background
+        // Player Health Bar
+        const px = this.player.x - 20;
+        const py = this.player.y - 30;
         this.healthBar.fillStyle(0x000000, 0.5);
-        this.healthBar.fillRect(x, y, width, height);
+        this.healthBar.fillRect(px, py, 40, 6);
+        const pPct = Math.max(0, this.player.health / this.player.maxHealth);
+        this.healthBar.fillStyle(pPct > 0.5 ? 0x00ff00 : (pPct > 0.25 ? 0xffff00 : 0xff0000), 1);
+        this.healthBar.fillRect(px + 1, py + 1, 38 * pPct, 4);
 
-        // Health fill
-        const healthPct = Math.max(0, this.player.health / this.player.maxHealth);
-        const color = healthPct > 0.5 ? 0x00ff00 : (healthPct > 0.25 ? 0xffff00 : 0xff0000);
+        // Boss Health Bar (if any)
+        this.enemies.getChildren().forEach(enemy => {
+            if (enemy.isBoss && enemy.active) {
+                const bx = enemy.x - 40;
+                const by = enemy.y - 85; // Above the name tag
+                const bWidth = 80;
+                const bHeight = 8;
 
-        this.healthBar.fillStyle(color, 1);
-        this.healthBar.fillRect(x + 1, y + 1, (width - 2) * healthPct, height - 2);
+                // Shadow/BG
+                this.healthBar.fillStyle(0x000000, 0.7);
+                this.healthBar.fillRect(bx, by, bWidth, bHeight);
+
+                // Border
+                this.healthBar.lineStyle(2, 0x00f2ff, 1);
+                this.healthBar.strokeRect(bx, by, bWidth, bHeight);
+
+                // Internal Fill
+                const bPct = Math.max(0, enemy.health / enemy.maxHealth);
+                this.healthBar.fillStyle(0xff0055, 1);
+                this.healthBar.fillRect(bx + 1, by + 1, (bWidth - 2) * bPct, bHeight - 2);
+            }
+        });
     }
 
     spawnWave() {
         this.enemiesKilled = 0;
-        this.enemiesSpawned = 0;
+        this.isBossWave = (this.wave % 4 === 0);
 
-        // Spawn first enemy immediately
-        this.spawnEnemy();
-        this.enemiesSpawned++;
+        if (this.isBossWave) {
+            this.enemiesPerWave = 1;
+            console.log(`BOSS WAVE ${this.wave}: RAFAEL ROSSETI COMING!`);
+            this.time.delayedCall(1000, () => this.spawnBoss());
+        } else {
+            this.enemiesPerWave = 3 + (this.wave - 1) * 5;
+            this.enemiesSpawned = 0;
 
-        this.time.addEvent({
-            delay: 1500,
-            callback: () => {
-                if (this.enemiesSpawned < this.enemiesPerWave) {
-                    this.spawnEnemy();
-                    this.enemiesSpawned++;
-                }
-            },
-            callbackScope: this,
-            repeat: this.enemiesPerWave - 2
+            // Spawn first enemy immediately
+            this.spawnEnemy();
+            this.enemiesSpawned++;
+
+            this.time.addEvent({
+                delay: 1500,
+                callback: () => {
+                    if (this.enemiesSpawned < this.enemiesPerWave) {
+                        this.spawnEnemy();
+                        this.enemiesSpawned++;
+                    }
+                },
+                callbackScope: this,
+                repeat: this.enemiesPerWave - 2
+            });
+        }
+    }
+
+    spawnBoss() {
+        const portalList = this.spawners.getChildren();
+        if (portalList.length === 0) return;
+
+        const portal = portalList[Phaser.Math.Between(0, portalList.length - 1)];
+        const boss = new Enemy(this, portal.x, portal.y, this.wave);
+
+        // Transform into Boss
+        boss.setTexture('boss');
+        boss.clearTint(); // Remove the default enemy pink tint
+        boss.setScale(1.5);
+        boss.health = 400 * (1 + (this.wave * 0.25));
+        boss.maxHealth = boss.health;
+        boss.speed = 120;
+        boss.damage = 25;
+        boss.isBoss = true;
+
+        this.enemies.add(boss);
+
+        // Name Tag
+        const nameTag = this.add.text(boss.x, boss.y - 70, 'Rafael Rosseti', {
+            fontSize: '16px',
+            fill: '#00f2ff',
+            stroke: '#000000',
+            strokeThickness: 3,
+            fontWeight: 'bold'
+        }).setOrigin(0.5);
+
+        // Update tag position
+        this.events.on('update', () => {
+            if (boss.active) {
+                nameTag.setPosition(boss.x, boss.y - 70);
+            } else {
+                nameTag.destroy();
+            }
+        });
+
+        // Effect
+        this.cameras.main.flash(500, 255, 0, 85);
+        this.tweens.add({
+            targets: portal,
+            scale: 2,
+            duration: 300,
+            yoyo: true
         });
     }
 
