@@ -108,7 +108,7 @@ export class GameScene extends Phaser.Scene {
     update() {
         if (this.isWavePaused) return;
 
-        this.player.update(Object.assign(this.cursors, this.keys), this.input.activePointer);
+        this.player.update({ ...this.cursors, ...this.keys }, this.input.activePointer);
 
         this.enemies.getChildren().forEach(enemy => {
             enemy.update(this.player);
@@ -149,6 +149,7 @@ export class GameScene extends Phaser.Scene {
 
         const enemy = new Enemy(this, x, y, this.wave);
         this.enemies.add(enemy);
+        console.log(`Enemy spawned at ${x}, ${y} for Wave ${this.wave}`);
     }
 
     spawnCoin(x, y) {
