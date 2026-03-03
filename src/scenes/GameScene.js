@@ -6,6 +6,17 @@ export class GameScene extends Phaser.Scene {
         super('GameScene');
     }
 
+    init(data) {
+        this.wave = data.wave || 1;
+        this.enemiesPerWave = 3 + (this.wave - 1) * 2;
+        this.enemiesSpawned = 0;
+        this.enemiesKilled = 0;
+        this.isWavePaused = false;
+
+        // If data.player exists, it's a transition from UpgradeScene
+        this.persistedPlayer = data.player || null;
+    }
+
     preload() {
         // Create simple graphics since we don't have assets yet
         this.graphics = this.add.graphics();
@@ -47,12 +58,12 @@ export class GameScene extends Phaser.Scene {
         this.graphics.strokeRect(0, 0, 32, 32);
         this.graphics.generateTexture('wall', 32, 32);
 
-        // Portal texture
+        // Portal texture (Solid Glowing Circles)
         this.graphics.clear();
-        this.graphics.lineStyle(4, 0xff00ff, 1);
+        this.graphics.fillStyle(0xff00ff, 0.3);
+        this.graphics.fillCircle(24, 24, 20);
+        this.graphics.lineStyle(3, 0x00ffff, 1);
         this.graphics.strokeCircle(24, 24, 20);
-        this.graphics.lineStyle(2, 0x00ffff, 0.5);
-        this.graphics.strokeCircle(24, 24, 12);
         this.graphics.generateTexture('portal', 48, 48);
 
         this.graphics.destroy();
@@ -61,6 +72,15 @@ export class GameScene extends Phaser.Scene {
     create() {
         console.log("GameScene: Creating...");
         this.player = new Player(this, 400, 300);
+
+        // Apply persisted stats
+        if (this.persistedPlayer) {
+            this.player.health = this.persistedPlayer.health;
+            this.player.maxHealth = this.persistedPlayer.maxHealth;
+            this.player.coins = this.persistedPlayer.coins;
+            this.player.damageMultiplier = this.persistedPlayer.damageMultiplier;
+            this.player.speedMultiplier = this.persistedPlayer.speedMultiplier;
+        }
 
         this.enemies = this.physics.add.group({
             classType: Enemy,
@@ -221,10 +241,19 @@ export class GameScene extends Phaser.Scene {
 
     completeWave() {
         this.isWavePaused = true;
-        this.wave++;
         this.player.coins += 50; // Survival bonus
-        this.updateUI();
-        this.showShop();
+
+        // Pass data to UpgradeScene
+        this.scene.start('UpgradeScene', {
+            player: {
+                health: this.player.health,
+                maxHealth: this.player.maxHealth,
+                coins: this.player.coins,
+                damageMultiplier: this.player.damageMultiplier,
+                speedMultiplier: this.player.speedMultiplier
+            },
+            wave: this.wave
+        });
     }
 
     setupUI() {
@@ -239,6 +268,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     updateUI() {
+        if (!document.getElementById('wave-count')) return;
         document.getElementById('wave-count').innerText = this.wave;
         document.getElementById('coin-count').innerText = this.player.coins;
         document.getElementById('health-pct').innerText = Math.max(0, Math.floor(this.player.health));
@@ -305,7 +335,6 @@ export class GameScene extends Phaser.Scene {
     }
 
     nextWave() {
-        document.querySelector('.shop-overlay').remove();
         this.isWavePaused = false;
         this.spawnWave();
     }
@@ -314,11 +343,11 @@ export class GameScene extends Phaser.Scene {
         // Simple procedural obstacles
         const wallPositions = [
             // Corners/Edges to keep play area interesting
-            { x: 200, y: 200, w: 4, h: 1 },
-            { x: 600, y: 200, w: 1, h: 4 },
+            { x: 200, y: 150, w: 4, h: 1 },
+            { x: 600, y: 150, w: 1, h: 4 },
             { x: 200, y: 400, w: 1, h: 4 },
             { x: 500, y: 450, w: 4, h: 1 },
-            { x: 400, y: 100, w: 2, h: 2 }
+            // Removed central wall that blocked spawn test
         ];
 
         wallPositions.forEach(pos => {
@@ -329,12 +358,12 @@ export class GameScene extends Phaser.Scene {
             }
         });
 
-        // Add Spawners (Portals)
+        // Add Spawners (Portals) - Safer positions
         const portalPositions = [
-            { x: 50, y: 50 },
-            { x: 750, y: 50 },
-            { x: 50, y: 550 },
-            { x: 750, y: 550 }
+            { x: 100, y: 100 },
+            { x: 700, y: 100 },
+            { x: 100, y: 500 },
+            { x: 700, y: 500 }
         ];
 
         portalPositions.forEach(pos => {
