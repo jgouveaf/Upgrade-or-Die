@@ -408,9 +408,9 @@ export class GameScene extends Phaser.Scene {
         const ui = document.getElementById('ui-layer');
         ui.innerHTML = `
             <div id="wave-container" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none;">
-                <div style="font-size: 18px; color: var(--secondary); text-transform: uppercase; letter-spacing: 2px; font-weight: 800; text-shadow: 0 0 10px var(--secondary);">Wave <span id="wave-count">1</span></div>
+                <div style="font-family: 'Press Start 2P', cursive; font-size: 18px; color: var(--secondary); text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--secondary);">WAVE <span id="wave-count">1</span></div>
             </div>
-            <div id="game-stats" style="position: absolute; top: 20px; right: 20px; font-size: 14px; text-shadow: 2px 2px #000; color: #ffda00;">
+            <div id="game-stats" style="position: absolute; top: 20px; right: 20px; font-family: 'Press Start 2P', cursive; font-size: 14px; text-shadow: 2px 2px #000; color: #ffda00;">
                 <div>$ <span id="coin-count">0</span></div>
             </div>
         `;
