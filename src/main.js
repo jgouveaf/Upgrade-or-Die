@@ -24,4 +24,4 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
-// v12 - Deployment fix
+// Initialized

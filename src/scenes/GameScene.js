@@ -181,57 +181,59 @@ export class GameScene extends Phaser.Scene {
         this.keys = this.input.keyboard.addKeys('W,A,S,D');
         this.input.on('pointerdown', () => this.shoot());
 
-        // Player Health Bar Graphics
-        this.healthBar = this.add.graphics();
+        // Pause Logic
+        this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+        this.escKey.on('down', () => this.togglePause());
 
-        this.spawnWave();
-
-        // Overlap/Collisions
-        this.physics.add.overlap(this.bullets, this.enemies, (bullet, enemy) => {
-            enemy.takeDamage(10 * this.player.damageMultiplier);
-            bullet.destroy();
-        });
-
-        this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
-            player.health -= enemy.damage / 60;
-
-            if (enemy.isBat) {
-                player.applyPoison(this);
-            }
-
-            if (player.health <= 0) {
-                this.scene.start('GameOverScene', { wave: this.wave });
-            }
-        });
-
-        this.physics.add.overlap(this.player, this.coins, (player, coin) => {
-            const baseValue = 5;
-            player.coins += Math.floor(baseValue * (coin.coinMult || 1));
-            this.updateUI();
-            coin.destroy();
-        });
-
-        // Wall Collisions
-        this.physics.add.collider(this.player, this.walls);
-        this.physics.add.collider(this.enemies, this.walls);
-        this.physics.add.collider(this.bullets, this.walls, (bullet) => {
-            bullet.destroy();
-        });
-        this.physics.add.collider(this.enemyBullets, this.walls, (bullet) => {
-            bullet.destroy();
-        });
-        this.physics.add.collider(this.player, this.enemyBullets, (player, bullet) => {
-            player.health -= 10;
-            bullet.destroy();
-            this.updateUI();
-            if (player.health <= 0) {
-                this.scene.start('GameOverScene', { wave: this.wave });
-            }
-        });
-        this.physics.add.collider(this.enemies, this.enemies);
-
-        // UI
+        // UI Setup
         this.setupUI();
+        this.setupPauseUIListeners();
+    }
+
+    setupPauseUIListeners() {
+        const resumeBtn = document.getElementById('resume-btn');
+        const controlsBtn = document.getElementById('controls-btn');
+        const quitBtn = document.getElementById('quit-btn');
+        const backToPauseBtn = document.getElementById('back-to-pause');
+
+        if (resumeBtn) resumeBtn.onclick = () => this.togglePause();
+        if (controlsBtn) controlsBtn.onclick = () => this.showControls(true);
+        if (backToPauseBtn) backToPauseBtn.onclick = () => this.showControls(false);
+        if (quitBtn) quitBtn.onclick = () => {
+            this.togglePause();
+            this.scene.start('StartScene');
+        };
+    }
+
+    togglePause() {
+        this.isWavePaused = !this.isWavePaused;
+        const overlay = document.getElementById('pause-overlay');
+        const menu = document.getElementById('pause-menu');
+        const controls = document.getElementById('controls-panel');
+
+        if (this.isWavePaused) {
+            this.physics.pause();
+            this.tweens.pauseAll();
+            if (overlay) overlay.style.display = 'flex';
+            if (menu) menu.style.display = 'flex';
+            if (controls) controls.style.display = 'none';
+        } else {
+            this.physics.resume();
+            this.tweens.resumeAll();
+            if (overlay) overlay.style.display = 'none';
+        }
+    }
+
+    showControls(show) {
+        const menu = document.getElementById('pause-menu');
+        const controls = document.getElementById('controls-panel');
+        if (show) {
+            if (menu) menu.style.display = 'none';
+            if (controls) controls.style.display = 'block';
+        } else {
+            if (menu) menu.style.display = 'flex';
+            if (controls) controls.style.display = 'none';
+        }
     }
 
     update() {
