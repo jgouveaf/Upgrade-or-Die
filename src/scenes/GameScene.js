@@ -41,6 +41,14 @@ export class GameScene extends Phaser.Scene {
         this.graphics.strokeRect(0, 0, 32, 32);
         this.graphics.generateTexture('wall', 32, 32);
 
+        // Portal texture
+        this.graphics.clear();
+        this.graphics.lineStyle(4, 0xff00ff, 1);
+        this.graphics.strokeCircle(24, 24, 20);
+        this.graphics.lineStyle(2, 0x00ffff, 0.5);
+        this.graphics.strokeCircle(24, 24, 12);
+        this.graphics.generateTexture('portal', 48, 48);
+
         this.graphics.destroy();
     }
 
@@ -61,6 +69,7 @@ export class GameScene extends Phaser.Scene {
         this.coins = this.physics.add.group();
 
         this.walls = this.physics.add.staticGroup();
+        this.spawners = this.add.group();
         this.createMap();
 
         // Input
@@ -145,20 +154,24 @@ export class GameScene extends Phaser.Scene {
     }
 
     spawnEnemy() {
-        // FOR DEBUG: Spawn at center alternating with borders
-        const side = Phaser.Math.Between(0, 4);
-        let x, y;
+        const portalList = this.spawners.getChildren();
+        if (portalList.length === 0) return;
 
-        if (side === 4) { // Debug spawn
-            x = 400; y = 100;
-        } else if (side === 0) { x = Phaser.Math.Between(0, 800); y = -50; }
-        else if (side === 1) { x = 850; y = Phaser.Math.Between(0, 600); }
-        else if (side === 2) { x = Phaser.Math.Between(0, 800); y = 650; }
-        else { x = -50; y = Phaser.Math.Between(0, 600); }
+        const portal = portalList[Phaser.Math.Between(0, portalList.length - 1)];
+        const x = portal.x;
+        const y = portal.y;
 
         const enemy = new Enemy(this, x, y, this.wave);
         this.enemies.add(enemy);
-        console.log(`Enemy spawned at ${x}, ${y} for Wave ${this.wave}`);
+        console.log(`Enemy spawned at portal ${x}, ${y} for Wave ${this.wave}`);
+
+        // Simple scale effect on portal when spawning
+        this.tweens.add({
+            targets: portal,
+            scale: 1.5,
+            duration: 100,
+            yoyo: true
+        });
     }
 
     spawnCoin(x, y) {
@@ -290,6 +303,27 @@ export class GameScene extends Phaser.Scene {
                     this.walls.create(pos.x + (i * 32), pos.y + (j * 32), 'wall').refreshBody();
                 }
             }
+        });
+
+        // Add Spawners (Portals)
+        const portalPositions = [
+            { x: 100, y: 100 },
+            { x: 700, y: 100 },
+            { x: 100, y: 500 },
+            { x: 700, y: 500 }
+        ];
+
+        portalPositions.forEach(pos => {
+            const portal = this.add.sprite(pos.x, pos.y, 'portal');
+            this.spawners.add(portal);
+
+            // Add a simple rotation animation to the portal
+            this.tweens.add({
+                targets: portal,
+                angle: 360,
+                duration: 3000,
+                repeat: -1
+            });
         });
     }
 }
