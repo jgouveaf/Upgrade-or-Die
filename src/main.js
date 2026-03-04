@@ -1,7 +1,7 @@
-import { StartScene } from './scenes/StartScene.js';
-import { GameScene } from './scenes/GameScene.js';
-import { UpgradeScene } from './scenes/UpgradeScene.js';
-import { GameOverScene } from './scenes/GameOverScene.js';
+import { StartScene } from './scenes/StartScene.js?v=2';
+import { GameScene } from './scenes/GameScene.js?v=2';
+import { UpgradeScene } from './scenes/UpgradeScene.js?v=2';
+import { GameOverScene } from './scenes/GameOverScene.js?v=2';
 
 const config = {
     type: Phaser.AUTO,
