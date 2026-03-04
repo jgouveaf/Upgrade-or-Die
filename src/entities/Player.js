@@ -18,6 +18,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.coins = 0;
         this.isPoisoned = false;
         this.poisonEvent = null;
+
+        // Gadget System
+        this.gadgets = {
+            turrets: {}, // Key: element, Value: level
+            forceFields: {}, // Key: element, Value: level
+            specialShots: {} // Key: element, Value: level
+        };
     }
 
     update(input, mouse) {
