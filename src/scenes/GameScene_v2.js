@@ -80,23 +80,39 @@ export class GameScene extends Phaser.Scene {
         this.graphics.strokeRect(4, 4, 40, 40);
         this.graphics.generateTexture('portal', 48, 48);
 
-        // Pixel Boss (Rafael Rosseti) - More detailed
+        // Pixel Boss (Rafael Rosseti) - NEW VERSION (Bald, Beard, Light Sweater)
         this.graphics.clear();
-        // Hair (Brown)
-        this.graphics.fillStyle(0x4b2d13, 1);
-        this.graphics.fillRect(18, 4, 28, 12);
+
         // Face (Skin)
         this.graphics.fillStyle(0xffdbac, 1);
-        this.graphics.fillRect(20, 8, 24, 24);
+        this.graphics.fillRect(20, 8, 24, 24); // Head block
+
+        // Bald top curvature (slightly lighter skin)
+        this.graphics.fillStyle(0xffe0bd, 1);
+        this.graphics.fillRect(24, 6, 16, 2);
+
+        // Beard (Dark Goatee)
+        this.graphics.fillStyle(0x222222, 1);
+        this.graphics.fillRect(26, 26, 12, 6); // Chin
+        this.graphics.fillRect(24, 24, 2, 8);  // Side
+        this.graphics.fillRect(38, 24, 2, 8);  // Side
+
         // Eyes
         this.graphics.fillStyle(0x000000, 1);
-        this.graphics.fillRect(24, 16, 4, 4);
-        this.graphics.fillRect(36, 16, 4, 4);
-        // Body (Suit/Shirt)
-        this.graphics.fillStyle(0x222222, 1);
+        this.graphics.fillRect(26, 18, 3, 3);
+        this.graphics.fillRect(35, 18, 3, 3);
+
+        // Body (Light Grey Sweater)
+        this.graphics.fillStyle(0xe0e0e0, 1);
         this.graphics.fillRect(14, 32, 36, 32);
-        this.graphics.fillStyle(0xffffff, 1);
-        this.graphics.fillRect(28, 32, 8, 16); // Shirt
+
+        // Rock Hand (Horns)
+        this.graphics.fillStyle(0xffdbac, 1);
+        this.graphics.fillRect(50, 24, 8, 10); // Hand base
+        this.graphics.fillRect(50, 18, 2, 6);  // Index horn
+        this.graphics.fillRect(56, 18, 2, 6);  // Pinky horn
+        this.graphics.fillStyle(0x000000, 0.3);
+        this.graphics.fillRect(52, 26, 4, 4);  // Folded fingers
 
         this.graphics.generateTexture('boss', 64, 64);
 
@@ -447,6 +463,11 @@ export class GameScene extends Phaser.Scene {
         boss.maxHealth = boss.health;
         boss.isBoss = true;
         boss.clearTint();
+
+        // Restricted Hitbox: Only the head (24x24)
+        boss.body.setSize(24, 24);
+        boss.body.setOffset(20, 6);
+
         this.enemies.add(boss);
 
         const nameTag = this.add.text(boss.x, boss.y - 88, 'Rafael Rosseti', {
