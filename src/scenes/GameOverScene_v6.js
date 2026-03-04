@@ -1,6 +1,7 @@
 export class GameOverScene extends Phaser.Scene {
     constructor() {
-        super('GameOverScene');
+        super('GameOverScene_v6');
+        console.log("GameOverScene v6 Constructor");
     }
 
     init(data) {
@@ -114,7 +115,7 @@ export class GameOverScene extends Phaser.Scene {
         });
 
         this.input.on('pointerdown', () => {
-            this.scene.start('GameScene');
+            this.scene.start('GameScene_v6', { wave: 1 });
         });
     }
 }

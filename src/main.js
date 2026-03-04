@@ -1,7 +1,9 @@
-import { StartScene } from './scenes/StartScene_v4.js';
-import { GameScene } from './scenes/GameScene_v4.js';
-import { UpgradeScene } from './scenes/UpgradeScene_v4.js';
-import { GameOverScene } from './scenes/GameOverScene_v4.js';
+import { StartScene } from './scenes/StartScene_v6.js';
+import { GameScene } from './scenes/GameScene_v6.js';
+import { UpgradeScene } from './scenes/UpgradeScene_v6.js';
+import { GameOverScene } from './scenes/GameOverScene_v6.js';
+
+console.log("Main.js v6 Loaded - Force Refresh");
 
 const config = {
     type: Phaser.AUTO,
@@ -29,4 +31,6 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
-// Initialized
+// Initialized v6
+window.game = game; // Make accessible globally for debugging
+console.log("Game Instance Created");

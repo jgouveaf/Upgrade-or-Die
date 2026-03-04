@@ -2,12 +2,21 @@ import { GADGET_DEFINITIONS, ELEMENTS, GADGET_TYPES } from '../utils/GadgetData.
 
 export class UpgradeScene extends Phaser.Scene {
     constructor() {
-        super('UpgradeScene');
+        super('UpgradeScene_v6');
         this.isSpecialPhase = false;
+        console.log("UpgradeScene v6 Constructor");
     }
 
-    init(data) {
-        this.playerData = data.player || { gadgets: { turrets: {}, forceFields: {}, specialShots: {} } };
+    init(data = {}) {
+        console.log("UpgradeScene_v6: init called with data:", data);
+        this.playerData = data.player || {
+            coins: 0,
+            health: 100,
+            maxHealth: 100,
+            damageMultiplier: 1,
+            speedMultiplier: 1,
+            gadgets: { turrets: {}, forceFields: {}, specialShots: {} }
+        };
         this.wave = data.wave || 1;
         this.difficulty = data.difficulty || 'normal';
         this.isSpecialPhase = data.isSpecialPhase || false;
@@ -19,8 +28,11 @@ export class UpgradeScene extends Phaser.Scene {
     }
 
     create() {
+        console.log("UpgradeScene: create called. Wave:", this.wave);
         const { width, height } = this.scale;
-
+        if (!width || !height) {
+            console.warn("UpgradeScene: Scale not available yet?");
+        }
         // Overlay background
         this.add.rectangle(0, 0, width, height, 0x0a0a0c, 1).setOrigin(0);
 
@@ -193,6 +205,7 @@ export class UpgradeScene extends Phaser.Scene {
                 if (this.playerData.coins >= cost) {
                     this.playerData.coins -= cost;
                     this.applyGadget(gadget);
+                    console.log("UpgradeScene: Gadget applied, restarting v6");
                     this.scene.restart({
                         player: this.playerData,
                         wave: this.wave,
@@ -235,7 +248,8 @@ export class UpgradeScene extends Phaser.Scene {
     }
 
     finishUpgrade() {
-        this.scene.start('GameScene', {
+        console.log("UpgradeScene: Finish upgrade, starting GameScene_v6");
+        this.scene.start('GameScene_v6', {
             player: this.playerData,
             wave: this.wave + 1,
             difficulty: this.difficulty

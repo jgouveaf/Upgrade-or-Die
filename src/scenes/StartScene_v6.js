@@ -2,8 +2,9 @@ import { settingsManager } from '../utils/SettingsManager.js';
 
 export class StartScene extends Phaser.Scene {
     constructor() {
-        super('StartScene');
+        super('StartScene_v6');
         this.difficulty = 'normal';
+        console.log("StartScene v6 Constructor");
     }
 
     create() {
@@ -64,7 +65,8 @@ export class StartScene extends Phaser.Scene {
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
         startBtn.on('pointerdown', () => {
-            this.scene.start('GameScene', { difficulty: this.difficulty, wave: 1 });
+            console.log("StartScene: Starting GameScene_v6");
+            this.scene.start('GameScene_v6', { difficulty: this.difficulty, wave: 1 });
         });
 
         // Settings Button

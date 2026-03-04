@@ -5,8 +5,8 @@ import { GADGET_TYPES, ELEMENTS } from '../utils/GadgetData.js';
 
 export class GameScene extends Phaser.Scene {
     constructor() {
-        super('GameScene');
-        console.log("GameScene Loaded - Version 4");
+        super('GameScene_v6');
+        console.log("GameScene Loaded - Version 6");
     }
 
     init(data) {
@@ -289,7 +289,7 @@ export class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
             player.health -= enemy.damage / 60;
             if (enemy.isBat) player.applyPoison(this);
-            if (player.health <= 0) this.scene.start('GameOverScene', { wave: this.wave });
+            if (player.health <= 0) this.scene.start('GameOverScene_v6', { wave: this.wave });
         });
 
         this.physics.add.overlap(this.player, this.coins, (player, coin) => {
@@ -317,7 +317,7 @@ export class GameScene extends Phaser.Scene {
 
             bullet.destroy();
             this.updateUI();
-            if (player.health <= 0) this.scene.start('GameOverScene', { wave: this.wave });
+            if (player.health <= 0) this.scene.start('GameOverScene_v6', { wave: this.wave });
         });
         this.physics.add.collider(this.enemies, this.enemies);
 
@@ -341,7 +341,7 @@ export class GameScene extends Phaser.Scene {
         if (backToPauseBtn) backToPauseBtn.onclick = () => this.showControls(false);
         if (quitBtn) quitBtn.onclick = () => {
             this.togglePause();
-            this.scene.start('StartScene');
+            this.scene.start('StartScene_v6');
         };
     }
 
@@ -524,9 +524,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     completeWave() {
-        this.isWavePaused = true;
         this.player.coins += 50;
-        this.scene.start('UpgradeScene', {
+        console.log("GameScene: Wave complete. Starting UpgradeScene_v6");
+        this.scene.start('UpgradeScene_v6', {
             difficulty: this.difficulty,
             player: {
                 health: this.player.health,
