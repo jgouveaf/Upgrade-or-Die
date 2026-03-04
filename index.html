@@ -14,7 +14,55 @@
 
 <body>
     <div id="game-container"></div>
-    <div id="ui-layer"></div>
+    <div id="ui-layer">
+        <div id="pause-overlay" class="pause-overlay" style="display: none;">
+            <div id="pause-menu" class="pause-menu">
+                <h2 style="color: var(--primary); text-align: center; margin-bottom: 2rem;">PAUSA</h2>
+                <button class="pause-btn" id="resume-btn">Voltar</button>
+                <button class="pause-btn" id="controls-btn">Controles</button>
+                <button class="pause-btn exit" id="quit-btn">Sair</button>
+            </div>
+            <div id="controls-panel" class="controls-panel">
+                <h3 style="color: var(--secondary); text-align: center;">CONTROLES</h3>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <div style="display: flex; gap: 5px;">
+                            <div class="key-box">W</div>
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <div class="key-box">A</div>
+                            <div class="key-box">S</div>
+                            <div class="key-box">D</div>
+                        </div>
+                        <span>MOVER</span>
+                    </div>
+                    <div class="control-item">
+                        <div class="mouse-icon"></div>
+                        <span>ATIRAR</span>
+                    </div>
+                </div>
+                <button class="pause-btn" id="back-to-pause" style="margin-top: 2rem; width: 100%;">Voltar</button>
+            </div>
+        </div>
+
+        <!-- Settings Overlay -->
+        <div id="settings-overlay" class="settings-overlay" style="display: none;">
+            <div class="settings-menu">
+                <h2 style="color: var(--primary); text-align: center; margin-bottom: 2rem;">CONFIGURAÇÕES</h2>
+                <div id="bindings-list" class="bindings-list">
+                    <!-- Bindings will be injected here -->
+                </div>
+                <button class="pause-btn" id="close-settings" style="margin-top: 2rem;">FECHAR</button>
+            </div>
+            <div id="rebinding-modal" class="rebinding-modal" style="display: none;">
+                <div class="rebinding-content">
+                    <p>PRESSIONE UMA TECLA PARA</p>
+                    <h3 id="rebinding-action" style="color: var(--secondary); margin-top: 1rem;">AÇÃO</h3>
+                    <p style="font-size: 0.7rem; margin-top: 2rem; opacity: 0.7;">(Pressione ESC para cancelar)</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Game Scripts -->
     <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
@@ -27,7 +75,7 @@
                 // Only load the game after the font is ready
                 const s = document.createElement('script');
                 s.type = 'module';
-                s.src = 'src/main.js?v=v14';
+                s.src = 'src/main.js?v=' + Date.now();
                 document.body.appendChild(s);
             }
         });

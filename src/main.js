@@ -1,7 +1,7 @@
-import { StartScene } from './scenes/StartScene.js';
-import { GameScene } from './scenes/GameScene.js';
-import { UpgradeScene } from './scenes/UpgradeScene.js';
-import { GameOverScene } from './scenes/GameOverScene.js';
+import { StartScene } from './scenes/StartScene.js?v=2';
+import { GameScene } from './scenes/GameScene.js?v=2';
+import { UpgradeScene } from './scenes/UpgradeScene.js?v=2';
+import { GameOverScene } from './scenes/GameOverScene.js?v=2';
 
 const config = {
     type: Phaser.AUTO,
@@ -20,8 +20,13 @@ const config = {
             debug: false
         }
     },
+    input: {
+        mouse: {
+            disableContextMenu: true
+        }
+    },
     scene: [StartScene, GameScene, UpgradeScene, GameOverScene]
 };
 
 const game = new Phaser.Game(config);
-// v12 - Deployment fix
+// Initialized
