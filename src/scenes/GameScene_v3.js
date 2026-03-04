@@ -80,39 +80,42 @@ export class GameScene extends Phaser.Scene {
         this.graphics.strokeRect(4, 4, 40, 40);
         this.graphics.generateTexture('portal', 48, 48);
 
-        // Pixel Boss (Rafael Rosseti) - NEW VERSION (Bald, Beard, Light Sweater)
+        // Pixel Boss (Rafael Rosseti) - FINAL VERSION (Bald, Beard, Light Sweater)
         this.graphics.clear();
 
-        // Face (Skin)
+        // Head / Face (Skin)
         this.graphics.fillStyle(0xffdbac, 1);
-        this.graphics.fillRect(20, 8, 24, 24); // Head block
+        this.graphics.fillRect(20, 4, 24, 24); // Full head block
 
-        // Bald top curvature (slightly lighter skin)
+        // Shading for bald head (top highlight)
         this.graphics.fillStyle(0xffe0bd, 1);
-        this.graphics.fillRect(24, 6, 16, 2);
+        this.graphics.fillRect(24, 4, 16, 4);
+        this.graphics.fillRect(22, 6, 2, 2);
+        this.graphics.fillRect(40, 6, 2, 2);
 
-        // Beard (Dark Goatee)
-        this.graphics.fillStyle(0x222222, 1);
-        this.graphics.fillRect(26, 26, 12, 6); // Chin
-        this.graphics.fillRect(24, 24, 2, 8);  // Side
-        this.graphics.fillRect(38, 24, 2, 8);  // Side
+        // Beard / Goatee (More prominent dark area)
+        this.graphics.fillStyle(0x1a1a1a, 1);
+        this.graphics.fillRect(24, 18, 2, 10); // Left sideburn/beard line
+        this.graphics.fillRect(38, 18, 2, 10); // Right sideburn/beard line
+        this.graphics.fillRect(26, 24, 12, 6);  // Chin/Mouth area
+        this.graphics.fillRect(28, 22, 8, 2);   // Mustache
 
-        // Eyes
+        // Eyes (Small black dots)
         this.graphics.fillStyle(0x000000, 1);
-        this.graphics.fillRect(26, 18, 3, 3);
-        this.graphics.fillRect(35, 18, 3, 3);
+        this.graphics.fillRect(26, 14, 3, 3);
+        this.graphics.fillRect(35, 14, 3, 3);
 
-        // Body (Light Grey Sweater)
-        this.graphics.fillStyle(0xe0e0e0, 1);
-        this.graphics.fillRect(14, 32, 36, 32);
+        // Body (Light Grey / White Sweater)
+        this.graphics.fillStyle(0xeeeeee, 1);
+        this.graphics.fillRect(14, 28, 36, 36);
 
-        // Rock Hand (Horns)
+        // Rock Hand (Horns) - Better position
         this.graphics.fillStyle(0xffdbac, 1);
-        this.graphics.fillRect(50, 24, 8, 10); // Hand base
-        this.graphics.fillRect(50, 18, 2, 6);  // Index horn
-        this.graphics.fillRect(56, 18, 2, 6);  // Pinky horn
-        this.graphics.fillStyle(0x000000, 0.3);
-        this.graphics.fillRect(52, 26, 4, 4);  // Folded fingers
+        this.graphics.fillRect(52, 20, 10, 12); // Hand base
+        this.graphics.fillRect(52, 12, 2, 8);  // Index horn
+        this.graphics.fillRect(60, 12, 2, 8);  // Pinky horn
+        this.graphics.fillStyle(0x000000, 0.2);
+        this.graphics.fillRect(54, 22, 6, 6);  // Palm shade
 
         this.graphics.generateTexture('boss', 64, 64);
 
