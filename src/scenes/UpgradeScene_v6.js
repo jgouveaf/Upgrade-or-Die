@@ -138,7 +138,7 @@ export class UpgradeScene extends Phaser.Scene {
             const y = height / 2 + 50;
             const element = ELEMENTS[gadget.element.toUpperCase()];
 
-            const cost = 100 * (1 + Math.floor(this.wave / 3));
+            const cost = 175;
 
             const card = this.add.rectangle(x, y, 180, 260, 0x1a1a25)
                 .setStrokeStyle(3, element.color)
