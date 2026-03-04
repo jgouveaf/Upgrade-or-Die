@@ -671,6 +671,7 @@ export class GameScene extends Phaser.Scene {
 
             // Damage logic
             this.enemies.getChildren().forEach(enemy => {
+                if (!enemy.active) return;
                 const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, enemy.x, enemy.y);
                 if (dist < radius) {
                     this.applyElementalEffect(enemy, element, level, true);
@@ -719,17 +720,21 @@ export class GameScene extends Phaser.Scene {
 
         // Muzzle flash
         this.gadgetGraphics.fillStyle(0xffffff, 0.8);
-        this.gadgetGraphics.fillCircle(turret.x, turret.y, 5 + turret.level);
+        this.time.delayedCall(50, () => { if (this.gadgetGraphics) this.gadgetGraphics.clear(); });
 
-        this.time.delayedCall(50, () => this.gadgetGraphics.clear());
-
-        target.takeDamage(5 * turret.level);
-        this.applyElementalEffect(target, turret.element, turret.level, false);
+        // Safety check: target might be destroyed by takeDamage
+        if (target && target.active) {
+            this.applyElementalEffect(target, turret.element, turret.level, false);
+        }
     }
 
     applyElementalEffect(enemy, element, level, isAura) {
+        if (!enemy || !enemy.active) return;
+
         const damage = (isAura ? 0.2 : 5) * level;
         enemy.takeDamage(damage);
+
+        if (!enemy.active) return; // Died from damage
 
         switch (element) {
             case 'electric':
