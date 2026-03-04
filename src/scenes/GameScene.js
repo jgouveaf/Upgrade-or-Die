@@ -79,15 +79,26 @@ export class GameScene extends Phaser.Scene {
         this.graphics.strokeRect(4, 4, 40, 40);
         this.graphics.generateTexture('portal', 48, 48);
 
-        // Pixel Boss (Rafael Rosseti)
+        // Pixel Boss (Rafael Rosseti) - More detailed
         this.graphics.clear();
-        this.graphics.fillStyle(0xffffff, 1);
-        this.graphics.fillRect(16, 32, 32, 32);
+        // Hair (Brown)
+        this.graphics.fillStyle(0x4b2d13, 1);
+        this.graphics.fillRect(18, 4, 28, 12);
+        // Face (Skin)
         this.graphics.fillStyle(0xffdbac, 1);
         this.graphics.fillRect(20, 8, 24, 24);
+        // Eyes
+        this.graphics.fillStyle(0x000000, 1);
+        this.graphics.fillRect(24, 16, 4, 4);
+        this.graphics.fillRect(36, 16, 4, 4);
+        // Body (Suit/Shirt)
+        this.graphics.fillStyle(0x222222, 1);
+        this.graphics.fillRect(14, 32, 36, 32);
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillRect(28, 32, 8, 16); // Shirt
+
         this.graphics.generateTexture('boss', 64, 64);
 
-<<<<<<< HEAD
         // Pixel Piggy Bank (Boss Bullet) - 32x32
         this.graphics.clear();
 
@@ -174,13 +185,6 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(20, 18, 2, 2);
 
         this.graphics.generateTexture('poisonBat', 32, 32);
-=======
-        // Pixel Poison Bat
-        this.graphics.clear();
-        this.graphics.fillStyle(0x00ff00, 1);
-        this.graphics.fillRect(8, 8, 8, 8);
-        this.graphics.generateTexture('poisonBat', 24, 24);
->>>>>>> 4e36a5b5bdf50d118da998df238bfe0dee5d7cdb
 
         this.graphics.destroy();
     }
@@ -269,7 +273,6 @@ export class GameScene extends Phaser.Scene {
 
         this.physics.add.collider(this.player, this.walls);
         this.physics.add.collider(this.enemies, this.walls);
-<<<<<<< HEAD
         this.physics.add.collider(this.bullets, this.walls, (bullet) => {
             bullet.destroy();
         });
@@ -286,13 +289,6 @@ export class GameScene extends Phaser.Scene {
             }
 
             bullet.destroy();
-=======
-        this.physics.add.collider(this.bullets, this.walls, (b) => b.destroy());
-        this.physics.add.collider(this.enemyBullets, this.walls, (b) => b.destroy());
-        this.physics.add.collider(this.player, this.enemyBullets, (p, b) => {
-            p.health -= 10;
-            b.destroy();
->>>>>>> 4e36a5b5bdf50d118da998df238bfe0dee5d7cdb
             this.updateUI();
             if (p.health <= 0) this.scene.start('GameOverScene', { wave: this.wave });
         });
@@ -398,9 +394,14 @@ export class GameScene extends Phaser.Scene {
         this.enemies.getChildren().forEach(enemy => {
             if (enemy.isBoss && enemy.active) {
                 const bx = enemy.x - 40;
-                const by = enemy.y - 85;
+                const by = enemy.y - 75; // Adjusted to be closer to the boss
                 const bWidth = 80;
                 const bPct = Math.max(0, enemy.health / enemy.maxHealth);
+
+                // Outer glow/border
+                this.healthBar.lineStyle(2, 0x00f2ff, 0.3);
+                this.healthBar.strokeRect(bx - 2, by - 2, bWidth + 4, 12);
+
                 this.healthBar.fillStyle(0x000000, 0.7);
                 this.healthBar.fillRect(bx, by, bWidth, 8);
                 this.healthBar.fillStyle(0xff0055, 1);
@@ -444,11 +445,19 @@ export class GameScene extends Phaser.Scene {
         boss.health = 450 * (1 + (this.wave * 0.3));
         boss.maxHealth = boss.health;
         boss.isBoss = true;
+        boss.clearTint();
         this.enemies.add(boss);
 
-        const nameTag = this.add.text(boss.x, boss.y - 70, 'Rafael Rosseti', { fontSize: '16px', fill: '#00f2ff' }).setOrigin(0.5);
+        const nameTag = this.add.text(boss.x, boss.y - 88, 'Rafael Rosseti', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            fill: '#00f2ff',
+            stroke: '#000',
+            strokeThickness: 2
+        }).setOrigin(0.5);
+
         this.events.on('update', () => {
-            if (boss.active) nameTag.setPosition(boss.x, boss.y - 70);
+            if (boss.active) nameTag.setPosition(boss.x, boss.y - 88);
             else nameTag.destroy();
         });
     }
