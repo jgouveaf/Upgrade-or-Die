@@ -393,6 +393,23 @@ export class GameScene extends Phaser.Scene {
         const ui = document.getElementById('ui-layer');
         if (!ui) return;
 
+        // Ensure Pause Overlay exists (prevents cache issues)
+        if (!document.getElementById('pause-overlay')) {
+            console.log("GameScene: Pause UI missing, injecting...");
+            const pauseHTML = `
+                <div id="pause-overlay" class="pause-overlay" style="display: none;">
+                    <div id="pause-menu" class="pause-menu">
+                        <h2 style="color: var(--primary); text-align: center; margin-bottom: 2rem;">PAUSA</h2>
+                        <button class="pause-btn" id="resume-btn">Voltar</button>
+                        <button class="pause-btn" id="controls-btn">Controles</button>
+                        <button class="pause-btn exit" id="quit-btn">Sair</button>
+                    </div>
+                    <div id="controls-panel" class="controls-panel"></div>
+                </div>
+            `;
+            ui.insertAdjacentHTML('afterbegin', pauseHTML);
+        }
+
         // Update instructions panel content dynamically
         const controlsContent = `
             <h3 style="color: var(--secondary); text-align: center;">CONTROLES</h3>
@@ -418,14 +435,17 @@ export class GameScene extends Phaser.Scene {
         const controlsPanel = document.getElementById('controls-panel');
         if (controlsPanel) controlsPanel.innerHTML = controlsContent;
 
-        ui.innerHTML += `
-            <div id="wave-container" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none;">
-                <div style="font-family: 'Press Start 2P', cursive; font-size: 18px; color: var(--secondary);">WAVE <span id="wave-count">1</span></div>
-            </div>
-            <div id="game-stats" style="position: absolute; top: 20px; right: 20px; font-family: 'Press Start 2P', cursive; font-size: 14px; color: #ffda00;">
-                <div>$ <span id="coin-count">0</span></div>
-            </div>
-        `;
+        // HUD - Wave and Coins (Ensure only one instance exists)
+        if (!document.getElementById('wave-container')) {
+            ui.insertAdjacentHTML('beforeend', `
+                <div id="wave-container" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none;">
+                    <div style="font-family: 'Press Start 2P', cursive; font-size: 18px; color: var(--secondary);">WAVE <span id="wave-count">1</span></div>
+                </div>
+                <div id="game-stats" style="position: absolute; top: 20px; right: 20px; font-family: 'Press Start 2P', cursive; font-size: 14px; color: #ffda00;">
+                    <div>$ <span id="coin-count">0</span></div>
+                </div>
+            `);
+        }
     }
 
     updateUI() {

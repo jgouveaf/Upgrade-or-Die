@@ -99,6 +99,7 @@ export class StartScene extends Phaser.Scene {
     }
 
     handleOpenSettings() {
+        this.ensureSettingsUI();
         const overlay = document.getElementById('settings-overlay');
         const closeBtn = document.getElementById('close-settings');
 
@@ -108,6 +109,32 @@ export class StartScene extends Phaser.Scene {
         closeBtn.onclick = () => {
             overlay.style.display = 'none';
         };
+    }
+
+    ensureSettingsUI() {
+        if (document.getElementById('settings-overlay')) return;
+
+        console.log("StartScene: Settings UI missing from DOM, injecting...");
+        const uiLayer = document.getElementById('ui-layer') || document.body;
+
+        const settingsHTML = `
+            <div id="settings-overlay" class="settings-overlay" style="display: none;">
+                <div class="settings-menu">
+                    <h2 style="color: var(--primary); text-align: center; margin-bottom: 2rem;">CONFIGURAÇÕES</h2>
+                    <div id="bindings-list" class="bindings-list"></div>
+                    <button class="pause-btn" id="close-settings" style="margin-top: 2rem;">FECHAR</button>
+                </div>
+                <div id="rebinding-modal" class="rebinding-modal" style="display: none;">
+                    <div class="rebinding-content">
+                        <p>PRESSIONE UMA TECLA PARA</p>
+                        <h3 id="rebinding-action" style="color: var(--secondary); margin-top: 1rem;">AÇÃO</h3>
+                        <p style="font-size: 0.7rem; margin-top: 2rem; opacity: 0.7;">(Pressione ESC para cancelar)</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        uiLayer.insertAdjacentHTML('beforeend', settingsHTML);
     }
 
     renderBindings() {
