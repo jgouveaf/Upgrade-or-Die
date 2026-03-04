@@ -20,17 +20,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.poisonEvent = null;
     }
 
-    update(cursors, mouse) {
+    update(input, mouse) {
         const speed = this.baseSpeed * this.speedMultiplier;
 
         // Movement
         this.setVelocity(0);
-        if (cursors.left.isDown || cursors.A.isDown) this.setVelocityX(-speed);
-        if (cursors.right.isDown || cursors.D.isDown) this.setVelocityX(speed);
-        if (cursors.up.isDown || cursors.W.isDown) this.setVelocityY(-speed);
-        if (cursors.down.isDown || cursors.S.isDown) this.setVelocityY(speed);
+        if (input.left.isDown) this.setVelocityX(-speed);
+        if (input.right.isDown) this.setVelocityX(speed);
+        if (input.up.isDown) this.setVelocityY(-speed);
+        if (input.down.isDown) this.setVelocityY(speed);
 
-        // Animation or rotation can be added here
+        // Rotation
         const angle = Phaser.Math.Angle.Between(this.x, this.y, mouse.x + this.scene.cameras.main.scrollX, mouse.y + this.scene.cameras.main.scrollY);
         this.setRotation(angle + Math.PI / 2);
     }

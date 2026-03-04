@@ -1,5 +1,6 @@
 import { Player } from '../entities/Player.js';
 import { Enemy } from '../entities/Enemy.js';
+import { settingsManager } from '../utils/SettingsManager.js';
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -120,8 +121,38 @@ export class GameScene extends Phaser.Scene {
         this.createMap();
 
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.keys = this.input.keyboard.addKeys('W,A,S,D');
-        this.input.on('pointerdown', () => this.shoot());
+
+        // Dynamic Key Bindings
+        this.keys = this.input.keyboard.addKeys({
+            UP: settingsManager.getBinding('UP'),
+            LEFT: settingsManager.getBinding('LEFT'),
+            DOWN: settingsManager.getBinding('DOWN'),
+            RIGHT: settingsManager.getBinding('RIGHT')
+        });
+
+        // Dynamic Shooting
+        this.input.on('pointerdown', (pointer) => {
+            const shootBinding = settingsManager.getBinding('SHOOT');
+            let shouldShoot = false;
+
+            if (shootBinding === 'LEFT_CLICK' && pointer.leftButtonDown()) shouldShoot = true;
+            else if (shootBinding === 'RIGHT_CLICK' && pointer.rightButtonDown()) shouldShoot = true;
+            else if (shootBinding === 'MIDDLE_CLICK' && pointer.middleButtonDown()) shouldShoot = true;
+            else if (pointer.noButtonDown() === false) {
+                // If it's a key, we handle it elsewhere or here? 
+                // Actually, if someone binds a KEY to shoot, we should handle it.
+                // But for now, user asked for mouse. Let's support keys too.
+            }
+
+            if (shouldShoot) this.shoot();
+        });
+
+        // Support for keyboard shooting if bound
+        const shootKey = settingsManager.getBinding('SHOOT');
+        if (!shootKey.includes('CLICK')) {
+            this.shootKey = this.input.keyboard.addKey(shootKey);
+            this.shootKey.on('down', () => this.shoot());
+        }
 
         // INITIALIZE HEALTH BAR EARLY
         this.healthBar = this.add.graphics();
@@ -226,7 +257,13 @@ export class GameScene extends Phaser.Scene {
         }
 
         if (this.player) {
-            this.player.update({ ...this.cursors, ...this.keys }, this.input.activePointer);
+            const movement = {
+                up: this.keys.UP,
+                left: this.keys.LEFT,
+                down: this.keys.DOWN,
+                right: this.keys.RIGHT
+            };
+            this.player.update(movement, this.input.activePointer);
         }
 
         this.updateHealthBar();
@@ -355,6 +392,32 @@ export class GameScene extends Phaser.Scene {
     setupUI() {
         const ui = document.getElementById('ui-layer');
         if (!ui) return;
+
+        // Update instructions panel content dynamically
+        const controlsContent = `
+            <h3 style="color: var(--secondary); text-align: center;">CONTROLES</h3>
+            <div class="controls-grid">
+                <div class="control-item">
+                    <div style="display: flex; flex-direction: column; gap: 5px; align-items: center;">
+                        <div class="key-box">${settingsManager.getBinding('UP')}</div>
+                        <div style="display: flex; gap: 5px;">
+                            <div class="key-box">${settingsManager.getBinding('LEFT')}</div>
+                            <div class="key-box">${settingsManager.getBinding('DOWN')}</div>
+                            <div class="key-box">${settingsManager.getBinding('RIGHT')}</div>
+                        </div>
+                    </div>
+                    <span>MOVER</span>
+                </div>
+                <div class="control-item">
+                    <div class="mouse-icon"></div>
+                    <span>${settingsManager.getBinding('SHOOT').replace('_', ' ')}</span>
+                </div>
+            </div>
+            <button class="pause-btn" id="back-to-pause" style="margin-top: 2rem; width: 100%;">Voltar</button>
+        `;
+        const controlsPanel = document.getElementById('controls-panel');
+        if (controlsPanel) controlsPanel.innerHTML = controlsContent;
+
         ui.innerHTML += `
             <div id="wave-container" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none;">
                 <div style="font-family: 'Press Start 2P', cursive; font-size: 18px; color: var(--secondary);">WAVE <span id="wave-count">1</span></div>

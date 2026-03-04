@@ -1,3 +1,5 @@
+import { settingsManager } from '../utils/SettingsManager.js';
+
 export class StartScene extends Phaser.Scene {
     constructor() {
         super('StartScene');
@@ -65,6 +67,15 @@ export class StartScene extends Phaser.Scene {
             this.scene.start('GameScene', { difficulty: this.difficulty, wave: 1 });
         });
 
+        // Settings Button
+        const settingsBtn = this.add.text(width / 2, height - 120, 'CONFIGURAÇÕES', {
+            fontSize: '16px',
+            fontFamily: '"Press Start 2P"',
+            fill: '#00f2ff',
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+        settingsBtn.on('pointerdown', () => this.handleOpenSettings());
+
         // Blink animation
         this.tweens.add({
             targets: startBtn,
@@ -85,5 +96,89 @@ export class StartScene extends Phaser.Scene {
                 b.btn.setScale(1);
             }
         });
+    }
+
+    handleOpenSettings() {
+        const overlay = document.getElementById('settings-overlay');
+        const closeBtn = document.getElementById('close-settings');
+
+        overlay.style.display = 'flex';
+        this.renderBindings();
+
+        closeBtn.onclick = () => {
+            overlay.style.display = 'none';
+        };
+    }
+
+    renderBindings() {
+        const list = document.getElementById('bindings-list');
+        list.innerHTML = '';
+
+        const actions = [
+            { id: 'UP', label: 'MOVER CIMA' },
+            { id: 'LEFT', label: 'MOVER ESQUERDA' },
+            { id: 'DOWN', label: 'MOVER BAIXO' },
+            { id: 'RIGHT', label: 'MOVER DIREITA' },
+            { id: 'SHOOT', label: 'ATIRAR' }
+        ];
+
+        actions.forEach(action => {
+            const row = document.createElement('div');
+            row.className = 'binding-row';
+
+            const currentKey = settingsManager.getBinding(action.id);
+
+            row.innerHTML = `
+                <span class="binding-label">${action.label}</span>
+                <span class="binding-key">${currentKey}</span>
+                <button class="edit-btn" data-action="${action.id}">EDITAR</button>
+            `;
+
+            list.appendChild(row);
+
+            row.querySelector('.edit-btn').onclick = () => this.startRebinding(action.id, action.label);
+        });
+    }
+
+    startRebinding(actionId, actionLabel) {
+        const modal = document.getElementById('rebinding-modal');
+        const actionText = document.getElementById('rebinding-action');
+
+        actionText.innerText = actionLabel;
+        modal.style.display = 'flex';
+
+        const handleKeyDown = (e) => {
+            e.preventDefault();
+            if (e.key === 'Escape') {
+                finish();
+                return;
+            }
+
+            const newKey = e.key.toUpperCase();
+            settingsManager.setBinding(actionId, newKey);
+            finish();
+        };
+
+        const handlePointerDown = (e) => {
+            let mouseBtn = '';
+            if (e.button === 0) mouseBtn = 'LEFT_CLICK';
+            else if (e.button === 2) mouseBtn = 'RIGHT_CLICK';
+            else if (e.button === 1) mouseBtn = 'MIDDLE_CLICK';
+
+            if (mouseBtn) {
+                settingsManager.setBinding(actionId, mouseBtn);
+                finish();
+            }
+        };
+
+        const finish = () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('mousedown', handlePointerDown);
+            modal.style.display = 'none';
+            this.renderBindings();
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('mousedown', handlePointerDown);
     }
 }

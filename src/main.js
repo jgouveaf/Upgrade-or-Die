@@ -20,6 +20,11 @@ const config = {
             debug: false
         }
     },
+    input: {
+        mouse: {
+            disableContextMenu: true
+        }
+    },
     scene: [StartScene, GameScene, UpgradeScene, GameOverScene]
 };
 
