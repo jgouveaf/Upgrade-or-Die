@@ -5,6 +5,7 @@ import { settingsManager } from '../utils/SettingsManager.js';
 export class GameScene extends Phaser.Scene {
     constructor() {
         super('GameScene');
+        console.log("GameScene Loaded - Version 4");
     }
 
     init(data) {
@@ -290,7 +291,7 @@ export class GameScene extends Phaser.Scene {
 
             bullet.destroy();
             this.updateUI();
-            if (p.health <= 0) this.scene.start('GameOverScene', { wave: this.wave });
+            if (player.health <= 0) this.scene.start('GameOverScene', { wave: this.wave });
         });
         this.physics.add.collider(this.enemies, this.enemies);
 
