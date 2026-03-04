@@ -220,6 +220,7 @@ export class GameScene extends Phaser.Scene {
             this.player.coins = this.persistedPlayer.coins;
             this.player.damageMultiplier = this.persistedPlayer.damageMultiplier;
             this.player.speedMultiplier = this.persistedPlayer.speedMultiplier;
+            this.player.gadgets = this.persistedPlayer.gadgets || this.player.gadgets;
         } else {
             this.player.health *= this.difficultyConfig.hpMult;
             this.player.maxHealth *= this.difficultyConfig.hpMult;
@@ -532,7 +533,8 @@ export class GameScene extends Phaser.Scene {
                 maxHealth: this.player.maxHealth,
                 coins: this.player.coins,
                 damageMultiplier: this.player.damageMultiplier,
-                speedMultiplier: this.player.speedMultiplier
+                speedMultiplier: this.player.speedMultiplier,
+                gadgets: this.player.gadgets
             },
             wave: this.wave
         });

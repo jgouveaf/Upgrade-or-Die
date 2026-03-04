@@ -7,10 +7,15 @@ export class UpgradeScene extends Phaser.Scene {
     }
 
     init(data) {
-        this.playerData = data.player;
-        this.wave = data.wave;
+        this.playerData = data.player || { gadgets: { turrets: {}, forceFields: {}, specialShots: {} } };
+        this.wave = data.wave || 1;
         this.difficulty = data.difficulty || 'normal';
         this.isSpecialPhase = data.isSpecialPhase || false;
+
+        // Ensure gadgets object exists
+        if (!this.playerData.gadgets) {
+            this.playerData.gadgets = { turrets: {}, forceFields: {}, specialShots: {} };
+        }
     }
 
     create() {
@@ -110,7 +115,7 @@ export class UpgradeScene extends Phaser.Scene {
             fontSize: '14px',
             fontFamily: '"Press Start 2P"',
             fill: '#00f2ff'
-        }).setOrigin(0.5).setAlpha(0);
+        }).setOrigin(0.5).setAlpha(1);
 
         // Pick 3 random gadgets from definitions
         const shuffled = [...GADGET_DEFINITIONS].sort(() => 0.5 - Math.random());
