@@ -181,6 +181,55 @@ export class GameScene extends Phaser.Scene {
         this.keys = this.input.keyboard.addKeys('W,A,S,D');
         this.input.on('pointerdown', () => this.shoot());
 
+        // Player Health Bar Graphics
+        this.healthBar = this.add.graphics();
+
+        this.spawnWave();
+
+        // Overlap/Collisions
+        this.physics.add.overlap(this.bullets, this.enemies, (bullet, enemy) => {
+            enemy.takeDamage(10 * this.player.damageMultiplier);
+            bullet.destroy();
+        });
+
+        this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
+            player.health -= enemy.damage / 60;
+
+            if (enemy.isBat) {
+                player.applyPoison(this);
+            }
+
+            if (player.health <= 0) {
+                this.scene.start('GameOverScene', { wave: this.wave });
+            }
+        });
+
+        this.physics.add.overlap(this.player, this.coins, (player, coin) => {
+            const baseValue = 5;
+            player.coins += Math.floor(baseValue * (coin.coinMult || 1));
+            this.updateUI();
+            coin.destroy();
+        });
+
+        // Wall Collisions
+        this.physics.add.collider(this.player, this.walls);
+        this.physics.add.collider(this.enemies, this.walls);
+        this.physics.add.collider(this.bullets, this.walls, (bullet) => {
+            bullet.destroy();
+        });
+        this.physics.add.collider(this.enemyBullets, this.walls, (bullet) => {
+            bullet.destroy();
+        });
+        this.physics.add.collider(this.player, this.enemyBullets, (player, bullet) => {
+            player.health -= 10;
+            bullet.destroy();
+            this.updateUI();
+            if (player.health <= 0) {
+                this.scene.start('GameOverScene', { wave: this.wave });
+            }
+        });
+        this.physics.add.collider(this.enemies, this.enemies);
+
         // Pause Logic
         this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
         this.escKey.on('down', () => this.togglePause());
