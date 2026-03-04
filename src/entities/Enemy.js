@@ -47,6 +47,17 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             if (distance < 400 && this.scene.time.now > this.nextFire && !this.isBat) {
                 this.shoot(player);
             }
+            // Bat flapping effect
+            if (this.isBat && !this.isFlapping) {
+                this.isFlapping = true;
+                this.scene.tweens.add({
+                    targets: this,
+                    scaleX: 1.2,
+                    duration: 200,
+                    yoyo: true,
+                    repeat: -1
+                });
+            }
         } else {
             this.setVelocity(0);
         }
@@ -63,8 +74,26 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             bullet.setVisible(true);
             bullet.setTexture(bulletKey);
 
+            if (this.isBoss) {
+                bullet.body.setSize(20, 20);
+                bullet.setScale(1.2); // Make it look bigger
+            } else {
+                bullet.body.setSize(8, 8);
+                bullet.setScale(1);
+            }
+
             const bulletSpeed = this.isBoss ? 400 : 300;
             this.scene.physics.moveToObject(bullet, player, bulletSpeed);
+
+            // Add spin to boss bullet
+            if (this.isBoss) {
+                this.scene.tweens.add({
+                    targets: bullet,
+                    angle: 360,
+                    duration: 500,
+                    repeat: -1
+                });
+            }
 
             // Auto destroy after life
             this.scene.time.delayedCall(3000, () => {

@@ -107,31 +107,92 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(8, 28, 8, 12);
         this.graphics.generateTexture('boss', 64, 64);
 
-        // Pixel Piggy Bank (Boss Bullet) - 24x24
+        // Pixel Piggy Bank (Boss Bullet) - 32x32
         this.graphics.clear();
-        this.graphics.fillStyle(0xffaaff, 1); // Pink body
-        this.graphics.fillRect(4, 8, 16, 12);
-        this.graphics.fillRect(6, 6, 12, 16);
-        this.graphics.fillStyle(0xffffff, 1);
-        this.graphics.fillRect(14, 10, 2, 2); // Eye
-        this.graphics.fillStyle(0x000000, 1);
-        this.graphics.fillRect(15, 11, 1, 1); // Pupil
-        this.graphics.fillStyle(0xffda00, 1); // Coin on top
-        this.graphics.fillRect(10, 2, 4, 6);
-        this.graphics.generateTexture('bossBullet', 24, 24);
 
-        // Pixel Poison Bat - 24x24
+        // Shadow
+        this.graphics.fillStyle(0x000000, 0.2);
+        this.graphics.fillRect(4, 24, 24, 4);
+
+        // Body (Pink)
+        this.graphics.fillStyle(0xffaaff, 1);
+        this.graphics.fillRect(6, 12, 20, 14); // Main body
+        this.graphics.fillRect(8, 10, 16, 2);  // Top curve
+
+        // Snout
+        this.graphics.fillStyle(0xff88ff, 1);
+        this.graphics.fillRect(26, 16, 4, 6);
+        this.graphics.fillStyle(0xff55ff, 1);
+        this.graphics.fillRect(28, 18, 2, 2); // Nostril
+
+        // Ears
+        this.graphics.fillStyle(0xffaaff, 1);
+        this.graphics.fillRect(8, 8, 4, 4);
+        this.graphics.fillRect(16, 8, 4, 4);
+
+        // Eyes
+        this.graphics.fillStyle(0x000000, 1);
+        this.graphics.fillRect(20, 14, 2, 2);
+
+        // Tail (Curly)
+        this.graphics.fillStyle(0xff88ff, 1);
+        this.graphics.fillRect(4, 16, 2, 2);
+
+        // Legs
+        this.graphics.fillStyle(0xffaaff, 1);
+        this.graphics.fillRect(10, 26, 4, 4);
+        this.graphics.fillRect(20, 26, 4, 4);
+
+        // Coin Slot
+        this.graphics.fillStyle(0x333333, 1);
+        this.graphics.fillRect(14, 12, 6, 2);
+
+        // Coin Pop
+        this.graphics.fillStyle(0xffda00, 1);
+        this.graphics.fillRect(16, 6, 2, 6);
+
+        this.graphics.generateTexture('bossBullet', 32, 32);
+
+        // Pixel Poison Bat - 32x32
         this.graphics.clear();
-        this.graphics.fillStyle(0x00ff00, 1); // Green body
-        this.graphics.fillRect(8, 8, 8, 8); // main body
-        this.graphics.fillRect(0, 4, 8, 4); // left wing top
-        this.graphics.fillRect(4, 8, 4, 4); // left wing mid
-        this.graphics.fillRect(16, 4, 8, 4); // right wing top
-        this.graphics.fillRect(16, 8, 4, 4); // right wing mid
-        this.graphics.fillStyle(0xff0000, 1); // Red eyes
-        this.graphics.fillRect(10, 10, 2, 2);
-        this.graphics.fillRect(14, 10, 2, 2);
-        this.graphics.generateTexture('poisonBat', 24, 24);
+
+        // Wings (Dark Green / Toxic)
+        this.graphics.fillStyle(0x004400, 1);
+        this.graphics.fillRect(4, 12, 8, 4); // Left wing connection
+        this.graphics.fillRect(0, 8, 8, 4);  // Left wing tip
+        this.graphics.fillRect(20, 12, 8, 4); // Right wing connection
+        this.graphics.fillRect(24, 8, 8, 4);  // Right wing tip
+
+        // Wing membranes (Lighter vibrant green)
+        this.graphics.fillStyle(0x00cc00, 1);
+        this.graphics.fillRect(2, 10, 4, 2);
+        this.graphics.fillRect(26, 10, 4, 2);
+
+        // Body (Lighter toxic green)
+        this.graphics.fillStyle(0x00ff00, 1);
+        this.graphics.fillRect(12, 8, 8, 12); // Hood/Body
+        this.graphics.fillRect(14, 20, 4, 4);  // Lower body/tail
+
+        // Head detail
+        this.graphics.fillStyle(0x00ff00, 1);
+        this.graphics.fillRect(10, 6, 12, 4);
+
+        // Eyes (Glowing Purple/Red)
+        this.graphics.fillStyle(0xff00ff, 1);
+        this.graphics.fillRect(12, 10, 2, 2);
+        this.graphics.fillRect(18, 10, 2, 2);
+
+        // Fangs
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillRect(13, 13, 1, 2);
+        this.graphics.fillRect(18, 13, 1, 2);
+
+        // Poison Aura/Droplets
+        this.graphics.fillStyle(0x00ff00, 0.4);
+        this.graphics.fillRect(10, 22, 2, 2);
+        this.graphics.fillRect(20, 18, 2, 2);
+
+        this.graphics.generateTexture('poisonBat', 32, 32);
 
         this.graphics.destroy();
     }
@@ -221,7 +282,14 @@ export class GameScene extends Phaser.Scene {
             bullet.destroy();
         });
         this.physics.add.collider(this.player, this.enemyBullets, (player, bullet) => {
-            player.health -= 10;
+            const isBossBullet = bullet.texture.key === 'bossBullet';
+            player.health -= isBossBullet ? 25 : 10;
+
+            // Visual feedback for boss hit
+            if (isBossBullet) {
+                this.cameras.main.shake(100, 0.01);
+            }
+
             bullet.destroy();
             this.updateUI();
             if (player.health <= 0) {
@@ -328,7 +396,7 @@ export class GameScene extends Phaser.Scene {
         boss.setTexture('boss');
         boss.clearTint(); // Remove the default enemy pink tint
         boss.setScale(1.5);
-        boss.health = 400 * (1 + (this.wave * 0.25));
+        boss.health = 450 * (1 + (this.wave * 0.3));
         boss.maxHealth = boss.health;
         boss.speed = 120;
         boss.damage = 25;

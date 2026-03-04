@@ -36,7 +36,7 @@ export class StartScene extends Phaser.Scene {
 
         diffs.forEach((d, i) => {
             const x = width / 2;
-            const y = height / 2 + 30 + (i * 45);
+            const y = height / 2 + 40 + (i * 60);
 
             const btn = this.add.text(x, y, d.name, {
                 fontSize: '18px',
