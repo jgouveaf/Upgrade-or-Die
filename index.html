@@ -57,7 +57,7 @@
                 // Only load the game after the font is ready
                 const s = document.createElement('script');
                 s.type = 'module';
-                s.src = 'src/main.js';
+                s.src = 'src/main.js?v=' + Date.now();
                 document.body.appendChild(s);
             }
         });
