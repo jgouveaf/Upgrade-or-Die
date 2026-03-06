@@ -14,19 +14,21 @@ export class StartScene extends Phaser.Scene {
         this.add.rectangle(0, 0, width, height, 0x0a0a0c).setOrigin(0);
 
         // Title
-        const title = this.add.text(width / 2, height / 2 - 120, 'UPGRADE OR DIE', {
-            fontSize: '48px',
+        const title = this.add.text(width / 2, height / 2 - 200, 'UPGRADE OR DIE', {
+            fontSize: '36px',
             fontFamily: '"Press Start 2P"',
             fill: '#ff0055',
             stroke: '#00f2ff',
-            strokeThickness: 2
+            strokeThickness: 3,
+            padding: { x: 10, y: 10 }
         }).setOrigin(0.5);
 
         // Difficulty Header
-        this.add.text(width / 2, height / 2 - 30, 'SELECT DIFFICULTY:', {
-            fontSize: '16px',
+        this.add.text(width / 2, height / 2 - 110, 'SELECT DIFFICULTY:', {
+            fontSize: '14px',
             fontFamily: '"Press Start 2P"',
-            fill: '#ffffff'
+            fill: '#ffffff',
+            padding: { x: 5, y: 5 }
         }).setOrigin(0.5);
 
         const diffs = [
@@ -39,12 +41,13 @@ export class StartScene extends Phaser.Scene {
 
         diffs.forEach((d, i) => {
             const x = width / 2;
-            const y = height / 2 + 40 + (i * 60);
+            const y = height / 2 - 50 + (i * 60); // More breathing room between buttons
 
             const btn = this.add.text(x, y, d.name, {
-                fontSize: '18px',
+                fontSize: d.name.length > 10 ? '14px' : '18px', // Dynamically scale long names
                 fontFamily: '"Press Start 2P"',
-                fill: this.difficulty === d.id ? d.color : '#444'
+                fill: this.difficulty === d.id ? d.color : '#444',
+                padding: { x: 10, y: 5 }
             }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
             btn.on('pointerdown', () => {
@@ -56,12 +59,12 @@ export class StartScene extends Phaser.Scene {
         });
 
         // Click to Start
-        const startBtn = this.add.text(width / 2, height - 60, 'START GAME', {
+        const startBtn = this.add.text(width / 2, height - 70, 'START GAME', {
             fontSize: '20px',
             fontFamily: '"Press Start 2P"',
             fill: '#ffffff',
             backgroundColor: '#ff0055',
-            padding: { x: 20, y: 10 }
+            padding: { x: 25, y: 15 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
         startBtn.on('pointerdown', () => {
@@ -70,10 +73,11 @@ export class StartScene extends Phaser.Scene {
         });
 
         // Settings Button
-        const settingsBtn = this.add.text(width / 2, height - 120, 'CONFIGURAÇÕES', {
-            fontSize: '16px',
+        const settingsBtn = this.add.text(width / 2, height - 160, 'CONFIGURAÇÕES', {
+            fontSize: '14px',
             fontFamily: '"Press Start 2P"',
             fill: '#00f2ff',
+            padding: { x: 10, y: 10 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
         settingsBtn.on('pointerdown', () => this.handleOpenSettings());
