@@ -155,7 +155,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     explode(x, y) {
         const dist = Phaser.Math.Distance.Between(this.scene.player.x, this.scene.player.y, x, y);
         if (dist < 60) {
-            this.scene.player.health -= 30;
+            if (!this.scene.player.isImmortal) {
+                this.scene.player.health -= 30;
+            }
             this.scene.cameras.main.shake(100, 0.01);
             this.scene.updateUI();
             if (this.scene.player.health <= 0) {

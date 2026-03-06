@@ -293,8 +293,10 @@ export class GameScene extends Phaser.Scene {
         });
 
         this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
-            player.health -= enemy.damage / 60;
-            if (enemy.isBat) player.applyPoison(this);
+            if (!player.isImmortal) {
+                player.health -= enemy.damage / 60;
+                if (enemy.isBat) player.applyPoison(this);
+            }
             if (player.health <= 0) this.scene.start('GameOverScene_v6', { wave: this.wave });
         });
 
@@ -314,7 +316,10 @@ export class GameScene extends Phaser.Scene {
         });
         this.physics.add.collider(this.player, this.enemyBullets, (player, bullet) => {
             const isBossBullet = bullet.texture.key === 'bossBullet';
-            player.health -= isBossBullet ? 25 : 10;
+
+            if (!player.isImmortal) {
+                player.health -= isBossBullet ? 25 : 10;
+            }
 
             // Visual feedback for boss hit
             if (isBossBullet) {
@@ -329,6 +334,20 @@ export class GameScene extends Phaser.Scene {
 
         this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
         this.escKey.on('down', () => this.togglePause());
+
+        // Immortality Cheat Code
+        this.pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.pKey.on('down', () => {
+            this.player.isImmortal = !this.player.isImmortal;
+            this.player.setAlpha(this.player.isImmortal ? 0.7 : 1);
+            if (this.player.isImmortal) {
+                this.player.setTint(0xffff00); // Golden glow for immortality
+                console.log("Cheat active: PLAYER IMMORTAL");
+            } else {
+                this.player.clearTint();
+                console.log("Cheat disabled: PLAYER MORTAL");
+            }
+        });
 
         this.setupUI();
         this.setupPauseUIListeners();

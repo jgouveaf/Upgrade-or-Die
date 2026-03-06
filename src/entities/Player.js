@@ -18,6 +18,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.coins = 0;
         this.isPoisoned = false;
         this.poisonEvent = null;
+        this.isImmortal = false;
 
         // Gadget System
         this.gadgets = {
@@ -51,12 +52,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.poisonEvent = scene.time.addEvent({
             delay: 1000, // Damage every 1 second
             callback: () => {
-                this.health -= 5;
-
-                // Show floating text maybe? Not critical right now.
+                if (!this.isImmortal) {
+                    this.health -= 5;
+                }
 
                 if (this.health <= 0) {
-                    scene.scene.start('GameOverScene', { wave: scene.wave });
+                    scene.scene.start('GameOverScene_v6', { wave: scene.wave });
                 }
 
                 poisonTicks++;
