@@ -613,8 +613,15 @@ export class GameScene extends Phaser.Scene {
         this.enemies.add(enemy);
     }
 
+    spawnCoin(x, y) {
+        const coin = this.coins.create(x, y, 'coin');
+        coin.setBounce(0.5);
+        coin.coinMult = this.difficultyConfig.coinMult;
+    }
+
     toggleDebugShop() {
         this.debugShopOpen = !this.debugShopOpen;
+        this.isWavePaused = this.debugShopOpen;
 
         if (this.debugShopOpen) {
             this.physics.pause();
@@ -626,6 +633,7 @@ export class GameScene extends Phaser.Scene {
             if (this.debugShopContainer) {
                 this.debugShopContainer.destroy();
                 this.debugShopContainer = null;
+                this.debugShopItemsContainer = null;
             }
         }
     }
@@ -636,9 +644,7 @@ export class GameScene extends Phaser.Scene {
         const { width, height } = this.scale;
         this.debugShopContainer = this.add.container(0, 0).setScrollFactor(0).setDepth(1000);
 
-        // Dark Overlay
         const overlay = this.add.rectangle(0, 0, width, height, 0x000000, 0.8).setOrigin(0);
-
         const title = this.add.text(width / 2, 80, "DEBUG SHOP (TEST MODE)", {
             fontFamily: '"Press Start 2P"',
             fontSize: '20px',
@@ -652,23 +658,19 @@ export class GameScene extends Phaser.Scene {
             alpha: 0.7
         }).setOrigin(0.5);
 
-        this.debugShopContainer.add([overlay, title, hint]);
-
-        // Carregar Itens
+        this.debugShopItemsContainer = this.add.container(0, 0);
+        this.debugShopContainer.add([overlay, title, hint, this.debugShopItemsContainer]);
         this.renderDebugItems();
     }
 
     renderDebugItems() {
-        // Limpar itens anteriores do container mantendo o overlay e texto base
-        const itemsToKeep = this.debugShopContainer.list.slice(0, 3);
-        this.debugShopContainer.removeAll();
-        this.debugShopContainer.add(itemsToKeep);
+        if (!this.debugShopItemsContainer) return;
+        this.debugShopItemsContainer.removeAll(true);
 
         const { width, height } = this.scale;
         const startX = width / 2 - 220;
         const itemWidth = 220;
 
-        // Mostrar apenas 3 itens
         for (let i = 0; i < 3; i++) {
             const itemIdx = (this.debugShopIndex + i) % GADGET_DEFINITIONS.length;
             const gadget = GADGET_DEFINITIONS[itemIdx];
@@ -686,7 +688,6 @@ export class GameScene extends Phaser.Scene {
             }).setOrigin(0.5);
 
             const icon = this.add.text(x, y - 40, element.icon, { fontSize: '24px' }).setOrigin(0.5);
-
             const desc = this.add.text(x, y + 20, gadget.desc, {
                 fontFamily: '"Press Start 2P"',
                 fontSize: '8px',
@@ -710,16 +711,13 @@ export class GameScene extends Phaser.Scene {
                 } else {
                     this.player.gadgets[typeKey][gadget.element]++;
                 }
-
-                // Feedback visual e regerar gadgets
                 this.cameras.main.flash(200, 0, 255, 0);
                 this.setupGadgets();
             });
 
-            this.debugShopContainer.add([card, name, icon, desc, btn]);
+            this.debugShopItemsContainer.add([card, name, icon, desc, btn]);
         }
 
-        // Setas de Navegação
         const leftArrow = this.add.text(40, height / 2, "<", { fontSize: '40px', fill: '#fff' })
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
@@ -734,20 +732,13 @@ export class GameScene extends Phaser.Scene {
                 this.renderDebugItems();
             });
 
-        this.debugShopContainer.add([leftArrow, rightArrow]);
-    }
-
-    spawnCoin(x, y) {
-        const coin = this.coins.create(x, y, 'coin');
-        coin.setBounce(0.5);
-        coin.coinMult = this.difficultyConfig.coinMult;
+        this.debugShopItemsContainer.add([leftArrow, rightArrow]);
     }
 
 
     handleBulletHit(bullet, enemy) {
         if (!bullet.active || !enemy.active) return;
 
-        enemy.takeDamage(10 * this.player.damageMultiplier);
 
         // Lógica de Ricochete Elétrico (Volt Shot)
         if (bullet.element === 'electric' && (bullet.chainCount || 0) < 2) {
