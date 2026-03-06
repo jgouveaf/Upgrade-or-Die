@@ -20,8 +20,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.maxHealth = this.health;
         this.isBoss = false;
         this.isBat = false;
-        this.isYellow = false;
-        this.setTint(0xff0055);
+        this.isYellow = (this.texture.key === 'yellowEnemy');
+
+        if (!this.isYellow) {
+            this.setTint(0xff0055);
+        }
     }
 
     update() {
@@ -132,14 +135,17 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
                 target.setTint(color);
             },
             onComplete: () => {
-                this.explode(targetX, targetY);
+                const currentScene = this.scene;
+                if (!currentScene) return; // Scene might have ended
+
+                this.explode(currentScene, targetX, targetY);
 
                 // Final explosion visual
-                const explosion = this.scene.add.graphics();
+                const explosion = currentScene.add.graphics();
                 explosion.fillStyle(0xff4400, 0.8);
                 explosion.fillCircle(targetX, targetY, 60);
 
-                this.scene.tweens.add({
+                currentScene.tweens.add({
                     targets: explosion,
                     alpha: 0,
                     scale: 1.5,
@@ -152,16 +158,18 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         });
     }
 
-    explode(x, y) {
-        const dist = Phaser.Math.Distance.Between(this.scene.player.x, this.scene.player.y, x, y);
+    explode(scene, x, y) {
+        if (!scene || !scene.player) return;
+
+        const dist = Phaser.Math.Distance.Between(scene.player.x, scene.player.y, x, y);
         if (dist < 60) {
-            if (!this.scene.player.isImmortal) {
-                this.scene.player.health -= 30;
+            if (!scene.player.isImmortal) {
+                scene.player.health -= 30;
             }
-            this.scene.cameras.main.shake(100, 0.01);
-            this.scene.updateUI();
-            if (this.scene.player.health <= 0) {
-                this.scene.scene.start('GameOverScene_v6', { wave: this.scene.wave });
+            scene.cameras.main.shake(100, 0.01);
+            scene.updateUI();
+            if (scene.player.health <= 0) {
+                scene.scene.start('GameOverScene_v6', { wave: scene.wave });
             }
         }
     }

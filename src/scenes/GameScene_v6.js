@@ -532,31 +532,44 @@ export class GameScene extends Phaser.Scene {
         const portalList = this.spawners.getChildren();
         if (portalList.length === 0) return;
         const portal = portalList[Phaser.Math.Between(0, portalList.length - 1)];
-        const enemy = new Enemy(this, portal.x, portal.y, this.wave);
+
+        let texture = 'enemy';
+        let isYellow = false;
+        let isBat = false;
 
         if (this.wave === 7) {
+            texture = 'yellowEnemy';
+            isYellow = true;
+        } else if (this.wave > 7) {
+            const rand = Math.random();
+            if (rand < 0.3) {
+                texture = 'yellowEnemy';
+                isYellow = true;
+            } else if (rand < 0.6 && this.wave >= 5) {
+                texture = 'poisonBat';
+                isBat = true;
+            }
+        } else if (this.wave >= 5 && Math.random() < 0.3) {
+            texture = 'poisonBat';
+            isBat = true;
+        }
+
+        const enemy = new Enemy(this, portal.x, portal.y, this.wave);
+        if (isYellow) {
+            enemy.setTexture('yellowEnemy');
             enemy.isYellow = true;
             enemy.speed *= 0.8;
-            enemy.setTexture('yellowEnemy');
             enemy.clearTint();
-        } else if (this.wave > 7) {
-            if (Math.random() < 0.3) {
-                enemy.isYellow = true;
-                enemy.speed *= 0.8;
-                enemy.setTexture('yellowEnemy');
-                enemy.clearTint();
-            } else if (Math.random() < 0.3) {
-                enemy.setTexture('poisonBat');
-                enemy.isBat = true;
-                enemy.clearTint();
-            }
-        } else if (this.wave >= 5) {
-            if (Math.random() < 0.3) {
-                enemy.setTexture('poisonBat');
-                enemy.isBat = true;
-                enemy.clearTint();
-            }
+            console.log("Spawned YELLOW ENEMY at wave", this.wave);
+        } else if (isBat) {
+            enemy.setTexture('poisonBat');
+            enemy.isBat = true;
+            enemy.clearTint();
+            console.log("Spawned BAT ENEMY at wave", this.wave);
+        } else {
+            console.log("Spawned REGULAR ENEMY at wave", this.wave);
         }
+
         this.enemies.add(enemy);
     }
 
