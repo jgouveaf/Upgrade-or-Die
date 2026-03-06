@@ -323,6 +323,11 @@ export class GameScene extends Phaser.Scene {
 
         this.spawnWave();
 
+        // Debug Shop Setup
+        this.debugShopOpen = false;
+        this.debugShopIndex = 0;
+        this.debugShopContainer = null;
+
         // Collisions
         this.physics.add.overlap(this.bullets, this.enemies, (bullet, enemy) => {
             this.handleBulletHit(bullet, enemy);
@@ -371,18 +376,10 @@ export class GameScene extends Phaser.Scene {
         this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
         this.escKey.on('down', () => this.togglePause());
 
-        // Immortality Cheat Code
+        // DEBUG SHOP / IMMORTALITY TOGGLE
         this.pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
         this.pKey.on('down', () => {
-            this.player.isImmortal = !this.player.isImmortal;
-            this.player.setAlpha(this.player.isImmortal ? 0.7 : 1);
-            if (this.player.isImmortal) {
-                this.player.setTint(0xffff00); // Golden glow for immortality
-                console.log("Cheat active: PLAYER IMMORTAL");
-            } else {
-                this.player.clearTint();
-                console.log("Cheat disabled: PLAYER MORTAL");
-            }
+            this.toggleDebugShop();
         });
 
         this.setupUI();
@@ -613,6 +610,130 @@ export class GameScene extends Phaser.Scene {
         }
 
         this.enemies.add(enemy);
+    }
+
+    toggleDebugShop() {
+        this.debugShopOpen = !this.debugShopOpen;
+
+        if (this.debugShopOpen) {
+            this.physics.pause();
+            this.player.isImmortal = true;
+            this.player.setTint(0xffff00);
+            this.createDebugShopUI();
+        } else {
+            this.physics.resume();
+            if (this.debugShopContainer) {
+                this.debugShopContainer.destroy();
+                this.debugShopContainer = null;
+            }
+        }
+    }
+
+    createDebugShopUI() {
+        if (this.debugShopContainer) this.debugShopContainer.destroy();
+
+        const { width, height } = this.scale;
+        this.debugShopContainer = this.add.container(0, 0).setScrollFactor(0).setDepth(1000);
+
+        // Dark Overlay
+        const overlay = this.add.rectangle(0, 0, width, height, 0x000000, 0.8).setOrigin(0);
+
+        const title = this.add.text(width / 2, 80, "DEBUG SHOP (TEST MODE)", {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '20px',
+            fill: '#00f2ff'
+        }).setOrigin(0.5);
+
+        const hint = this.add.text(width / 2, height - 60, "Press [P] to Resume Game", {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            fill: '#ffffff',
+            alpha: 0.7
+        }).setOrigin(0.5);
+
+        this.debugShopContainer.add([overlay, title, hint]);
+
+        // Carregar Itens
+        this.renderDebugItems();
+    }
+
+    renderDebugItems() {
+        // Limpar itens anteriores do container mantendo o overlay e texto base
+        const itemsToKeep = this.debugShopContainer.list.slice(0, 3);
+        this.debugShopContainer.removeAll();
+        this.debugShopContainer.add(itemsToKeep);
+
+        const { width, height } = this.scale;
+        const startX = width / 2 - 220;
+        const itemWidth = 220;
+
+        // Mostrar apenas 3 itens
+        for (let i = 0; i < 3; i++) {
+            const itemIdx = (this.debugShopIndex + i) % GADGET_DEFINITIONS.length;
+            const gadget = GADGET_DEFINITIONS[itemIdx];
+            const x = startX + (i * itemWidth);
+            const y = height / 2;
+            const element = ELEMENTS[gadget.element.toUpperCase()];
+
+            const card = this.add.rectangle(x, y, 200, 240, 0x1a1a25).setStrokeStyle(2, element.color);
+            const name = this.add.text(x, y - 80, gadget.name, {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '10px',
+                fill: element.color,
+                align: 'center',
+                wordWrap: { width: 180 }
+            }).setOrigin(0.5);
+
+            const icon = this.add.text(x, y - 40, element.icon, { fontSize: '24px' }).setOrigin(0.5);
+
+            const desc = this.add.text(x, y + 20, gadget.desc, {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '8px',
+                fill: '#ddd',
+                align: 'center',
+                wordWrap: { width: 170 }
+            }).setOrigin(0.5);
+
+            const btn = this.add.text(x, y + 80, "[ ADD ]", {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '12px',
+                fill: '#00ff00'
+            }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+            btn.on('pointerdown', () => {
+                const typeKey = gadget.type === GADGET_TYPES.TURRET ? 'turrets' :
+                    (gadget.type === GADGET_TYPES.FORCE_FIELD ? 'forceFields' : 'specialShots');
+
+                if (!this.player.gadgets[typeKey][gadget.element]) {
+                    this.player.gadgets[typeKey][gadget.element] = 1;
+                } else {
+                    this.player.gadgets[typeKey][gadget.element]++;
+                }
+
+                // Feedback visual e regerar gadgets
+                this.cameras.main.flash(200, 0, 255, 0);
+                this.setupGadgets();
+            });
+
+            this.debugShopContainer.add([card, name, icon, desc, btn]);
+        }
+
+        // Setas de Navegação
+        const leftArrow = this.add.text(40, height / 2, "<", { fontSize: '40px', fill: '#fff' })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.debugShopIndex = (this.debugShopIndex - 1 + GADGET_DEFINITIONS.length) % GADGET_DEFINITIONS.length;
+                this.renderDebugItems();
+            });
+
+        const rightArrow = this.add.text(width - 40, height / 2, ">", { fontSize: '40px', fill: '#fff' })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.debugShopIndex = (this.debugShopIndex + 1) % GADGET_DEFINITIONS.length;
+                this.renderDebugItems();
+            });
+
+        this.debugShopContainer.add([leftArrow, rightArrow]);
     }
 
     spawnCoin(x, y) {
