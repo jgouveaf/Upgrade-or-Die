@@ -126,34 +126,38 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             duration: 2000,
             ease: 'Power2',
             onUpdate: (tween, target) => {
-                // Manually transition color from light red to dark red
+                // Safety check: if target or scene is gone, stop
+                if (!target || !target.scene) {
+                    tween.stop();
+                    return;
+                }
                 const progress = tween.progress;
-                const r = Math.floor(255 - (progress * 119)); // 255 -> 136 (0x88)
-                const g = Math.floor(204 - (progress * 204)); // 204 (0xcc) -> 0
-                const b = Math.floor(204 - (progress * 204)); // 204 (0xcc) -> 0
+                const r = Math.floor(255 - (progress * 119));
+                const g = Math.floor(204 - (progress * 204));
+                const b = Math.floor(204 - (progress * 204));
                 const color = (r << 16) | (g << 8) | b;
                 target.setTint(color);
             },
             onComplete: () => {
-                const currentScene = this.scene;
-                if (!currentScene) return; // Scene might have ended
+                if (indicator && indicator.scene) {
+                    const currentScene = indicator.scene;
+                    this.explode(currentScene, targetX, targetY);
 
-                this.explode(currentScene, targetX, targetY);
+                    // Final explosion visual
+                    const explosion = currentScene.add.graphics();
+                    explosion.fillStyle(0xff4400, 0.8);
+                    explosion.fillCircle(targetX, targetY, 60);
 
-                // Final explosion visual
-                const explosion = currentScene.add.graphics();
-                explosion.fillStyle(0xff4400, 0.8);
-                explosion.fillCircle(targetX, targetY, 60);
+                    currentScene.tweens.add({
+                        targets: explosion,
+                        alpha: 0,
+                        scale: 1.5,
+                        duration: 300,
+                        onComplete: () => explosion.destroy()
+                    });
 
-                currentScene.tweens.add({
-                    targets: explosion,
-                    alpha: 0,
-                    scale: 1.5,
-                    duration: 300,
-                    onComplete: () => explosion.destroy()
-                });
-
-                indicator.destroy();
+                    indicator.destroy();
+                }
             }
         });
     }
