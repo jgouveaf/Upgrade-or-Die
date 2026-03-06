@@ -168,7 +168,6 @@ export class GameScene extends Phaser.Scene {
 
         // Pixel Poison Bat - 32x32
         this.graphics.clear();
-
         // Wings (Dark Green / Toxic)
         this.graphics.fillStyle(0x004400, 1);
         this.graphics.fillRect(4, 12, 8, 4); // Left wing connection
@@ -204,8 +203,17 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillStyle(0x00ff00, 0.4);
         this.graphics.fillRect(10, 22, 2, 2);
         this.graphics.fillRect(20, 18, 2, 2);
-
         this.graphics.generateTexture('poisonBat', 32, 32);
+
+        // Pixel Yellow Enemy (New variant)
+        this.graphics.clear();
+        this.graphics.fillStyle(0xffff00, 1);
+        this.graphics.fillRect(0, 8, 32, 16);
+        this.graphics.fillRect(8, 0, 16, 32);
+        this.graphics.fillStyle(0x000000, 0.1); // Eyes (faint to be seen better)
+        this.graphics.fillRect(8, 8, 4, 4);
+        this.graphics.fillRect(20, 8, 4, 4);
+        this.graphics.generateTexture('yellowEnemy', 32, 32);
 
         // Pixel Bomb Indicator
         this.graphics.clear();
@@ -527,23 +535,27 @@ export class GameScene extends Phaser.Scene {
         const enemy = new Enemy(this, portal.x, portal.y, this.wave);
 
         if (this.wave === 7) {
-            if (Math.random() < 0.5) {
-                enemy.isYellow = true;
-                enemy.setTint(0xffff00);
-                enemy.speed *= 0.8;
-            }
+            enemy.isYellow = true;
+            enemy.speed *= 0.8;
+            enemy.setTexture('yellowEnemy');
+            enemy.clearTint();
         } else if (this.wave > 7) {
             if (Math.random() < 0.3) {
                 enemy.isYellow = true;
-                enemy.setTint(0xffff00);
                 enemy.speed *= 0.8;
+                enemy.setTexture('yellowEnemy');
+                enemy.clearTint();
             } else if (Math.random() < 0.3) {
                 enemy.setTexture('poisonBat');
                 enemy.isBat = true;
+                enemy.clearTint();
             }
-        } else if (this.wave >= 5 && Math.random() < 0.3) {
-            enemy.setTexture('poisonBat');
-            enemy.isBat = true;
+        } else if (this.wave >= 5) {
+            if (Math.random() < 0.3) {
+                enemy.setTexture('poisonBat');
+                enemy.isBat = true;
+                enemy.clearTint();
+            }
         }
         this.enemies.add(enemy);
     }
