@@ -32,11 +32,43 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
         const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
 
-        // Move towards player
         if (distance < 2000) {
-            const angle = Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y);
+            let angle = Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y);
 
-            // Set velocity directly
+            // Smarter movement: Obstacle Avoidance
+            const rayLength = 60;
+            const lookAheadX = this.x + Math.cos(angle) * rayLength;
+            const lookAheadY = this.y + Math.sin(angle) * rayLength;
+
+            // Check if there's a wall in the direct path
+            const wallInWay = this.scene.walls.getChildren().some(wall => {
+                return Phaser.Geom.Rectangle.Contains(wall.getBounds(), lookAheadX, lookAheadY);
+            });
+
+            if (wallInWay) {
+                // Try to steer left or right
+                const leftAngle = angle - Math.PI / 4;
+                const rightAngle = angle + Math.PI / 4;
+
+                const leftClear = !this.scene.walls.getChildren().some(wall => {
+                    const lx = this.x + Math.cos(leftAngle) * rayLength;
+                    const ly = this.y + Math.sin(leftAngle) * rayLength;
+                    return Phaser.Geom.Rectangle.Contains(wall.getBounds(), lx, ly);
+                });
+
+                if (leftClear) {
+                    angle = leftAngle;
+                } else {
+                    const rightClear = !this.scene.walls.getChildren().some(wall => {
+                        const rx = this.x + Math.cos(rightAngle) * rayLength;
+                        const ry = this.y + Math.sin(rightAngle) * rayLength;
+                        return Phaser.Geom.Rectangle.Contains(wall.getBounds(), rx, ry);
+                    });
+                    if (rightClear) angle = rightAngle;
+                    // If neither is clear, just keep original angle and let physics handle collision
+                }
+            }
+
             const vx = Math.cos(angle) * this.speed;
             const vy = Math.sin(angle) * this.speed;
             this.setVelocity(vx, vy);
@@ -47,6 +79,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             if (distance < 400 && this.scene.time.now > this.nextFire && !this.isBat) {
                 this.shoot(player);
             }
+
             // Bat flapping effect
             if (this.isBat && !this.isFlapping) {
                 this.isFlapping = true;

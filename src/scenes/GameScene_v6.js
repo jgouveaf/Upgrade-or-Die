@@ -607,14 +607,60 @@ export class GameScene extends Phaser.Scene {
     }
 
     createMap() {
-        const wallPositions = [{ x: 200, y: 150, w: 4, h: 1 }, { x: 600, y: 150, w: 1, h: 4 }, { x: 200, y: 400, w: 1, h: 4 }, { x: 500, y: 450, w: 4, h: 1 }];
-        wallPositions.forEach(pos => {
-            for (let i = 0; i < pos.w; i++) {
-                for (let j = 0; j < pos.h; j++) {
-                    this.walls.create(pos.x + (i * 32), pos.y + (j * 32), 'wall').refreshBody();
+        // Clear previous walls if any
+        if (this.walls) {
+            this.walls.clear(true, true);
+        } else {
+            this.walls = this.physics.add.staticGroup();
+        }
+
+        const { width, height } = this.scale;
+        const tileSize = 32;
+        const gridW = Math.floor(width / tileSize);
+        const gridH = Math.floor(height / tileSize);
+
+        // Areas to keep clear (Player start and Portals)
+        const clearZones = [
+            { x: 400, y: 300, radius: 100 }, // Player start
+            { x: 100, y: 100, radius: 80 },  // Top-left portal
+            { x: 700, y: 100, radius: 80 },  // Top-right portal
+            { x: 100, y: 500, radius: 80 },  // Bottom-left portal
+            { x: 700, y: 500, radius: 80 }   // Bottom-right portal
+        ];
+
+        const isClear = (x, y) => {
+            return !clearZones.some(zone => {
+                const dist = Phaser.Math.Distance.Between(x, y, zone.x, zone.y);
+                return dist < zone.radius;
+            });
+        };
+
+        // Number of wall clusters scales slightly with wave
+        const numClusters = 5 + Math.min(10, Math.floor(this.wave / 2));
+        for (let i = 0; i < numClusters; i++) {
+            let startX = Phaser.Math.Between(1, gridW - 2) * tileSize;
+            let startY = Phaser.Math.Between(1, gridH - 2) * tileSize;
+
+            if (isClear(startX, startY)) {
+                const clusterSize = Phaser.Math.Between(2, 6);
+                const horizontal = Math.random() > 0.5;
+
+                for (let j = 0; j < clusterSize; j++) {
+                    const wx = horizontal ? startX + (j * tileSize) : startX;
+                    const wy = horizontal ? startY : startY + (j * tileSize);
+
+                    // Check boundaries and clear zones for each block
+                    if (wx > 32 && wx < width - 32 && wy > 32 && wy < height - 32 && isClear(wx, wy)) {
+                        this.walls.create(wx, wy, 'wall').refreshBody();
+                    }
                 }
             }
-        });
+        }
+
+        // Portals (Visuals only, logic is in spawners group)
+        if (this.spawners) this.spawners.clear(true, true);
+        else this.spawners = this.physics.add.staticGroup();
+
         const portalPositions = [{ x: 100, y: 100 }, { x: 700, y: 100 }, { x: 100, y: 500 }, { x: 700, y: 500 }];
         portalPositions.forEach(pos => {
             const portal = this.add.sprite(pos.x, pos.y, 'portal');
