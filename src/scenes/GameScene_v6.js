@@ -92,11 +92,32 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(0, 0, 8, 8);
         this.graphics.generateTexture('enemyBullet', 8, 8);
 
-        // Pixel Wall
+        // Synthwave Pixel Wall - 32x32
         this.graphics.clear();
-        this.graphics.fillStyle(0x444444, 1);
-        this.graphics.fillRect(0, 0, 32, 32);
+        // Inner Dark (Synthwave Purple)
+        this.graphics.fillStyle(0x1a1a2e, 1);
+        this.graphics.fillRect(2, 2, 28, 28);
+        // Neon Border (Magenta Glow)
+        this.graphics.lineStyle(2, 0xff00ff, 1);
+        this.graphics.strokeRect(1, 1, 30, 30);
+        // Inner Glow / Detail
+        this.graphics.lineStyle(1, 0xff77ff, 0.5);
+        this.graphics.strokeRect(6, 6, 20, 20);
         this.graphics.generateTexture('wall', 32, 32);
+
+        // Synthwave Floor Tile - 64x64
+        this.graphics.clear();
+        // Base Dark
+        this.graphics.fillStyle(0x0a0a0c, 1);
+        this.graphics.fillRect(0, 0, 64, 64);
+        // Grid Lines (Cyan)
+        this.graphics.lineStyle(1, 0x00f2ff, 0.2);
+        this.graphics.strokeRect(0, 0, 64, 64);
+        // Decorative Neon Dots (from user's ref)
+        this.graphics.fillStyle(0x00f2ff, 0.4);
+        this.graphics.fillRect(0, 0, 2, 2);
+        this.graphics.fillRect(62, 62, 2, 2);
+        this.graphics.generateTexture('floor', 64, 64);
 
         // Pixel Portal
         this.graphics.clear();
@@ -278,6 +299,11 @@ export class GameScene extends Phaser.Scene {
 
     create() {
         console.log("GameScene: Create starting...");
+
+        // Adicionar Chão Synthwave (TileSprite)
+        const { width, height } = this.scale;
+        this.add.tileSprite(0, 0, width, height, 'floor').setOrigin(0).setScrollFactor(0).setAlpha(0.6);
+
         this.player = new Player(this, 400, 300);
 
         if (this.persistedPlayer) {
