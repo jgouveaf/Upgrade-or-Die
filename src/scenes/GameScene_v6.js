@@ -51,11 +51,33 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(20, 8, 4, 4);
         this.graphics.generateTexture('enemy', 32, 32);
 
-        // Pixel Bullet
+        // Pixel Bullet (Realistic Metal Aesthetic) - 16x16
         this.graphics.clear();
-        this.graphics.fillStyle(0xffda00, 1);
-        this.graphics.fillRect(0, 0, 8, 8);
-        this.graphics.generateTexture('bullet', 8, 8);
+
+        // Outline (Dark Brown)
+        this.graphics.fillStyle(0x4a2a00, 1);
+        this.graphics.fillRect(4, 2, 8, 12); // Main body outline
+        this.graphics.fillRect(6, 0, 4, 3); // Tip outline
+
+        // Shell Body (Golden/Brass)
+        this.graphics.fillStyle(0xd4af37, 1);
+        this.graphics.fillRect(5, 3, 6, 10);
+        this.graphics.fillRect(7, 1, 2, 2); // Core tip
+
+        // Red Detail Ring
+        this.graphics.fillStyle(0xff0000, 1);
+        this.graphics.fillRect(4, 9, 8, 2);
+
+        // Highlight/Reflection (White/Light Gold)
+        this.graphics.fillStyle(0xfff5d7, 1);
+        this.graphics.fillRect(6, 4, 1, 5);
+        this.graphics.fillRect(7, 2, 1, 1);
+
+        // Base (Copper)
+        this.graphics.fillStyle(0x8b4513, 1);
+        this.graphics.fillRect(5, 13, 6, 2);
+
+        this.graphics.generateTexture('bullet', 16, 16);
 
         // Pixel Coin
         this.graphics.clear();
