@@ -221,33 +221,31 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillCircle(16, 16, 16);
         this.graphics.generateTexture('bombIndicator', 32, 32);
 
-        // PIXEL BOLT (Lightning Animation Frames) - BLUE/CYAN
+        // PIXEL BOLT (New Energy Bolt Design) - CYAN CORE, BLUE OUTLINE
         for (let i = 0; i < 4; i++) {
             this.graphics.clear();
-            const boltColor = 0x00f2ff;
-            const coreColor = 0xffffff;
+            const outlineColor = 0x3b82f6; // Blue
+            const coreColor = 0x67e8f9;    // Cyan
 
-            let path = [{ x: 0, y: 16 }];
-            for (let j = 1; j <= 4; j++) {
-                path.push({
-                    x: j * 8,
-                    y: 16 + (Math.random() - 0.5) * 16 // Variância no trajeto do raio
-                });
+            // Draw a teardrop/bolt shape
+            this.graphics.fillStyle(outlineColor, 1);
+            this.graphics.fillRect(4, 12, 16, 8);  // Main body
+            this.graphics.fillRect(8, 10, 8, 12);  // Vertical thickness
+            this.graphics.fillRect(16, 14, 8, 4);  // Tip
+            this.graphics.fillRect(0, 15, 4, 2);   // Tail
+
+            this.graphics.fillStyle(coreColor, 1);
+            this.graphics.fillRect(6, 13, 12, 6);  // Inner core
+            this.graphics.fillRect(8, 12, 8, 8);   // Center thickness
+
+            // Sparkles/Particles (Randomized per frame)
+            if (i % 2 === 0) {
+                this.graphics.fillRect(2, 6, 2, 2);
+                this.graphics.fillRect(24, 20, 2, 2);
+            } else {
+                this.graphics.fillRect(4, 24, 2, 2);
+                this.graphics.fillRect(20, 4, 2, 2);
             }
-
-            // Camada de brilho (Azul)
-            this.graphics.lineStyle(4, boltColor, 0.4);
-            this.graphics.beginPath();
-            this.graphics.moveTo(path[0].x, path[0].y);
-            path.forEach(p => this.graphics.lineTo(p.x, p.y));
-            this.graphics.strokePath();
-
-            // Camada central (Branco)
-            this.graphics.lineStyle(2, coreColor, 1);
-            this.graphics.beginPath();
-            this.graphics.moveTo(path[0].x, path[0].y);
-            path.forEach(p => this.graphics.lineTo(p.x, p.y));
-            this.graphics.strokePath();
 
             this.graphics.generateTexture(`bolt_frame_${i}`, 32, 32);
         }
@@ -327,8 +325,7 @@ export class GameScene extends Phaser.Scene {
 
         // Collisions
         this.physics.add.overlap(this.bullets, this.enemies, (bullet, enemy) => {
-            enemy.takeDamage(10 * this.player.damageMultiplier);
-            bullet.destroy();
+            this.handleBulletHit(bullet, enemy);
         });
 
         this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
@@ -624,6 +621,38 @@ export class GameScene extends Phaser.Scene {
         coin.coinMult = this.difficultyConfig.coinMult;
     }
 
+
+    handleBulletHit(bullet, enemy) {
+        if (!bullet.active || !enemy.active) return;
+
+        enemy.takeDamage(10 * this.player.damageMultiplier);
+
+        // Lógica de Ricochete Elétrico (Volt Shot)
+        if (bullet.element === 'electric' && (bullet.chainCount || 0) < 2) {
+            bullet.chainCount = (bullet.chainCount || 0) + 1;
+
+            // Encontrar o próximo alvo mais próximo (excluindo este)
+            const nextTarget = this.enemies.getChildren().find(e =>
+                e !== enemy &&
+                e.active &&
+                Phaser.Math.Distance.Between(bullet.x, bullet.y, e.x, e.y) < 250
+            );
+
+            if (nextTarget) {
+                // Pequeno "flash" visual de conexão
+                this.gadgetGraphics.lineStyle(2, 0x00f2ff, 1);
+                this.gadgetGraphics.lineBetween(enemy.x, enemy.y, nextTarget.x, nextTarget.y);
+                this.time.delayedCall(50, () => this.gadgetGraphics.clear());
+
+                // Mover bala para o novo alvo
+                this.physics.moveToObject(bullet, nextTarget, 400);
+                bullet.setRotation(Phaser.Math.Angle.Between(bullet.x, bullet.y, nextTarget.x, nextTarget.y));
+                return; // Não destroem a bala
+            }
+        }
+
+        bullet.destroy();
+    }
 
     completeWave() {
         this.player.coins += 50;
@@ -921,11 +950,13 @@ export class GameScene extends Phaser.Scene {
                 bullet.setRotation(0);
                 bullet.setScale(1);
                 bullet.stop(); // Stop any previous animation
+                bullet.element = element;
+                bullet.chainCount = 0;
 
                 if (element === 'electric') {
                     bullet.play('bolt_anim');
-                    bullet.setRotation(Math.atan2(vy, vx));
-                    bullet.setScale(1.5); // Raio um pouco maior para impacto visual
+                    bullet.setRotation(Math.atan2(vy, vx) + Math.PI); // Ajuste de orientação do sprite do parafuso
+                    bullet.setScale(1.2);
                 } else if (element) {
                     bullet.setTint(ELEMENTS[element.toUpperCase()].color);
                 }
