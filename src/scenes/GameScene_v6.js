@@ -1082,21 +1082,31 @@ export class GameScene extends Phaser.Scene {
                 // Reset bullet properties from pool
                 bullet.setTexture('bullet');
                 bullet.clearTint();
-                bullet.setRotation(0);
                 bullet.setScale(1);
                 bullet.stop(); // Stop any previous animation
                 bullet.element = element;
                 bullet.chainCount = 0;
 
-                if (element === 'electric') {
-                    bullet.play('bolt_anim');
-                    bullet.setRotation(Math.atan2(vy, vx) + Math.PI); // Ajuste de orientação do sprite do parafuso
-                    bullet.setScale(1.2);
-                } else if (element) {
-                    bullet.setTint(ELEMENTS[element.toUpperCase()].color);
+                // Forçar o tamanho do corpo para a nova textura 16x16
+                if (bullet.body) {
+                    bullet.body.setSize(12, 12);
+                    bullet.body.setOffset(2, 2);
                 }
 
-                this.time.delayedCall(2000, () => { if (bullet.active) bullet.destroy(); });
+                if (element === 'electric') {
+                    bullet.play('bolt_anim');
+                    // O raio é horizontal (X), então aponta direto para a velocidade
+                    bullet.setRotation(Math.atan2(vy, vx));
+                    bullet.setScale(1.2);
+                } else {
+                    // A bala metálica é vertical (Y), então precisa de +90 graus (PI/2) para apontar para a frente
+                    bullet.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
+                    if (element) {
+                        bullet.setTint(ELEMENTS[element.toUpperCase()].color);
+                    }
+                }
+
+                this.time.delayedCall(2000, () => { if (bullet && bullet.active) bullet.destroy(); });
                 return bullet;
             }
         };
@@ -1120,4 +1130,3 @@ export class GameScene extends Phaser.Scene {
             });
         }
     }
-}
