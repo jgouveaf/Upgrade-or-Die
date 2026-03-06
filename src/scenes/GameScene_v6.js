@@ -207,6 +207,12 @@ export class GameScene extends Phaser.Scene {
 
         this.graphics.generateTexture('poisonBat', 32, 32);
 
+        // Pixel Bomb Indicator
+        this.graphics.clear();
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillCircle(16, 16, 16);
+        this.graphics.generateTexture('bombIndicator', 32, 32);
+
         this.graphics.destroy();
     }
 
@@ -500,7 +506,23 @@ export class GameScene extends Phaser.Scene {
         if (portalList.length === 0) return;
         const portal = portalList[Phaser.Math.Between(0, portalList.length - 1)];
         const enemy = new Enemy(this, portal.x, portal.y, this.wave);
-        if (this.wave >= 5 && Math.random() < 0.3) {
+
+        if (this.wave === 7) {
+            if (Math.random() < 0.5) {
+                enemy.isYellow = true;
+                enemy.setTint(0xffff00);
+                enemy.speed *= 0.8;
+            }
+        } else if (this.wave > 7) {
+            if (Math.random() < 0.3) {
+                enemy.isYellow = true;
+                enemy.setTint(0xffff00);
+                enemy.speed *= 0.8;
+            } else if (Math.random() < 0.3) {
+                enemy.setTexture('poisonBat');
+                enemy.isBat = true;
+            }
+        } else if (this.wave >= 5 && Math.random() < 0.3) {
             enemy.setTexture('poisonBat');
             enemy.isBat = true;
         }

@@ -20,6 +20,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.maxHealth = this.health;
         this.isBoss = false;
         this.isBat = false;
+        this.isYellow = false;
         this.setTint(0xff0055);
     }
 
@@ -76,8 +77,12 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.setRotation(angle + Math.PI / 2);
 
             // Try to shoot if in range
-            if (distance < 400 && this.scene.time.now > this.nextFire && !this.isBat) {
-                this.shoot(player);
+            if (distance < 400 && this.scene.time.now > this.nextFire) {
+                if (this.isYellow) {
+                    this.placeIndicator(player);
+                } else if (!this.isBat) {
+                    this.shoot(player);
+                }
             }
 
             // Bat flapping effect
@@ -93,6 +98,69 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             }
         } else {
             this.setVelocity(0);
+        }
+    }
+
+    placeIndicator(player) {
+        this.nextFire = this.scene.time.now + (this.fireRate * 1.5);
+
+        const targetX = player.x;
+        const targetY = player.y;
+
+        const indicator = this.scene.add.sprite(targetX, targetY, 'bombIndicator');
+        indicator.setAlpha(0.6);
+        indicator.setScale(0.1);
+
+        // Color transition: Starts light red, goes to dark red
+        // In Phaser, we can use a tween on a custom object or use tint.
+        // Let's use tint to go from light red (0xffcccc) to dark red (0x880000).
+        indicator.setTint(0xffcccc);
+
+        this.scene.tweens.add({
+            targets: indicator,
+            scale: 2.0,
+            alpha: 1,
+            duration: 2000,
+            ease: 'Power2',
+            onUpdate: (tween, target) => {
+                // Manually transition color from light red to dark red
+                const progress = tween.progress;
+                const r = Math.floor(255 - (progress * 119)); // 255 -> 136 (0x88)
+                const g = Math.floor(204 - (progress * 204)); // 204 (0xcc) -> 0
+                const b = Math.floor(204 - (progress * 204)); // 204 (0xcc) -> 0
+                const color = (r << 16) | (g << 8) | b;
+                target.setTint(color);
+            },
+            onComplete: () => {
+                this.explode(targetX, targetY);
+
+                // Final explosion visual
+                const explosion = this.scene.add.graphics();
+                explosion.fillStyle(0xff4400, 0.8);
+                explosion.fillCircle(targetX, targetY, 60);
+
+                this.scene.tweens.add({
+                    targets: explosion,
+                    alpha: 0,
+                    scale: 1.5,
+                    duration: 300,
+                    onComplete: () => explosion.destroy()
+                });
+
+                indicator.destroy();
+            }
+        });
+    }
+
+    explode(x, y) {
+        const dist = Phaser.Math.Distance.Between(this.scene.player.x, this.scene.player.y, x, y);
+        if (dist < 60) {
+            this.scene.player.health -= 30;
+            this.scene.cameras.main.shake(100, 0.01);
+            this.scene.updateUI();
+            if (this.scene.player.health <= 0) {
+                this.scene.scene.start('GameOverScene_v6', { wave: this.scene.wave });
+            }
         }
     }
 
@@ -141,7 +209,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.die();
         } else {
             // Flash effect
-            const originalTint = this.isBoss ? 0xffffff : 0xff0055;
+            const originalTint = this.isBoss ? 0xffffff : (this.isYellow ? 0xffff00 : 0xff0055);
             this.setTint(0xffffff);
             this.scene.time.delayedCall(100, () => {
                 if (this.active) {
