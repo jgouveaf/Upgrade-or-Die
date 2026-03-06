@@ -761,6 +761,8 @@ export class GameScene extends Phaser.Scene {
     handleBulletHit(bullet, enemy) {
         if (!bullet.active || !enemy.active) return;
 
+        // APLICAR DANO (Estava faltando!)
+        enemy.takeDamage(10 * this.player.damageMultiplier);
 
         // Lógica de Ricochete Elétrico (Volt Shot)
         if (bullet.element === 'electric' && (bullet.chainCount || 0) < 2) {
@@ -777,12 +779,12 @@ export class GameScene extends Phaser.Scene {
                 // Pequeno "flash" visual de conexão
                 this.gadgetGraphics.lineStyle(2, 0x00f2ff, 1);
                 this.gadgetGraphics.lineBetween(enemy.x, enemy.y, nextTarget.x, nextTarget.y);
-                this.time.delayedCall(50, () => this.gadgetGraphics.clear());
+                this.time.delayedCall(50, () => { if (this.gadgetGraphics) this.gadgetGraphics.clear(); });
 
                 // Mover bala para o novo alvo
                 this.physics.moveToObject(bullet, nextTarget, 400);
                 bullet.setRotation(Phaser.Math.Angle.Between(bullet.x, bullet.y, nextTarget.x, nextTarget.y));
-                return; // Não destroem a bala
+                return; // Não destrói a bala ainda
             }
         }
 
