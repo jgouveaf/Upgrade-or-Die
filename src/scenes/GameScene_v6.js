@@ -221,6 +221,37 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillCircle(16, 16, 16);
         this.graphics.generateTexture('bombIndicator', 32, 32);
 
+        // PIXEL BOLT (Lightning Animation Frames) - BLUE/CYAN
+        for (let i = 0; i < 4; i++) {
+            this.graphics.clear();
+            const boltColor = 0x00f2ff;
+            const coreColor = 0xffffff;
+
+            let path = [{ x: 0, y: 16 }];
+            for (let j = 1; j <= 4; j++) {
+                path.push({
+                    x: j * 8,
+                    y: 16 + (Math.random() - 0.5) * 16 // Variância no trajeto do raio
+                });
+            }
+
+            // Camada de brilho (Azul)
+            this.graphics.lineStyle(4, boltColor, 0.4);
+            this.graphics.beginPath();
+            this.graphics.moveTo(path[0].x, path[0].y);
+            path.forEach(p => this.graphics.lineTo(p.x, p.y));
+            this.graphics.strokePath();
+
+            // Camada central (Branco)
+            this.graphics.lineStyle(2, coreColor, 1);
+            this.graphics.beginPath();
+            this.graphics.moveTo(path[0].x, path[0].y);
+            path.forEach(p => this.graphics.lineTo(p.x, p.y));
+            this.graphics.strokePath();
+
+            this.graphics.generateTexture(`bolt_frame_${i}`, 32, 32);
+        }
+
         this.graphics.destroy();
     }
 
@@ -358,6 +389,20 @@ export class GameScene extends Phaser.Scene {
         });
 
         this.setupUI();
+
+        // ANIMAÇÃO DO RAIO ELÉTRICO
+        this.anims.create({
+            key: 'bolt_anim',
+            frames: [
+                { key: 'bolt_frame_0' },
+                { key: 'bolt_frame_1' },
+                { key: 'bolt_frame_2' },
+                { key: 'bolt_frame_3' }
+            ],
+            frameRate: 20,
+            repeat: -1
+        });
+
         this.setupPauseUIListeners();
         this.events.on('shutdown', this.shutdown, this);
         console.log("GameScene: Create finished.");
@@ -579,15 +624,6 @@ export class GameScene extends Phaser.Scene {
         coin.coinMult = this.difficultyConfig.coinMult;
     }
 
-    shoot() {
-        if (this.isWavePaused) return;
-        const bullet = this.bullets.get(this.player.x, this.player.y);
-        if (bullet) {
-            bullet.setActive(true).setVisible(true);
-            this.physics.moveTo(bullet, this.input.x + this.cameras.main.scrollX, this.input.y + this.cameras.main.scrollY, 400);
-            this.time.delayedCall(2000, () => { if (bullet.active) bullet.destroy(); });
-        }
-    }
 
     completeWave() {
         this.player.coins += 50;
@@ -878,8 +914,22 @@ export class GameScene extends Phaser.Scene {
             if (bullet) {
                 bullet.setActive(true).setVisible(true);
                 bullet.setVelocity(vx, vy);
-                if (element) bullet.setTint(ELEMENTS[element.toUpperCase()].color);
-                else bullet.clearTint();
+
+                // Reset bullet properties from pool
+                bullet.setTexture('bullet');
+                bullet.clearTint();
+                bullet.setRotation(0);
+                bullet.setScale(1);
+                bullet.stop(); // Stop any previous animation
+
+                if (element === 'electric') {
+                    bullet.play('bolt_anim');
+                    bullet.setRotation(Math.atan2(vy, vx));
+                    bullet.setScale(1.5); // Raio um pouco maior para impacto visual
+                } else if (element) {
+                    bullet.setTint(ELEMENTS[element.toUpperCase()].color);
+                }
+
                 this.time.delayedCall(2000, () => { if (bullet.active) bullet.destroy(); });
                 return bullet;
             }
