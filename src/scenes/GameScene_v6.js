@@ -94,34 +94,49 @@ export class GameScene extends Phaser.Scene {
 
         // Synthwave Pixel Wall - 32x32 (Ultra Neon Version)
         this.graphics.clear();
-
-        // 1. Double Neon Glow (Outer)
-        this.graphics.lineStyle(6, 0xff00ff, 0.2); // Faint outer glow
+        this.graphics.lineStyle(6, 0xff00ff, 0.3); // Faint outer glow
         this.graphics.strokeRect(0, 0, 32, 32);
-        this.graphics.lineStyle(3, 0xff00ff, 0.6); // Sharp neon glow
-        this.graphics.strokeRect(0, 0, 32, 32);
-
-        // 2. Main Body (Dark Metal)
+        this.graphics.lineStyle(2, 0xff00ff, 1);   // Sharp neon edge
+        this.graphics.strokeRect(1, 1, 30, 30);
         this.graphics.fillStyle(0x0a0a1e, 1);
-        this.graphics.fillRect(2, 2, 28, 28);
-
-        // 3. Neon Grid Details (Cyan Contrast)
-        this.graphics.lineStyle(1, 0x00f2ff, 0.3);
+        this.graphics.fillRect(3, 3, 26, 26);
+        this.graphics.lineStyle(1, 0x00f2ff, 0.4);
         this.graphics.lineBetween(16, 4, 16, 28);
         this.graphics.lineBetween(4, 16, 28, 16);
-
-        // 4. Hot Bevels (Magenta/White)
         this.graphics.fillStyle(0xff00ff, 1);
-        this.graphics.fillRect(2, 2, 28, 1); // Top
-        this.graphics.fillRect(2, 2, 1, 28); // Left
-
-        // 5. Bright Core
-        this.graphics.fillStyle(0xff00ff, 0.8);
-        this.graphics.fillRect(12, 12, 8, 8);
-        this.graphics.fillStyle(0xffffff, 0.9);
-        this.graphics.fillRect(14, 14, 4, 4);
-
+        this.graphics.fillRect(14, 14, 4, 4); // Bright neon core
         this.graphics.generateTexture('wall', 32, 32);
+
+        // Pixel Portal (Classic Ultra Neon Vortex)
+        if (this.textures.exists('portal')) this.textures.remove('portal');
+        this.graphics.clear();
+
+        // 1. Outer Glow (Pulse simulated)
+        this.graphics.fillStyle(0x00f2ff, 0.3);
+        this.graphics.fillCircle(24, 24, 24);
+
+        // 2. Concentric Energy Rings
+        this.graphics.lineStyle(4, 0x00f2ff, 1);
+        this.graphics.strokeCircle(24, 24, 20);
+        this.graphics.lineStyle(3, 0xffffff, 0.8);
+        this.graphics.strokeCircle(24, 24, 16);
+        this.graphics.lineStyle(2, 0x00f2ff, 1);
+        this.graphics.strokeCircle(24, 24, 10);
+
+        // 3. Core Singularity
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillCircle(24, 24, 5);
+
+        // 4. Dynamic "Sparks"
+        this.graphics.fillStyle(0x00f2ff, 1);
+        this.graphics.fillRect(22, 2, 4, 6); // Top spark
+        this.graphics.fillRect(22, 40, 4, 6); // Bottom spark
+        this.graphics.fillRect(2, 22, 6, 4); // Left spark
+        this.graphics.fillRect(40, 22, 6, 4); // Right spark
+
+        this.graphics.generateTexture('portal', 48, 48);
+
+        console.log("TEXTURE GENERATION: WALL AND PORTAL UPDATED");
 
         // Synthwave Floor Tile - 64x64
         this.graphics.clear();
@@ -136,27 +151,6 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(0, 0, 2, 2);
         this.graphics.fillRect(62, 62, 2, 2);
         this.graphics.generateTexture('floor', 64, 64);
-
-        // Pixel Portal (Classic Energy Vortex)
-        this.graphics.clear();
-
-        // Outer Glow
-        this.graphics.fillStyle(0x00ffff, 0.2);
-        this.graphics.fillCircle(24, 24, 24);
-
-        // Energy Rings
-        this.graphics.lineStyle(3, 0x00ffff, 1);
-        this.graphics.strokeCircle(24, 24, 20);
-        this.graphics.lineStyle(2, 0xffffff, 0.8);
-        this.graphics.strokeCircle(24, 24, 14);
-        this.graphics.lineStyle(1, 0x00ffff, 1);
-        this.graphics.strokeCircle(24, 24, 8);
-
-        // Core Spark
-        this.graphics.fillStyle(0xffffff, 1);
-        this.graphics.fillCircle(24, 24, 4);
-
-        this.graphics.generateTexture('portal', 48, 48);
 
         // Pixel Boss (Rafael Rosseti) - FINAL VERSION (Bald, Beard, Light Sweater)
         this.graphics.clear();
