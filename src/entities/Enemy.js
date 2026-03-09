@@ -21,6 +21,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.isBoss = false;
         this.isBat = false;
         this.isYellow = (this.texture.key === 'yellowEnemy');
+        this.isPoisoned = false;
+        this.poisonEvent = null;
 
         if (!this.isYellow) {
             this.setTint(0xff0055);
@@ -217,6 +219,53 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
+    applyPoison(scene) {
+        if (this.isPoisoned) return;
+        this.isPoisoned = true;
+
+        this.setTintFill(0x00ff00);
+        scene.time.delayedCall(100, () => {
+            if (this.active) this.setTint(0x00ff00);
+        });
+
+        let poisonTicks = 0;
+        this.poisonEvent = scene.time.addEvent({
+            delay: 1000,
+            callback: () => {
+                if (!this.active) return;
+
+                // 10% da vida atual
+                const damage = this.health * 0.10;
+                this.takeDamage(damage);
+
+                poisonTicks++;
+                if (poisonTicks >= 3) {
+                    this.clearPoison();
+                }
+            },
+            repeat: 2
+        });
+    }
+
+    clearPoison() {
+        this.isPoisoned = false;
+        if (this.poisonEvent) {
+            this.poisonEvent.remove();
+            this.poisonEvent = null;
+        }
+
+        if (this.active) {
+            this.clearTint();
+            if (this.isBoss) {
+                // Boss has base texture
+            } else if (this.isYellow) {
+                this.setTint(0xffff00);
+            } else if (!this.isBat) {
+                this.setTint(0xff0055);
+            }
+        }
+    }
+
     takeDamage(amount) {
         this.health -= amount;
         if (this.health <= 0) {
@@ -244,6 +293,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
 
     die() {
+        if (this.poisonEvent) {
+            this.poisonEvent.remove();
+        }
+
         // Drop coins
         if (this.isBoss) {
             // Drop 20 coins of 5 value = 100 coins total

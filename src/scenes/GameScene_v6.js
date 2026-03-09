@@ -564,17 +564,32 @@ export class GameScene extends Phaser.Scene {
             this.player.update(movement, this.input.activePointer);
         }
 
-        // Emit smoke particles for active poison bullets
-        if (this.bullets && this.poisonSmokeParticles) {
-            this.bullets.getChildren().forEach(b => {
-                if (b.active && b.element === 'poison') {
-                    // Emit slight randomize to make it smoky
-                    this.poisonSmokeParticles.emitParticleAt(
-                        b.x + Phaser.Math.Between(-4, 4),
-                        b.y + Phaser.Math.Between(-4, 4)
-                    );
-                }
-            });
+        // Emit smoke particles for active poison bullets and poisoned enemies
+        if (this.poisonSmokeParticles) {
+            // Smoke for bullets
+            if (this.bullets) {
+                this.bullets.getChildren().forEach(b => {
+                    if (b.active && b.element === 'poison') {
+                        this.poisonSmokeParticles.emitParticleAt(
+                            b.x + Phaser.Math.Between(-4, 4),
+                            b.y + Phaser.Math.Between(-4, 4)
+                        );
+                    }
+                });
+            }
+
+            // Smoke for poisoned enemies
+            if (this.enemies) {
+                this.enemies.getChildren().forEach(enemy => {
+                    if (enemy.active && enemy.isPoisoned) {
+                        // Emit mostly from the top half of the enemy for a cool effect
+                        this.poisonSmokeParticles.emitParticleAt(
+                            enemy.x + Phaser.Math.Between(-10, 10),
+                            enemy.y + Phaser.Math.Between(-15, 5)
+                        );
+                    }
+                });
+            }
         }
 
         this.updateGadgets();
@@ -848,6 +863,11 @@ export class GameScene extends Phaser.Scene {
 
         // APLICAR DANO (Estava faltando!)
         enemy.takeDamage(10 * this.player.damageMultiplier);
+
+        // Veneno Shot Action
+        if (bullet.element === 'poison') {
+            enemy.applyPoison(this);
+        }
 
         // Lógica de Ricochete Elétrico (Volt Shot)
         if (bullet.element === 'electric' && (bullet.chainCount || 0) < 2) {
@@ -1201,6 +1221,9 @@ export class GameScene extends Phaser.Scene {
                 const ang = Phaser.Math.Angle.Between(this.player.x, this.player.y, enemy.x, enemy.y);
                 enemy.x += Math.cos(ang) * (isAura ? 1 : 10);
                 enemy.y += Math.sin(ang) * (isAura ? 1 : 10);
+                break;
+            case 'poison':
+                enemy.applyPoison(this);
                 break;
         }
     }
