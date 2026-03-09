@@ -326,7 +326,7 @@ export class GameScene extends Phaser.Scene {
         });
         this.fireParticles.setDepth(15);
 
-        this.bullets = this.physics.add.group({ defaultKey: 'bullet', maxSize: 50 });
+        this.bullets = this.physics.add.group({ classType: Phaser.Physics.Arcade.Sprite, defaultKey: 'bullet', maxSize: 50 });
         this.enemyBullets = this.physics.add.group({ defaultKey: 'enemyBullet', maxSize: 100 });
         this.coins = this.physics.add.group();
         this.walls = this.physics.add.staticGroup();
@@ -1287,15 +1287,21 @@ export class GameScene extends Phaser.Scene {
         if (this.lastShootTime && now - this.lastShootTime < 200) return;
         this.lastShootTime = now;
 
-        // Determina o elemento do tiro (apenas 1 por vez)
+        // Determina o elemento do tiro — cicla pelos disponíveis a cada tiro
         const specials = Object.keys(this.player.gadgets.specialShots);
-        const element = specials.includes('fire') ? 'fire' : (specials[0] || null);
+        let element = null;
+        if (specials.length > 0) {
+            if (this._lastElementIndex === undefined) this._lastElementIndex = 0;
+            element = specials[this._lastElementIndex % specials.length];
+            this._lastElementIndex++;
+        }
 
         const bullet = this.bullets.get(this.player.x, this.player.y);
         if (!bullet) return;
 
-        // Mata todos os tweens anteriores desta bala (resetar pool)
+        // Mata todos os tweens e animações anteriores desta bala (piscina reutilizável)
         this.tweens.killTweensOf(bullet);
+        if (bullet.anims) bullet.stop();
 
         bullet.setActive(true).setVisible(true);
         bullet.setAlpha(1);
@@ -1314,37 +1320,46 @@ export class GameScene extends Phaser.Scene {
         }
 
         if (element === 'electric') {
-            bullet.setTexture('bullet');
+            // Usa bolt_frame_0 como textura base — bolt_anim alterna entre bolt_frame_0..3
+            bullet.setTexture('bolt_frame_0');
             bullet.clearTint();
             bullet.setScale(1.2);
-            bullet.stop();
-            bullet.play('bolt_anim');
             bullet.setRotation(angle);
+            if (bullet.anims) bullet.play('bolt_anim', true);
+
         } else if (element === 'poison') {
             bullet.setTexture('poison_skull');
             bullet.clearTint();
-            bullet.setScale(1);
-            bullet.stop();
+            bullet.setScale(1.2);
             bullet.setRotation(0);
+            // Pulsação visual
             this.tweens.add({
                 targets: bullet,
-                scale: { from: 1, to: 1.3 },
+                scaleX: { from: 1.2, to: 1.6 },
+                scaleY: { from: 1.2, to: 1.6 },
                 yoyo: true,
                 repeat: -1,
-                duration: 300
+                duration: 250
             });
+
         } else if (element === 'fire') {
             bullet.setTexture('fireball_img');
             bullet.clearTint();
             bullet.setScale(1.8);
-            bullet.stop();
             bullet.setRotation(angle);
+            // Rotação contínua da bola de fogo
+            this.tweens.add({
+                targets: bullet,
+                angle: '+=360',
+                duration: 500,
+                repeat: -1
+            });
+
         } else {
             // Bala normal metálica
             bullet.setTexture('bullet');
             bullet.clearTint();
             bullet.setScale(1);
-            bullet.stop();
             bullet.setRotation(angle + Math.PI / 2);
         }
 
