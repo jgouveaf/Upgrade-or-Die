@@ -319,9 +319,19 @@ export class GameScene extends Phaser.Scene {
         }
 
         this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true });
+        this.fireTrails = this.physics.add.group(); // rastro de fogo no chão
+        this.fireParticles = this.add.particles(0, 0, 'icon_fire', {
+            speed: { min: 20, max: 60 },
+            scale: { start: 1.5, end: 0 },
+            alpha: { start: 0.8, end: 0 },
+            lifespan: 300,
+            blendMode: 'ADD',
+            emitting: false
+        });
+        this.fireParticles.setDepth(15);
+
         this.bullets = this.physics.add.group({ defaultKey: 'bullet', maxSize: 50 });
         this.enemyBullets = this.physics.add.group({ defaultKey: 'enemyBullet', maxSize: 100 });
-        this.fireTrails = this.physics.add.group(); // grupo de rastro de chamas
         this.coins = this.physics.add.group();
         this.walls = this.physics.add.staticGroup();
         this.spawners = this.physics.add.staticGroup();
@@ -385,22 +395,19 @@ export class GameScene extends Phaser.Scene {
             this.handleBulletHit(bullet, enemy);
         });
 
-        // Fire Trails (Overlap contínuo)
+        // Fire Trails (Overlap)
         this.physics.add.overlap(this.enemies, this.fireTrails, (enemy, trail) => {
             if (enemy.active && trail.active) {
-                // Aplica dano a cada meio segundo para não triturar instataneamente
                 if (!enemy.lastFireTrailHurt || this.time.now > enemy.lastFireTrailHurt + 500) {
-                    enemy.takeDamage(10 * this.player.damageMultiplier);
+                    enemy.takeDamage(12 * this.player.damageMultiplier);
                     enemy.lastFireTrailHurt = this.time.now;
-
-                    // Visual feedback
                     enemy.setTint(0xff4400);
-                    this.time.delayedCall(100, () => {
-                        if (enemy.active && !enemy.isPoisoned) enemy.clearTint();
-                    });
+                    this.time.delayedCall(100, () => { if (enemy.active && !enemy.isPoisoned) enemy.clearTint(); });
                 }
             }
         });
+
+
 
         this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
             if (!player.isImmortal) {
@@ -599,18 +606,22 @@ export class GameScene extends Phaser.Scene {
 
                 // Fire Trail effect
                 if (b.element === 'fire') {
-                    if (!b.lastTrailTime || this.time.now > b.lastTrailTime + 100) {
+                    // Partículas de cauda
+                    if (this.fireParticles) this.fireParticles.emitParticleAt(b.x, b.y);
+
+                    if (!b.lastTrailTime || this.time.now > b.lastTrailTime + 80) {
                         b.lastTrailTime = this.time.now;
-                        const trail = this.fireTrails.create(b.x, b.y, 'fireball');
+                        const trail = this.fireTrails.create(b.x, b.y, 'trail_flame');
                         if (trail) {
-                            trail.setAlpha(0.7);
-                            trail.setScale(Phaser.Math.FloatBetween(0.4, 0.7)); // smaller trail
-                            trail.body.setCircle(8); // colisão circular
+                            trail.setDepth(5);
+                            trail.setAlpha(0.8);
+                            trail.setScale(Phaser.Math.FloatBetween(1.0, 1.5));
+                            trail.body.setCircle(10, -2, -2);
 
                             this.tweens.add({
                                 targets: trail,
                                 alpha: 0,
-                                scale: 0,
+                                scale: 0.2,
                                 duration: 2000,
                                 onComplete: () => { if (trail.active) trail.destroy(); }
                             });
@@ -1312,18 +1323,17 @@ export class GameScene extends Phaser.Scene {
                     // Keep it upright but maybe slightly rotate? Actually upright is better for skulls
                     bullet.setRotation(0);
                 } else if (element === 'fire') {
-                    bullet.setTexture('fireball');
+                    bullet.setTexture('fireball_img');
                     bullet.setTint(0xffffff);
-                    bullet.setScale(1.5);
+                    bullet.setScale(2.0);
                     this.tweens.add({
                         targets: bullet,
-                        scaleX: 1.8,
-                        scaleY: 1.2,
+                        scaleX: 2.2,
+                        scaleY: 1.6,
                         yoyo: true,
                         repeat: -1,
-                        duration: 100
+                        duration: 80
                     });
-                    // Aponta a bola de fogo (baseada no sprite horizontal) para a velocidade
                     bullet.setRotation(Math.atan2(vy, vx));
                 } else {
                     // A bala metálica é vertical (Y), então precisa de +90 graus (PI/2) para apontar para a frente
@@ -1394,12 +1404,21 @@ export class GameScene extends Phaser.Scene {
             " yr  "
         ], { 'y': 0xffff00, 'o': 0xffaa00, 'r': 0xff4400 });
 
-        drawIcon('fireball', [
-            "  o  ",
-            " orr ",
-            "oorrw",
-            "orrr ",
-            " or  "
+        drawIcon('fireball_img', [
+            "  yyyy  ",
+            " yyorrr ",
+            "yyorrrw ",
+            "yyorrrw ",
+            " yyorrr ",
+            "  yyyy  "
+        ], { 'y': 0xffff00, 'r': 0xff4400, 'o': 0xffaa00, 'w': 0xffffff });
+
+        drawIcon('trail_flame', [
+            "   r   ",
+            "  ror  ",
+            " rorrw ",
+            "  ror  ",
+            "   r   "
         ], { 'w': 0xffffff, 'r': 0xff4400, 'o': 0xffaa00 });
 
         drawIcon('icon_poison', [
