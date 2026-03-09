@@ -86,37 +86,43 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(0, 3, 12, 6);
         this.graphics.generateTexture('coin', 12, 12);
 
-        // Pixel Enemy Bullet (Exact Fireball from Reference)
-        if (this.textures.exists('enemyBullet')) this.textures.remove('enemyBullet');
-        this.graphics.clear();
-
-        const fp = { r: 0xff0000, o: 0xff8800, y: 0xffff00, w: 0xfffde0 };
+        // Pixel Enemy Bullet (Refined Fireball from Reference)
+        if (this.textures.exists('enemyFireball')) this.textures.remove('enemyFireball');
+        const fireGraphics = this.add.graphics();
+        const fp = { r: 0xff0000, o: 0xff8800, y: 0xffff00, w: 0xffffff };
         const fData = [
-            "               rrrrrr   ",
-            "             rroooooorr ",
-            "           rrooyyyyyyoor",
-            "       rrrroyyyyyyyyoor ",
-            "    rrooooyyyywwwwyyoor ",
-            " rroyyyyyywwwwwwwwyyoor ",
-            "royyyyyyyywwwwwwwwyyoor ",
-            " rrooooyyyywwwwyyoorrr  ",
-            "    rrrroyyyyyyyyoor    ",
-            "        rrooyyyyyyoor   ",
-            "          rroooooorr    ",
-            "             rrrrrr     "
+            "                rrrrrr    ",
+            "            rrrroooooorr  ",
+            "        rrrrooooyyyyyyoor ",
+            "    rrrroooooyyyyyyyyyoor ",
+            " rrooooooyyyyyywwwwyyoor  ",
+            "rooyyyyyyyyyyywwwwwwyoor  ",
+            "rooyyyyyyyyyyywwwwwwyoor  ",
+            " rrooooooyyyyyywwwwyyoor  ",
+            "    rrrroooooyyyyyyyyyoor ",
+            "        rrrrooooyyyyyyoor ",
+            "            rrrroooooorr  ",
+            "                rrrrrr    "
         ];
 
-        const pixelSize = 2; // Scaling the pixel art
+        const pSize = 2;
         for (let y = 0; y < fData.length; y++) {
             for (let x = 0; x < fData[y].length; x++) {
                 const char = fData[y][x];
                 if (fp[char]) {
-                    this.graphics.fillStyle(fp[char], 1);
-                    this.graphics.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                    fireGraphics.fillStyle(fp[char], 1);
+                    fireGraphics.fillRect(x * pSize, y * pSize, pSize, pSize);
                 }
             }
         }
-        this.graphics.generateTexture('enemyBullet', 48, 24);
+        fireGraphics.generateTexture('enemyFireball', 52, 24);
+        fireGraphics.destroy();
+
+        // Legacy fallback
+        this.graphics.clear();
+        this.graphics.fillStyle(0xff4400, 1);
+        this.graphics.fillRect(0, 0, 8, 8);
+        this.graphics.generateTexture('enemyBullet', 8, 8);
 
         // Synthwave Pixel Wall - 32x32 (Ultra Neon Version)
         if (this.textures.exists('wall')) this.textures.remove('wall');

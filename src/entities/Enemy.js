@@ -188,7 +188,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         // Lock the fire timer immediately — no other shot can start until this cooldown ends
         this.nextFire = this.scene.time.now + this.fireRate;
 
-        const bulletKey = this.isBoss ? 'bossBullet' : 'enemyBullet';
+        const bulletKey = this.isBoss ? 'bossBullet' : 'enemyFireball';
         const bullet = this.scene.enemyBullets.get(this.x, this.y, bulletKey);
 
         if (bullet) {
@@ -200,8 +200,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
                 bullet.body.setSize(20, 20);
                 bullet.setScale(1.2);
             } else {
-                bullet.body.setSize(12, 8);
-                bullet.setScale(1.2);
+                bullet.body.setSize(18, 12);
+                bullet.setScale(1.0);
             }
 
             const bulletSpeed = this.isBoss ? 400 : 300;
