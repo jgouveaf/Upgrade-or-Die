@@ -97,12 +97,9 @@ export class GameScene extends Phaser.Scene {
         // Inner Dark (Synthwave Purple)
         this.graphics.fillStyle(0x1a1a2e, 1);
         this.graphics.fillRect(2, 2, 28, 28);
-        // Neon Border (Magenta Glow)
-        this.graphics.lineStyle(2, 0xff00ff, 1);
-        this.graphics.strokeRect(1, 1, 30, 30);
-        // Inner Glow / Detail
-        this.graphics.lineStyle(1, 0xff77ff, 0.5);
-        this.graphics.strokeRect(6, 6, 20, 20);
+        // Neon Border (Magenta Glow) - REMOVIDO para visual mais limpo
+        // this.graphics.lineStyle(2, 0xff00ff, 1);
+        // this.graphics.strokeRect(1, 1, 30, 30);
         this.graphics.generateTexture('wall', 32, 32);
 
         // Synthwave Floor Tile - 64x64
@@ -121,8 +118,8 @@ export class GameScene extends Phaser.Scene {
 
         // Pixel Portal
         this.graphics.clear();
-        this.graphics.lineStyle(4, 0x00ffff, 1);
-        this.graphics.strokeRect(4, 4, 40, 40);
+        this.graphics.fillStyle(0x00ffff, 0.3);
+        this.graphics.fillRect(4, 4, 40, 40);
         this.graphics.generateTexture('portal', 48, 48);
 
         // Pixel Boss (Rafael Rosseti) - FINAL VERSION (Bald, Beard, Light Sweater)
@@ -210,31 +207,27 @@ export class GameScene extends Phaser.Scene {
 
         this.graphics.generateTexture('bossBullet', 32, 32);
 
-        // Pixel Poison Bat - 32x32
+        // Pixel Fire Bat - 32x32 (Replaces poisonBat visuals)
         this.graphics.clear();
-        // Wings (Dark Green / Toxic)
-        this.graphics.fillStyle(0x004400, 1);
-        this.graphics.fillRect(4, 12, 8, 4); // Left wing connection
-        this.graphics.fillRect(0, 8, 8, 4);  // Left wing tip
-        this.graphics.fillRect(20, 12, 8, 4); // Right wing connection
-        this.graphics.fillRect(24, 8, 8, 4);  // Right wing tip
+        // Wings (Dark Red / Maroon)
+        this.graphics.fillStyle(0x440000, 1);
+        this.graphics.fillRect(4, 12, 8, 4); // Left wing
+        this.graphics.fillRect(0, 8, 8, 4);
+        this.graphics.fillRect(20, 12, 8, 4); // Right wing
+        this.graphics.fillRect(24, 8, 8, 4);
 
-        // Wing membranes (Lighter vibrant green)
-        this.graphics.fillStyle(0x00cc00, 1);
+        // Wing membranes (Vibrant Red)
+        this.graphics.fillStyle(0xff0000, 1);
         this.graphics.fillRect(2, 10, 4, 2);
         this.graphics.fillRect(26, 10, 4, 2);
 
-        // Body (Lighter toxic green)
-        this.graphics.fillStyle(0x00ff00, 1);
-        this.graphics.fillRect(12, 8, 8, 12); // Hood/Body
-        this.graphics.fillRect(14, 20, 4, 4);  // Lower body/tail
+        // Body (Fire Red)
+        this.graphics.fillStyle(0xff4400, 1);
+        this.graphics.fillRect(12, 8, 8, 12);
+        this.graphics.fillRect(14, 20, 4, 4);
 
-        // Head detail
-        this.graphics.fillStyle(0x00ff00, 1);
-        this.graphics.fillRect(10, 6, 12, 4);
-
-        // Eyes (Glowing Purple/Red)
-        this.graphics.fillStyle(0xff00ff, 1);
+        // Eyes (White/Yellow Glow)
+        this.graphics.fillStyle(0xffff00, 1);
         this.graphics.fillRect(12, 10, 2, 2);
         this.graphics.fillRect(18, 10, 2, 2);
 
@@ -243,11 +236,8 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(13, 13, 1, 2);
         this.graphics.fillRect(18, 13, 1, 2);
 
-        // Poison Aura/Droplets
-        this.graphics.fillStyle(0x00ff00, 0.4);
-        this.graphics.fillRect(10, 22, 2, 2);
-        this.graphics.fillRect(20, 18, 2, 2);
-        this.graphics.generateTexture('poisonBat', 32, 32);
+        this.graphics.generateTexture('fireBat', 32, 32);
+        this.graphics.generateTexture('poisonBat', 32, 32); // Fallback for legacy code
 
         // Pixel Yellow Enemy (New variant)
         this.graphics.clear();
@@ -300,7 +290,13 @@ export class GameScene extends Phaser.Scene {
     create() {
         console.log("GameScene: Create starting...");
 
-        // Adicionar Chão Synthwave (TileSprite)
+        // FORÇAR debug desligado em todos os níveis possíveis
+        this.physics.world.drawDebug = false;
+        if (this.physics.world.debugGraphic) {
+            this.physics.world.debugGraphic.clear();
+            this.physics.world.debugGraphic.visible = false;
+        }
+
         const { width, height } = this.scale;
         this.add.tileSprite(0, 0, width, height, 'floor').setOrigin(0).setScrollFactor(0).setAlpha(0.6);
 
@@ -319,6 +315,17 @@ export class GameScene extends Phaser.Scene {
         }
 
         this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true });
+        this.fireTrails = this.physics.add.group(); // rastro de fogo no chão
+        this.fireParticles = this.add.particles(0, 0, 'icon_fire', {
+            speed: { min: 20, max: 60 },
+            scale: { start: 1.5, end: 0 },
+            alpha: { start: 0.8, end: 0 },
+            lifespan: 300,
+            blendMode: 'ADD',
+            emitting: false
+        });
+        this.fireParticles.setDepth(15);
+
         this.bullets = this.physics.add.group({ defaultKey: 'bullet', maxSize: 50 });
         this.enemyBullets = this.physics.add.group({ defaultKey: 'enemyBullet', maxSize: 100 });
         this.coins = this.physics.add.group();
@@ -370,6 +377,8 @@ export class GameScene extends Phaser.Scene {
         this.healthBar = this.add.graphics();
         console.log("GameScene: HealthBar initialized:", !!this.healthBar);
 
+        this.generatePixelIcons();
+
         this.spawnWave();
 
         // Debug Shop Setup
@@ -381,6 +390,20 @@ export class GameScene extends Phaser.Scene {
         this.physics.add.overlap(this.bullets, this.enemies, (bullet, enemy) => {
             this.handleBulletHit(bullet, enemy);
         });
+
+        // Fire Trails (Overlap)
+        this.physics.add.overlap(this.enemies, this.fireTrails, (enemy, trail) => {
+            if (enemy.active && trail.active) {
+                if (!enemy.lastFireTrailHurt || this.time.now > enemy.lastFireTrailHurt + 500) {
+                    enemy.takeDamage(12 * this.player.damageMultiplier);
+                    enemy.lastFireTrailHurt = this.time.now;
+                    enemy.setTint(0xff4400);
+                    this.time.delayedCall(100, () => { if (enemy.active && !enemy.isPoisoned) enemy.clearTint(); });
+                }
+            }
+        });
+
+
 
         this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
             if (!player.isImmortal) {
@@ -445,6 +468,52 @@ export class GameScene extends Phaser.Scene {
             frameRate: 20,
             repeat: -1
         });
+
+        // POISON SKULL TEXTURE (Generated dynamically)
+        if (!this.textures.exists('poison_skull')) {
+            const canvas = this.textures.createCanvas('poison_skull', 16, 16);
+            const ctx = canvas.getContext();
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(4, 2, 8, 5); // top head
+            ctx.fillRect(3, 3, 10, 4); // mid head
+            ctx.fillStyle = '#111111'; // background/eyes
+            ctx.clearRect(5, 4, 2, 2); // left eye
+            ctx.clearRect(9, 4, 2, 2); // right eye
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(5, 8, 6, 2); // teeth base
+            ctx.clearRect(6, 8, 1, 2); // gap
+            ctx.clearRect(9, 8, 1, 2); // gap
+            // crossbones
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(2, 11, 2, 2);
+            ctx.fillRect(12, 11, 2, 2);
+            ctx.fillRect(4, 10, 8, 2);
+            ctx.fillRect(2, 13, 2, 2);
+            ctx.fillRect(12, 13, 2, 2);
+            canvas.refresh();
+        }
+
+        // POISON SMOKE TEXTURE
+        if (!this.textures.exists('poison_smoke')) {
+            const smokeCanvas = this.textures.createCanvas('poison_smoke', 8, 8);
+            const sCtx = smokeCanvas.getContext();
+            sCtx.fillStyle = '#00ff00';
+            sCtx.beginPath();
+            sCtx.arc(4, 4, 4, 0, Math.PI * 2);
+            sCtx.fill();
+            smokeCanvas.refresh();
+        }
+
+        // Setup Poison Smoke Particle Manager
+        this.poisonSmokeParticles = this.add.particles(0, 0, 'poison_smoke', {
+            speed: 10,
+            scale: { start: 1.5, end: 0 },
+            alpha: { start: 0.6, end: 0 },
+            lifespan: 500,
+            blendMode: 'ADD',
+            emitting: false
+        });
+        this.poisonSmokeParticles.setDepth(10); // Above background, below player/bullets usually
 
         this.setupPauseUIListeners();
         this.events.on('shutdown', this.shutdown, this);
@@ -516,6 +585,60 @@ export class GameScene extends Phaser.Scene {
                 right: this.keys.RIGHT
             };
             this.player.update(movement, this.input.activePointer);
+        }
+
+        // Bullet effects (Trails and Smoke)
+        if (this.bullets) {
+            this.bullets.getChildren().forEach(b => {
+                if (!b.active) return;
+
+                // Poison effect
+                if (b.element === 'poison' && this.poisonSmokeParticles) {
+                    this.poisonSmokeParticles.emitParticleAt(
+                        b.x + Phaser.Math.Between(-4, 4),
+                        b.y + Phaser.Math.Between(-4, 4)
+                    );
+                }
+
+                // Fire Trail effect (Ground embers)
+                if (b.element === 'fire') {
+                    // Partículas de cauda (Fumaça pequena)
+                    if (this.fireParticles) {
+                        this.fireParticles.emitParticleAt(b.x, b.y);
+                    }
+
+                    if (!b.lastTrailTime || this.time.now > b.lastTrailTime + 150) {
+                        b.lastTrailTime = this.time.now;
+                        const trail = this.fireTrails.create(b.x, b.y, 'trail_flame');
+                        if (trail) {
+                            trail.setDepth(5);
+                            trail.setAlpha(0.6);
+                            trail.setScale(Phaser.Math.FloatBetween(0.6, 0.9));
+                            trail.body.setSize(8, 8);
+
+                            this.tweens.add({
+                                targets: trail,
+                                alpha: 0,
+                                scale: 0.1,
+                                duration: 800,
+                                onComplete: () => { if (trail.active) trail.destroy(); }
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+        // Smoke for poisoned enemies
+        if (this.poisonSmokeParticles && this.enemies) {
+            this.enemies.getChildren().forEach(enemy => {
+                if (enemy.active && enemy.isPoisoned) {
+                    this.poisonSmokeParticles.emitParticleAt(
+                        enemy.x + Phaser.Math.Between(-10, 10),
+                        enemy.y + Phaser.Math.Between(-15, 5)
+                    );
+                }
+            });
         }
 
         this.updateGadgets();
@@ -730,12 +853,12 @@ export class GameScene extends Phaser.Scene {
             const name = this.add.text(x, y - 80, gadget.name, {
                 fontFamily: '"Press Start 2P"',
                 fontSize: '10px',
-                fill: element.color,
+                fill: '#ffffff', // changed to white
                 align: 'center',
                 wordWrap: { width: 180 }
             }).setOrigin(0.5);
 
-            const icon = this.add.text(x, y - 40, element.icon, { fontSize: '24px' }).setOrigin(0.5);
+            const icon = this.add.image(x, y - 40, 'icon_' + gadget.element).setScale(2);
             const desc = this.add.text(x, y + 20, gadget.desc, {
                 fontFamily: '"Press Start 2P"',
                 fontSize: '8px',
@@ -789,6 +912,11 @@ export class GameScene extends Phaser.Scene {
 
         // APLICAR DANO (Estava faltando!)
         enemy.takeDamage(10 * this.player.damageMultiplier);
+
+        // Veneno Shot Action
+        if (bullet.element === 'poison') {
+            enemy.applyPoison(this);
+        }
 
         // Lógica de Ricochete Elétrico (Volt Shot)
         if (bullet.element === 'electric' && (bullet.chainCount || 0) < 2) {
@@ -964,6 +1092,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     setupGadgets() {
+        // Clear existing turrets to prevent duplicates when re-setting up (e.g., from Debug Shop)
+        if (this.activeTurrets) this.activeTurrets.clear(true, true);
+
         // Initialize Turrets based on player stats
         Object.keys(this.player.gadgets.turrets).forEach((element, index) => {
             const level = this.player.gadgets.turrets[element];
@@ -971,10 +1102,40 @@ export class GameScene extends Phaser.Scene {
             const dist = 60;
             const turret = this.add.container(this.player.x + Math.cos(angle) * dist, this.player.y + Math.sin(angle) * dist);
 
-            // Visual
-            const base = this.add.rectangle(0, 0, 20, 20, 0x333333).setStrokeStyle(2, ELEMENTS[element.toUpperCase()].color);
-            const gun = this.add.rectangle(10, 0, 15, 6, ELEMENTS[element.toUpperCase()].color);
-            turret.add([base, gun]);
+            const elementData = ELEMENTS[element.toUpperCase()];
+            const elementColor = elementData.color;
+
+            // 1. Base pedestal (Gray/Metal)
+            const baseCircle = this.add.circle(0, 0, 12, 0x444444).setStrokeStyle(2, 0x222222);
+            const baseTop = this.add.circle(0, 0, 8, 0x666666);
+            const pedestal = this.add.container(0, 0, [baseCircle, baseTop]);
+
+            // 2. Body (Replaces the Orange with Element Color)
+            const bodyMain = this.add.rectangle(2, 0, 16, 14, elementColor).setStrokeStyle(2, 0x222222);
+            const bodyDetail = this.add.rectangle(-4, 0, 8, 10, 0x333333); // dark engine/core part at the back
+
+            // 3. Barrels (Gatling style)
+            const barrel1 = this.add.rectangle(16, -4, 14, 3, 0x222222);
+            const barrel2 = this.add.rectangle(18, 0, 14, 4, 0x222222);
+            const barrel3 = this.add.rectangle(16, 4, 14, 3, 0x222222);
+
+            // 4. Element Glow / Details on Barrels
+            const glow1 = this.add.rectangle(22, -4, 4, 3, elementColor);
+            const glow2 = this.add.rectangle(24, 0, 4, 4, elementColor);
+            const glow3 = this.add.rectangle(22, 4, 4, 3, elementColor);
+
+            // 5. Element Icon (Damage Element Indicator)
+            const icon = this.add.image(2, 0, 'icon_' + element).setOrigin(0.5);
+
+            // Grouping the rotating part (Body + Barrels)
+            const gunGroup = this.add.container(0, 0, [
+                bodyMain, bodyDetail,
+                barrel1, barrel2, barrel3,
+                glow1, glow2, glow3,
+                icon
+            ]);
+
+            turret.add([pedestal, gunGroup]);
             turret.element = element;
             turret.level = level;
             turret.nextFire = 0;
@@ -1020,9 +1181,10 @@ export class GameScene extends Phaser.Scene {
         });
 
         // 2. Turrets
+        const totalTurrets = this.activeTurrets.getChildren().length;
         this.activeTurrets.getChildren().forEach((turret, index) => {
-            // Orbit player
-            const orbitAngle = (this.time.now * 0.001) + (index * 1.5);
+            // Orbit player - Uniform spacing
+            const orbitAngle = (this.time.now * 0.001) + (index * (Math.PI * 2 / totalTurrets));
             const dist = 70;
             turret.x = this.player.x + Math.cos(orbitAngle) * dist;
             turret.y = this.player.y + Math.sin(orbitAngle) * dist;
@@ -1053,14 +1215,33 @@ export class GameScene extends Phaser.Scene {
     }
 
     fireTurret(turret, target) {
-        // Flash effect (Stronger with level)
         const thickness = 1 + turret.level;
-        this.gadgetGraphics.lineStyle(thickness, ELEMENTS[turret.element.toUpperCase()].color, 1);
-        this.gadgetGraphics.lineBetween(turret.x, turret.y, target.x, target.y);
+        const color = ELEMENTS[turret.element.toUpperCase()].color;
+
+        // Use a separate graphics object for the shot effect so we don't clear the force fields
+        const trace = this.add.graphics();
+        trace.lineStyle(thickness, color, 1);
+
+        // Tracer line
+        trace.lineBetween(turret.x, turret.y, target.x, target.y);
 
         // Muzzle flash
-        this.gadgetGraphics.fillStyle(0xffffff, 0.8);
-        this.time.delayedCall(50, () => { if (this.gadgetGraphics) this.gadgetGraphics.clear(); });
+        const angle = Phaser.Math.Angle.Between(turret.x, turret.y, target.x, target.y);
+        const barrelTipX = turret.x + Math.cos(angle) * 24;
+        const barrelTipY = turret.y + Math.sin(angle) * 24;
+
+        trace.fillStyle(0xffffff, 0.9);
+        trace.fillCircle(barrelTipX, barrelTipY, 5);
+        trace.fillStyle(color, 0.6);
+        trace.fillCircle(barrelTipX, barrelTipY, 9);
+
+        // Fade out quickly for a snappy minigun feel
+        this.tweens.add({
+            targets: trace,
+            alpha: 0,
+            duration: 80,
+            onComplete: () => trace.destroy()
+        });
 
         // Safety check: target might be destroyed by takeDamage
         if (target && target.active) {
@@ -1092,70 +1273,170 @@ export class GameScene extends Phaser.Scene {
                 enemy.x += Math.cos(ang) * (isAura ? 1 : 10);
                 enemy.y += Math.sin(ang) * (isAura ? 1 : 10);
                 break;
+            case 'poison':
+                enemy.applyPoison(this);
+                break;
         }
     }
 
     shoot() {
         if (this.isWavePaused) return;
 
-        // Custom shot logic
+        // Cooldown para evitar múltiplos disparos por clique
+        const now = this.time.now;
+        if (this.lastShootTime && now - this.lastShootTime < 200) return;
+        this.lastShootTime = now;
+
+        // Determina o elemento do tiro (apenas 1 por vez)
         const specials = Object.keys(this.player.gadgets.specialShots);
+        const element = specials.includes('fire') ? 'fire' : (specials[0] || null);
 
-        const spawnBullet = (vx, vy, element = null) => {
-            const bullet = this.bullets.get(this.player.x, this.player.y);
-            if (bullet) {
-                bullet.setActive(true).setVisible(true);
-                bullet.setVelocity(vx, vy);
+        const bullet = this.bullets.get(this.player.x, this.player.y);
+        if (!bullet) return;
 
-                // Reset bullet properties from pool
-                bullet.setTexture('bullet');
-                bullet.clearTint();
-                bullet.setScale(1);
-                bullet.stop(); // Stop any previous animation
-                bullet.element = element;
-                bullet.chainCount = 0;
+        // Mata todos os tweens anteriores desta bala (resetar pool)
+        this.tweens.killTweensOf(bullet);
 
-                // Forçar o tamanho do corpo para a nova textura 16x16
-                if (bullet.body) {
-                    bullet.body.setSize(12, 12);
-                    bullet.body.setOffset(2, 2);
-                }
-
-                if (element === 'electric') {
-                    bullet.play('bolt_anim');
-                    // O raio é horizontal (X), então aponta direto para a velocidade
-                    bullet.setRotation(Math.atan2(vy, vx));
-                    bullet.setScale(1.2);
-                } else {
-                    // A bala metálica é vertical (Y), então precisa de +90 graus (PI/2) para apontar para a frente
-                    bullet.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
-                    if (element) {
-                        bullet.setTint(ELEMENTS[element.toUpperCase()].color);
-                    }
-                }
-
-                this.time.delayedCall(2000, () => { if (bullet && bullet.active) bullet.destroy(); });
-                return bullet;
-            }
-        };
+        bullet.setActive(true).setVisible(true);
+        bullet.setAlpha(1);
+        bullet.element = element;
+        bullet.chainCount = 0;
 
         const targetX = this.input.x + this.cameras.main.scrollX;
         const targetY = this.input.y + this.cameras.main.scrollY;
         const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, targetX, targetY);
         const speed = 400;
+        bullet.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
 
-        // If no specials, just normal shot
-        if (specials.length === 0) {
-            spawnBullet(Math.cos(angle) * speed, Math.sin(angle) * speed);
-        } else {
-            // Apply each special effect
-            specials.forEach(element => {
-                const level = this.player.gadgets.specialShots[element];
-                for (let i = 0; i < level; i++) {
-                    const spread = (i - (level - 1) / 2) * 0.1;
-                    spawnBullet(Math.cos(angle + spread) * speed, Math.sin(angle + spread) * speed, element);
-                }
-            });
+        if (bullet.body) {
+            bullet.body.setSize(12, 12);
+            bullet.body.setOffset(2, 2);
         }
+
+        if (element === 'electric') {
+            bullet.setTexture('bullet');
+            bullet.clearTint();
+            bullet.setScale(1.2);
+            bullet.stop();
+            bullet.play('bolt_anim');
+            bullet.setRotation(angle);
+        } else if (element === 'poison') {
+            bullet.setTexture('poison_skull');
+            bullet.clearTint();
+            bullet.setScale(1);
+            bullet.stop();
+            bullet.setRotation(0);
+            this.tweens.add({
+                targets: bullet,
+                scale: { from: 1, to: 1.3 },
+                yoyo: true,
+                repeat: -1,
+                duration: 300
+            });
+        } else if (element === 'fire') {
+            bullet.setTexture('fireball_img');
+            bullet.clearTint();
+            bullet.setScale(1.8);
+            bullet.stop();
+            bullet.setRotation(angle);
+        } else {
+            // Bala normal metálica
+            bullet.setTexture('bullet');
+            bullet.clearTint();
+            bullet.setScale(1);
+            bullet.stop();
+            bullet.setRotation(angle + Math.PI / 2);
+        }
+
+        this.time.delayedCall(2000, () => { if (bullet && bullet.active) bullet.destroy(); });
+    }
+
+    generatePixelIcons() {
+        const drawIcon = (key, data, palette) => {
+            if (this.textures.exists(key)) return;
+            const g = this.add.graphics();
+            for (let y = 0; y < data.length; y++) {
+                for (let x = 0; x < data[y].length; x++) {
+                    const char = data[y][x];
+                    if (char !== ' ') {
+                        g.fillStyle(palette[char], 1);
+                        g.fillRect(x * 2, y * 2, 2, 2); // 2x2 pixels per block
+                    }
+                }
+            }
+            g.generateTexture(key, data[0].length * 2, data.length * 2);
+            g.destroy();
+        };
+
+        drawIcon('icon_electric', [
+            "  w  ",
+            " wcw ",
+            "wwc  ",
+            " wcw ",
+            "  cww",
+            "  w  ",
+            "  w  "
+        ], { 'w': 0xffffff, 'c': 0x00f2ff });
+
+        drawIcon('icon_fire', [
+            "  r  ",
+            " yrr ",
+            " yry ",
+            "rory ",
+            "ryyr ",
+            " yr  "
+        ], { 'y': 0xffff00, 'o': 0xffaa00, 'r': 0xff4400 });
+
+        drawIcon('fireball_img', [
+            "  yyyy  ",
+            " yyorrr ",
+            "yyorrrw ",
+            "yyorrrw ",
+            " yyorrr ",
+            "  yyyy  "
+        ], { 'y': 0xffff00, 'r': 0xff4400, 'o': 0xffaa00, 'w': 0xffffff });
+
+        drawIcon('trail_flame', [
+            "   r   ",
+            "  ror  ",
+            " rorrw ",
+            "  ror  ",
+            "   r   "
+        ], { 'w': 0xffffff, 'r': 0xff4400, 'o': 0xffaa00 });
+
+        drawIcon('icon_poison', [
+            " www ",
+            " wgw ",
+            "w   w",
+            "wgggw",
+            "wgggg",
+            "wwwww"
+        ], { 'w': 0xffffff, 'g': 0x00ff00 });
+
+        drawIcon('icon_force', [
+            "  ww ",
+            " www ",
+            " wwww",
+            " www ",
+            "  w  "
+        ], { 'w': 0xffffff });
+
+        drawIcon('icon_push', [
+            " wwww ",
+            "w    w",
+            " wwww "
+        ], { 'w': 0xff00ff });
+
+        drawIcon('fireBat', [
+            "r   r   r",
+            " r r r r ",
+            "  rrrrr  ",
+            " rrrrrrr ",
+            " rwr rwr ",
+            " rrrrrrr ",
+            "  rrrrr  ",
+            "   rrr   "
+        ], { 'r': 0xff0000, 'w': 0xffffff });
     }
 }
+

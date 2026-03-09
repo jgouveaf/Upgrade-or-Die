@@ -7,8 +7,6 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         // Fix collision box (smaller than visual to prevent sticking)
         this.body.setCircle(12, 4, 4);
 
-        console.log("Enemy instance created at", x, y);
-
         // Scale stats by wave
         this.health = 20 * (1 + (wave * 0.15));
         this.damage = 10 * (1 + (wave * 0.10));
@@ -21,6 +19,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.isBoss = false;
         this.isBat = false;
         this.isYellow = (this.texture.key === 'yellowEnemy');
+        this._isShooting = false; // Prevents firing multiple bullets at the same time
 
         if (!this.isYellow) {
             this.setTint(0xff0055);
@@ -79,7 +78,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
             this.setRotation(angle + Math.PI / 2);
 
-            // Try to shoot if in range
+            // Try to shoot if in range — _isShooting flag prevents multiple bullets firing at once
             if (distance < 400 && !this._isShooting && this.scene.time.now > this.nextFire) {
                 if (this.isYellow) {
                     this._isShooting = true;
@@ -118,8 +117,6 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         indicator.setScale(0.1);
 
         // Color transition: Starts light red, goes to dark red
-        // In Phaser, we can use a tween on a custom object or use tint.
-        // Let's use tint to go from light red (0xffcccc) to dark red (0x880000).
         indicator.setTint(0xffcccc);
 
         this.scene.tweens.add({
