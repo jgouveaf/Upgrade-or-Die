@@ -86,30 +86,26 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(0, 3, 12, 6);
         this.graphics.generateTexture('coin', 12, 12);
 
-        // Pixel Enemy Bullet (Fireball Sprite)
+        // Pixel Enemy Bullet (Improved Fireball with Tail)
+        if (this.textures.exists('enemyBullet')) this.textures.remove('enemyBullet');
         this.graphics.clear();
-        const firePalette = { 'y': 0xffff00, 'r': 0xff4400, 'o': 0xffaa00, 'w': 0xffffff };
-        const fireData = [
-            "  yyyy  ",
-            " yyorrr ",
-            "yyorrrw ",
-            "yyorrrw ",
-            " yyorrr ",
-            "  yyyy  "
-        ];
+        // Core of the fireball
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillRect(10, 4, 4, 4);
+        this.graphics.fillStyle(0xffff00, 1);
+        this.graphics.fillRect(8, 2, 8, 8);
+        // Outer flame
+        this.graphics.fillStyle(0xff4400, 1);
+        this.graphics.fillRect(6, 0, 10, 12);
+        // Flame tail
+        this.graphics.fillStyle(0xffaa00, 0.8);
+        this.graphics.fillRect(0, 4, 6, 4);
+        this.graphics.fillRect(2, 2, 4, 8);
 
-        for (let y = 0; y < fireData.length; y++) {
-            for (let x = 0; x < fireData[y].length; x++) {
-                const char = fireData[y][x];
-                if (char !== ' ') {
-                    this.graphics.fillStyle(firePalette[char], 1);
-                    this.graphics.fillRect(x * 2, y * 2, 2, 2);
-                }
-            }
-        }
         this.graphics.generateTexture('enemyBullet', 16, 12);
 
         // Synthwave Pixel Wall - 32x32 (Ultra Neon Version)
+        if (this.textures.exists('wall')) this.textures.remove('wall');
         this.graphics.clear();
         this.graphics.lineStyle(6, 0xff00ff, 0.3); // Faint outer glow
         this.graphics.strokeRect(0, 0, 32, 32);
@@ -124,32 +120,29 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(14, 14, 4, 4); // Bright neon core
         this.graphics.generateTexture('wall', 32, 32);
 
-        // Pixel Portal (Classic Ultra Neon Vortex)
+        // Pixel Portal (Square Neon Version)
         if (this.textures.exists('portal')) this.textures.remove('portal');
         this.graphics.clear();
 
-        // 1. Outer Glow (Pulse simulated)
-        this.graphics.fillStyle(0x00f2ff, 0.3);
-        this.graphics.fillCircle(24, 24, 24);
+        // 1. Outer Neon Glow
+        this.graphics.lineStyle(6, 0x00f2ff, 0.3);
+        this.graphics.strokeRect(0, 0, 48, 48);
 
-        // 2. Concentric Energy Rings
+        // 2. Thick Cyan Frame
         this.graphics.lineStyle(4, 0x00f2ff, 1);
-        this.graphics.strokeCircle(24, 24, 20);
-        this.graphics.lineStyle(3, 0xffffff, 0.8);
-        this.graphics.strokeCircle(24, 24, 16);
-        this.graphics.lineStyle(2, 0x00f2ff, 1);
-        this.graphics.strokeCircle(24, 24, 10);
+        this.graphics.strokeRect(4, 4, 40, 40);
 
-        // 3. Core Singularity
+        // 3. Inner White Frame (Energy edge)
+        this.graphics.lineStyle(2, 0xffffff, 0.8);
+        this.graphics.strokeRect(8, 8, 32, 32);
+
+        // 4. Energy Filling (Translucent)
+        this.graphics.fillStyle(0x00f2ff, 0.2);
+        this.graphics.fillRect(10, 10, 28, 28);
+
+        // 5. Core Spark
         this.graphics.fillStyle(0xffffff, 1);
-        this.graphics.fillCircle(24, 24, 5);
-
-        // 4. Dynamic "Sparks"
-        this.graphics.fillStyle(0x00f2ff, 1);
-        this.graphics.fillRect(22, 2, 4, 6); // Top spark
-        this.graphics.fillRect(22, 40, 4, 6); // Bottom spark
-        this.graphics.fillRect(2, 22, 6, 4); // Left spark
-        this.graphics.fillRect(40, 22, 6, 4); // Right spark
+        this.graphics.fillRect(22, 22, 4, 4);
 
         this.graphics.generateTexture('portal', 48, 48);
 
