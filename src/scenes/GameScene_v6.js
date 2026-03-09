@@ -971,10 +971,42 @@ export class GameScene extends Phaser.Scene {
             const dist = 60;
             const turret = this.add.container(this.player.x + Math.cos(angle) * dist, this.player.y + Math.sin(angle) * dist);
 
-            // Visual
-            const base = this.add.rectangle(0, 0, 20, 20, 0x333333).setStrokeStyle(2, ELEMENTS[element.toUpperCase()].color);
-            const gun = this.add.rectangle(10, 0, 15, 6, ELEMENTS[element.toUpperCase()].color);
-            turret.add([base, gun]);
+            const elementData = ELEMENTS[element.toUpperCase()];
+            const elementColor = elementData.color;
+
+            // 1. Base pedestal (Gray/Metal)
+            const baseCircle = this.add.circle(0, 0, 12, 0x444444).setStrokeStyle(2, 0x222222);
+            const baseTop = this.add.circle(0, 0, 8, 0x666666);
+            const pedestal = this.add.container(0, 0, [baseCircle, baseTop]);
+
+            // 2. Body (Replaces the Orange with Element Color)
+            const bodyMain = this.add.rectangle(2, 0, 16, 14, elementColor).setStrokeStyle(2, 0x222222);
+            const bodyDetail = this.add.rectangle(-4, 0, 8, 10, 0x333333); // dark engine/core part at the back
+
+            // 3. Barrels (Gatling style)
+            const barrel1 = this.add.rectangle(16, -4, 14, 3, 0x222222);
+            const barrel2 = this.add.rectangle(18, 0, 14, 4, 0x222222);
+            const barrel3 = this.add.rectangle(16, 4, 14, 3, 0x222222);
+
+            // 4. Element Glow / Details on Barrels
+            const glow1 = this.add.rectangle(22, -4, 4, 3, elementColor);
+            const glow2 = this.add.rectangle(24, 0, 4, 4, elementColor);
+            const glow3 = this.add.rectangle(22, 4, 4, 3, elementColor);
+
+            // 5. Element Icon (Damage Element Indicator)
+            const icon = this.add.text(2, 0, elementData.icon, {
+                fontSize: '10px'
+            }).setOrigin(0.5);
+
+            // Grouping the rotating part (Body + Barrels)
+            const gunGroup = this.add.container(0, 0, [
+                bodyMain, bodyDetail,
+                barrel1, barrel2, barrel3,
+                glow1, glow2, glow3,
+                icon
+            ]);
+
+            turret.add([pedestal, gunGroup]);
             turret.element = element;
             turret.level = level;
             turret.nextFire = 0;
@@ -1053,14 +1085,33 @@ export class GameScene extends Phaser.Scene {
     }
 
     fireTurret(turret, target) {
-        // Flash effect (Stronger with level)
         const thickness = 1 + turret.level;
-        this.gadgetGraphics.lineStyle(thickness, ELEMENTS[turret.element.toUpperCase()].color, 1);
-        this.gadgetGraphics.lineBetween(turret.x, turret.y, target.x, target.y);
+        const color = ELEMENTS[turret.element.toUpperCase()].color;
+
+        // Use a separate graphics object for the shot effect so we don't clear the force fields
+        const trace = this.add.graphics();
+        trace.lineStyle(thickness, color, 1);
+
+        // Tracer line
+        trace.lineBetween(turret.x, turret.y, target.x, target.y);
 
         // Muzzle flash
-        this.gadgetGraphics.fillStyle(0xffffff, 0.8);
-        this.time.delayedCall(50, () => { if (this.gadgetGraphics) this.gadgetGraphics.clear(); });
+        const angle = Phaser.Math.Angle.Between(turret.x, turret.y, target.x, target.y);
+        const barrelTipX = turret.x + Math.cos(angle) * 24;
+        const barrelTipY = turret.y + Math.sin(angle) * 24;
+
+        trace.fillStyle(0xffffff, 0.9);
+        trace.fillCircle(barrelTipX, barrelTipY, 5);
+        trace.fillStyle(color, 0.6);
+        trace.fillCircle(barrelTipX, barrelTipY, 9);
+
+        // Fade out quickly for a snappy minigun feel
+        this.tweens.add({
+            targets: trace,
+            alpha: 0,
+            duration: 80,
+            onComplete: () => trace.destroy()
+        });
 
         // Safety check: target might be destroyed by takeDamage
         if (target && target.active) {
