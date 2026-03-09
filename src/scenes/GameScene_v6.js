@@ -86,37 +86,61 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(0, 3, 12, 6);
         this.graphics.generateTexture('coin', 12, 12);
 
-        // Pixel Enemy Bullet (Refined Fireball from Reference)
-        if (this.textures.exists('enemyFireball')) this.textures.remove('enemyFireball');
-        const fireGraphics = this.add.graphics();
-        const fp = { r: 0xff0000, o: 0xff8800, y: 0xffff00, w: 0xffffff };
-        const fData = [
-            "                rrrrrr    ",
-            "            rrrroooooorr  ",
-            "        rrrrooooyyyyyyoor ",
-            "    rrrroooooyyyyyyyyyoor ",
-            " rrooooooyyyyyywwwwyyoor  ",
-            "rooyyyyyyyyyyywwwwwwyoor  ",
-            "rooyyyyyyyyyyywwwwwwyoor  ",
-            " rrooooooyyyyyywwwwyyoor  ",
-            "    rrrroooooyyyyyyyyyoor ",
-            "        rrrrooooyyyyyyoor ",
-            "            rrrroooooorr  ",
-            "                rrrrrr    "
-        ];
+        // Pixel Enemy Bullet (Refined Fireball - 2 Frames for Animation)
+        if (this.textures.exists('enemyFireball_1')) this.textures.remove('enemyFireball_1');
+        if (this.textures.exists('enemyFireball_2')) this.textures.remove('enemyFireball_2');
 
-        const pSize = 2;
-        for (let y = 0; y < fData.length; y++) {
-            for (let x = 0; x < fData[y].length; x++) {
-                const char = fData[y][x];
-                if (fp[char]) {
-                    fireGraphics.fillStyle(fp[char], 1);
-                    fireGraphics.fillRect(x * pSize, y * pSize, pSize, pSize);
+        const generateFireballFrame = (key, tailVariation) => {
+            const fireGraphics = this.add.graphics();
+            const fp = { r: 0xff0000, o: 0xff8800, y: 0xffff00, w: 0xffffff };
+            const fData = [
+                "                rrrr   ",
+                "            rrrroooorr ",
+                "        rrrroooyyyyoor ",
+                "    rrrrooooyyyyyyyoor ",
+                " rrooooyyyyyyywwwyoor  ",
+                "rooyyyyyyyyyywwwwwoor  ",
+                "rooyyyyyyyyyywwwwwoor  ",
+                " rrooooyyyyyyywwwyoor  ",
+                "    rrrrooooyyyyyyyoor ",
+                "        rrrroooyyyyoor ",
+                "            rrrroooorr ",
+                "                rrrr   "
+            ];
+
+            // Add slight variation to tail for animation
+            if (tailVariation) {
+                fData[4] = "  rooooyyyyyyywwwyoor  ";
+                fData[7] = "  rooooyyyyyyywwwyoor  ";
+            }
+
+            const pSize = 1.5; // Smaller size
+            for (let y = 0; y < fData.length; y++) {
+                for (let x = 0; x < fData[y].length; x++) {
+                    const char = fData[y][x];
+                    if (fp[char]) {
+                        fireGraphics.fillStyle(fp[char], 1);
+                        fireGraphics.fillRect(x * pSize, y * pSize, pSize, pSize);
+                    }
                 }
             }
-        }
-        fireGraphics.generateTexture('enemyFireball', 52, 24);
-        fireGraphics.destroy();
+            fireGraphics.generateTexture(key, 40, 20);
+            fireGraphics.destroy();
+        };
+
+        generateFireballFrame('enemyFireball_1', false);
+        generateFireballFrame('enemyFireball_2', true);
+
+        // Animation for Fireball
+        this.anims.create({
+            key: 'fireball_burn',
+            frames: [
+                { key: 'enemyFireball_1' },
+                { key: 'enemyFireball_2' }
+            ],
+            frameRate: 12,
+            repeat: -1
+        });
 
         // Legacy fallback
         this.graphics.clear();
