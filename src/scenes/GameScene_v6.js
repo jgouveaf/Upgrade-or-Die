@@ -446,6 +446,52 @@ export class GameScene extends Phaser.Scene {
             repeat: -1
         });
 
+        // POISON SKULL TEXTURE (Generated dynamically)
+        if (!this.textures.exists('poison_skull')) {
+            const canvas = this.textures.createCanvas('poison_skull', 16, 16);
+            const ctx = canvas.getContext();
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(4, 2, 8, 5); // top head
+            ctx.fillRect(3, 3, 10, 4); // mid head
+            ctx.fillStyle = '#111111'; // background/eyes
+            ctx.clearRect(5, 4, 2, 2); // left eye
+            ctx.clearRect(9, 4, 2, 2); // right eye
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(5, 8, 6, 2); // teeth base
+            ctx.clearRect(6, 8, 1, 2); // gap
+            ctx.clearRect(9, 8, 1, 2); // gap
+            // crossbones
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(2, 11, 2, 2);
+            ctx.fillRect(12, 11, 2, 2);
+            ctx.fillRect(4, 10, 8, 2);
+            ctx.fillRect(2, 13, 2, 2);
+            ctx.fillRect(12, 13, 2, 2);
+            canvas.refresh();
+        }
+
+        // POISON SMOKE TEXTURE
+        if (!this.textures.exists('poison_smoke')) {
+            const smokeCanvas = this.textures.createCanvas('poison_smoke', 8, 8);
+            const sCtx = smokeCanvas.getContext();
+            sCtx.fillStyle = '#00ff00';
+            sCtx.beginPath();
+            sCtx.arc(4, 4, 4, 0, Math.PI * 2);
+            sCtx.fill();
+            smokeCanvas.refresh();
+        }
+
+        // Setup Poison Smoke Particle Manager
+        this.poisonSmokeParticles = this.add.particles(0, 0, 'poison_smoke', {
+            speed: 10,
+            scale: { start: 1.5, end: 0 },
+            alpha: { start: 0.6, end: 0 },
+            lifespan: 500,
+            blendMode: 'ADD',
+            emitting: false
+        });
+        this.poisonSmokeParticles.setDepth(10); // Above background, below player/bullets usually
+
         this.setupPauseUIListeners();
         this.events.on('shutdown', this.shutdown, this);
         console.log("GameScene: Create finished.");
@@ -516,6 +562,19 @@ export class GameScene extends Phaser.Scene {
                 right: this.keys.RIGHT
             };
             this.player.update(movement, this.input.activePointer);
+        }
+
+        // Emit smoke particles for active poison bullets
+        if (this.bullets && this.poisonSmokeParticles) {
+            this.bullets.getChildren().forEach(b => {
+                if (b.active && b.element === 'poison') {
+                    // Emit slight randomize to make it smoky
+                    this.poisonSmokeParticles.emitParticleAt(
+                        b.x + Phaser.Math.Between(-4, 4),
+                        b.y + Phaser.Math.Between(-4, 4)
+                    );
+                }
+            });
         }
 
         this.updateGadgets();
@@ -1177,6 +1236,20 @@ export class GameScene extends Phaser.Scene {
                     // O raio é horizontal (X), então aponta direto para a velocidade
                     bullet.setRotation(Math.atan2(vy, vx));
                     bullet.setScale(1.2);
+                } else if (element === 'poison') {
+                    bullet.setTexture('poison_skull');
+                    bullet.setTint(0xffffff); // Clear any inherited tint
+                    // Make the skull wobble slightly as it flies
+                    this.tweens.add({
+                        targets: bullet,
+                        scale: { from: 1, to: 1.4 },
+                        alpha: { from: 1, to: 0.8 },
+                        yoyo: true,
+                        repeat: -1,
+                        duration: 300
+                    });
+                    // Keep it upright but maybe slightly rotate? Actually upright is better for skulls
+                    bullet.setRotation(0);
                 } else {
                     // A bala metálica é vertical (Y), então precisa de +90 graus (PI/2) para apontar para a frente
                     bullet.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
