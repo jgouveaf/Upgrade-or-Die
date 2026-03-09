@@ -1094,6 +1094,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     setupGadgets() {
+        // Clear existing turrets to prevent duplicates when re-setting up (e.g., from Debug Shop)
+        if (this.activeTurrets) this.activeTurrets.clear(true, true);
+
         // Initialize Turrets based on player stats
         Object.keys(this.player.gadgets.turrets).forEach((element, index) => {
             const level = this.player.gadgets.turrets[element];
@@ -1180,9 +1183,10 @@ export class GameScene extends Phaser.Scene {
         });
 
         // 2. Turrets
+        const totalTurrets = this.activeTurrets.getChildren().length;
         this.activeTurrets.getChildren().forEach((turret, index) => {
-            // Orbit player
-            const orbitAngle = (this.time.now * 0.001) + (index * 1.5);
+            // Orbit player - Uniform spacing
+            const orbitAngle = (this.time.now * 0.001) + (index * (Math.PI * 2 / totalTurrets));
             const dist = 70;
             turret.x = this.player.x + Math.cos(orbitAngle) * dist;
             turret.y = this.player.y + Math.sin(orbitAngle) * dist;
