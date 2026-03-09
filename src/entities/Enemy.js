@@ -1,44 +1,35 @@
 export class Enemy extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, wave) {
-        super(scene, x, y, 'enemy');
+        super(scene, x, y, 'fireBat');
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        // Fix collision box (smaller than visual to prevent sticking)
         this.body.setCircle(12, 4, 4);
 
-        console.log("Enemy instance created at", x, y);
-
-        // Scale stats by wave
+        // Escala stats por wave
         this.health = 20 * (1 + (wave * 0.15));
         this.damage = 10 * (1 + (wave * 0.10));
         this.speed = 100 + (wave * 5);
-        this.fireRate = 2000 - (wave * 50); // Fires every 2s, getting faster
-        this.fireRate = Math.max(500, this.fireRate);
+        this.fireRate = Math.max(1500, 2500 - (wave * 80));
 
-        this.nextFire = scene.time.now + Phaser.Math.Between(0, 1000);
+        this.nextFire = scene.time.now + Phaser.Math.Between(500, 2000);
         this.maxHealth = this.health;
         this.isBoss = false;
-        this.isBat = true; // Agora todos os inimigos base são morcegos
+        this.isBat = true;
         this.isFireBat = true;
-        this.isYellow = (this.texture.key === 'yellowEnemy');
+        this.isYellow = false;
         this.isPoisoned = false;
         this.poisonEvent = null;
+        this.isFlapping = false;
 
-        if (this.isFireBat) {
-            this.setTexture('fireBat');
-            this.setScale(1.5);
-            // Iniciamos a animação de bater asas
-            this.isFlapping = false;
-        } else if (!this.isYellow) {
-            this.setTint(0xff0055);
-        }
+        this.setTexture('fireBat');
+        this.setScale(1.5);
     }
 
     update() {
         const player = this.scene.player;
         if (this.scene.isWavePaused || !player || !player.body) {
-            if (this.body) this.setVelocity(0);
+            this.setVelocity(0);
             return;
         }
 
@@ -47,27 +38,23 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         if (distance < 2000) {
             let angle = Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y);
 
-            // Smarter movement: Obstacle Avoidance
+            // Desvio de obstáculos
             const rayLength = 60;
             const lookAheadX = this.x + Math.cos(angle) * rayLength;
             const lookAheadY = this.y + Math.sin(angle) * rayLength;
 
-            // Check if there's a wall in the direct path
-            const wallInWay = this.scene.walls.getChildren().some(wall => {
-                return Phaser.Geom.Rectangle.Contains(wall.getBounds(), lookAheadX, lookAheadY);
-            });
+            const wallInWay = this.scene.walls.getChildren().some(wall =>
+                Phaser.Geom.Rectangle.Contains(wall.getBounds(), lookAheadX, lookAheadY)
+            );
 
             if (wallInWay) {
-                // Try to steer left or right
                 const leftAngle = angle - Math.PI / 4;
                 const rightAngle = angle + Math.PI / 4;
-
                 const leftClear = !this.scene.walls.getChildren().some(wall => {
                     const lx = this.x + Math.cos(leftAngle) * rayLength;
                     const ly = this.y + Math.sin(leftAngle) * rayLength;
                     return Phaser.Geom.Rectangle.Contains(wall.getBounds(), lx, ly);
                 });
-
                 if (leftClear) {
                     angle = leftAngle;
                 } else {
@@ -77,44 +64,82 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
                         return Phaser.Geom.Rectangle.Contains(wall.getBounds(), rx, ry);
                     });
                     if (rightClear) angle = rightAngle;
-                    // If neither is clear, just keep original angle and let physics handle collision
                 }
             }
 
-            const vx = Math.cos(angle) * this.speed;
-            const vy = Math.sin(angle) * this.speed;
-            this.setVelocity(vx, vy);
-
+            this.setVelocity(Math.cos(angle) * this.speed, Math.sin(angle) * this.speed);
             this.setRotation(angle + Math.PI / 2);
 
-            // Try to shoot if in range
+            // Atira APENAS SE estiver em alcance E o cooldown passou
             if (distance < 400 && this.scene.time.now > this.nextFire) {
-            } else {
                 this.shoot(player);
-            }
-        }
-
-        // Fire Bat flapping and particles
-        if (this.isFireBat) {
-            if (!this.isFlapping) {
-                this.isFlapping = true;
-                this.scene.tweens.add({
-                    targets: this,
-                    scaleY: 1.1,
-                    scaleX: 1.8,
-                    duration: 150,
-                    yoyo: true,
-                    repeat: -1
-                });
-            }
-
-            // Emite partículas de fogo constantes
-            if (this.scene.fireParticles && Phaser.Math.Between(0, 10) > 7) {
-                this.scene.fireParticles.emitParticleAt(this.x, this.y);
             }
         } else {
             this.setVelocity(0);
         }
+
+        // Animação de asas (só inicia uma vez)
+        if (!this.isFlapping) {
+            this.isFlapping = true;
+            this.scene.tweens.add({
+                targets: this,
+                scaleY: 1.1,
+                scaleX: 1.8,
+                duration: 150,
+                yoyo: true,
+                repeat: -1
+            });
+        }
+
+        // Partículas de fogo
+        if (this.scene.fireParticles && Phaser.Math.Between(0, 10) > 7) {
+            this.scene.fireParticles.emitParticleAt(this.x, this.y);
+        }
+    }
+
+    shoot(player) {
+        // Registra próximo tiro ANTES de qualquer retorno
+        this.nextFire = this.scene.time.now + this.fireRate;
+
+        // Pega UMA ÚNICA bala do pool
+        const bullet = this.scene.enemyBullets.get(this.x, this.y);
+        if (!bullet) return;
+
+        // Mata qualquer tween residual desta bala (pool reutiliza objetos)
+        this.scene.tweens.killTweensOf(bullet);
+
+        // Configura a bala
+        bullet.setActive(true);
+        bullet.setVisible(true);
+        bullet.setTexture('fireball_img');
+        bullet.clearTint();
+        bullet.setScale(1.2);
+        bullet.setAlpha(1);
+        bullet.setAngle(0);
+
+        if (bullet.body) {
+            bullet.body.enable = true;
+            bullet.body.setSize(12, 12);
+        }
+
+        // Velocidade em direção ao jogador
+        this.scene.physics.moveToObject(bullet, player, 220);
+
+        // Animação de rotação da bola de fogo
+        this.scene.tweens.add({
+            targets: bullet,
+            angle: 360,
+            duration: 600,
+            repeat: -1
+        });
+
+        // Auto-destruição após 4 segundos
+        this.scene.time.delayedCall(4000, () => {
+            if (bullet && bullet.active) {
+                this.scene.tweens.killTweensOf(bullet);
+                bullet.setActive(false).setVisible(false);
+            }
+        });
     }
 
     placeIndicator(player) {
@@ -126,10 +151,6 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         const indicator = this.scene.add.sprite(targetX, targetY, 'bombIndicator');
         indicator.setAlpha(0.6);
         indicator.setScale(0.1);
-
-        // Color transition: Starts light red, goes to dark red
-        // In Phaser, we can use a tween on a custom object or use tint.
-        // Let's use tint to go from light red (0xffcccc) to dark red (0x880000).
         indicator.setTint(0xffcccc);
 
         this.scene.tweens.add({
@@ -139,28 +160,20 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             duration: 2000,
             ease: 'Power2',
             onUpdate: (tween, target) => {
-                // Safety check: if target or scene is gone, stop
-                if (!target || !target.scene) {
-                    tween.stop();
-                    return;
-                }
+                if (!target || !target.scene) { tween.stop(); return; }
                 const progress = tween.progress;
                 const r = Math.floor(255 - (progress * 119));
                 const g = Math.floor(204 - (progress * 204));
                 const b = Math.floor(204 - (progress * 204));
-                const color = (r << 16) | (g << 8) | b;
-                target.setTint(color);
+                target.setTint((r << 16) | (g << 8) | b);
             },
             onComplete: () => {
                 if (indicator && indicator.scene) {
                     const currentScene = indicator.scene;
                     this.explode(currentScene, targetX, targetY);
-
-                    // Final explosion visual
                     const explosion = currentScene.add.graphics();
                     explosion.fillStyle(0xff4400, 0.8);
                     explosion.fillCircle(targetX, targetY, 60);
-
                     currentScene.tweens.add({
                         targets: explosion,
                         alpha: 0,
@@ -168,7 +181,6 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
                         duration: 300,
                         onComplete: () => explosion.destroy()
                     });
-
                     indicator.destroy();
                 }
             }
@@ -177,12 +189,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     explode(scene, x, y) {
         if (!scene || !scene.player) return;
-
         const dist = Phaser.Math.Distance.Between(scene.player.x, scene.player.y, x, y);
         if (dist < 60) {
-            if (!scene.player.isImmortal) {
-                scene.player.health -= 30;
-            }
+            if (!scene.player.isImmortal) scene.player.health -= 30;
             scene.cameras.main.shake(100, 0.01);
             scene.updateUI();
             if (scene.player.health <= 0) {
@@ -191,94 +200,20 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
-    shoot(player) {
-        this.nextFire = this.scene.time.now + this.fireRate;
-
-        if (this.isFireBat) {
-            // Ataque de bola de fogo giratória
-            const bullet = this.scene.enemyBullets.get(this.x, this.y, 'fireball_img');
-            if (bullet) {
-                bullet.setActive(true).setVisible(true).setTexture('fireball_img');
-                bullet.setScale(1.2);
-                bullet.setTint(0xffffff);
-
-                const bulletSpeed = 250;
-                this.scene.physics.moveToObject(bullet, player, bulletSpeed);
-
-                // Gira a bola de fogo
-                this.scene.tweens.add({
-                    targets: bullet,
-                    angle: 360,
-                    duration: 400,
-                    repeat: -1
-                });
-
-                this.scene.time.delayedCall(4000, () => {
-                    if (bullet.active) bullet.destroy();
-                });
-            }
-            return;
-        }
-
-        const bulletKey = this.isBoss ? 'bossBullet' : 'enemyBullet';
-        const bullet = this.scene.enemyBullets.get(this.x, this.y, bulletKey);
-
-        if (bullet) {
-            bullet.setActive(true);
-            bullet.setVisible(true);
-            bullet.setTexture(bulletKey);
-
-            if (this.isBoss) {
-                bullet.body.setSize(20, 20);
-                bullet.setScale(1.2); // Make it look bigger
-            } else {
-                bullet.body.setSize(8, 8);
-                bullet.setScale(1);
-            }
-
-            const bulletSpeed = this.isBoss ? 400 : 300;
-            this.scene.physics.moveToObject(bullet, player, bulletSpeed);
-
-            // Add spin to boss bullet
-            if (this.isBoss) {
-                this.scene.tweens.add({
-                    targets: bullet,
-                    angle: 360,
-                    duration: 500,
-                    repeat: -1
-                });
-            }
-
-            // Auto destroy after life
-            this.scene.time.delayedCall(3000, () => {
-                if (bullet.active) bullet.destroy();
-            });
-        }
-    }
-
     applyPoison(scene) {
         if (this.isPoisoned) return;
         this.isPoisoned = true;
-
-        this.setTintFill(0x00ff00);
-        scene.time.delayedCall(100, () => {
-            if (this.active) this.setTint(0x00ff00);
-        });
+        this.setTint(0x00ff00);
 
         let poisonTicks = 0;
         this.poisonEvent = scene.time.addEvent({
             delay: 1000,
             callback: () => {
                 if (!this.active) return;
-
-                // 10% da vida atual
                 const damage = this.health * 0.10;
                 this.takeDamage(damage);
-
                 poisonTicks++;
-                if (poisonTicks >= 3) {
-                    this.clearPoison();
-                }
+                if (poisonTicks >= 3) this.clearPoison();
             },
             repeat: 2
         });
@@ -290,18 +225,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.poisonEvent.remove();
             this.poisonEvent = null;
         }
-
         if (this.active) {
             this.clearTint();
-            if (this.isBoss) {
-                // Boss has base texture
-            } else if (this.isYellow) {
-                this.setTint(0xffff00);
-            } else if (this.isFireBat) {
-                // Default texture is already red
-            } else if (!this.isBat) {
-                this.setTint(0xff0055);
-            }
         }
     }
 
@@ -310,37 +235,21 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         if (this.health <= 0) {
             this.die();
         } else {
-            // Flash effect (brilhando em branco)
-            const originalTint = this.isBoss ? 0xffffff : (this.isYellow ? 0xffff00 : 0xff0055);
             this.setTintFill(0xffffff);
-
-            // Também vamos dar uma ligeira piscada mudando a transparência
             this.setAlpha(0.6);
-
             this.scene.time.delayedCall(100, () => {
                 if (this.active) {
                     this.clearTint();
                     this.setAlpha(1);
-                    if (this.isFireBat) {
-                        // Keep red bat
-                    } else if (!this.isBoss && !this.isBat && !this.isYellow) {
-                        this.setTint(originalTint);
-                    } else if (this.isYellow) {
-                        this.setTint(0xffff00);
-                    }
                 }
             });
         }
     }
 
     die() {
-        if (this.poisonEvent) {
-            this.poisonEvent.remove();
-        }
+        if (this.poisonEvent) this.poisonEvent.remove();
 
-        // Drop coins
         if (this.isBoss) {
-            // Drop 20 coins of 5 value = 100 coins total
             for (let i = 0; i < 20; i++) {
                 this.scene.spawnCoin(
                     this.x + Phaser.Math.Between(-40, 40),
@@ -350,6 +259,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         } else {
             this.scene.spawnCoin(this.x, this.y);
         }
+
         this.scene.enemiesKilled++;
         this.destroy();
     }
