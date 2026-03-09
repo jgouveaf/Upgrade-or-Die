@@ -229,6 +229,38 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         });
     }
 
+    applyPoison(scene) {
+        if (this.isPoisoned) return;
+        this.isPoisoned = true;
+        this.setTint(0x00ff00);
+
+        let poisonTicks = 0;
+        this.poisonEvent = scene.time.addEvent({
+            delay: 1000,
+            callback: () => {
+                if (!this.active) { this.clearPoison(); return; }
+                const damage = this.health * 0.10;
+                this.takeDamage(damage);
+                poisonTicks++;
+                if (poisonTicks >= 3) this.clearPoison();
+            },
+            repeat: 2
+        });
+    }
+
+    clearPoison() {
+        this.isPoisoned = false;
+        if (this.poisonEvent) {
+            this.poisonEvent.remove();
+            this.poisonEvent = null;
+        }
+        if (this.active) {
+            const originalTint = this.isBoss ? null : (this.isYellow ? 0xffff00 : (this.isBat ? null : 0xff0055));
+            if (originalTint) this.setTint(originalTint);
+            else this.clearTint();
+        }
+    }
+
     takeDamage(amount) {
         this.health -= amount;
         if (this.health <= 0) {
@@ -247,6 +279,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
 
     die() {
+        // Clean up poison timer if active
+        if (this.poisonEvent) {
+            this.poisonEvent.remove();
+            this.poisonEvent = null;
+        }
         // Drop coins
         if (this.isBoss) {
             // Drop 20 coins of 5 value = 100 coins total
