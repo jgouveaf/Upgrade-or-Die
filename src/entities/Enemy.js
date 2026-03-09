@@ -200,11 +200,13 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
                 bullet.body.setSize(20, 20);
                 bullet.setScale(1.2);
             } else {
-                bullet.body.setSize(8, 8);
-                bullet.setScale(1);
+                bullet.body.setSize(12, 8);
+                bullet.setScale(1.2);
             }
 
             const bulletSpeed = this.isBoss ? 400 : 300;
+            const angle = Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y);
+            bullet.setRotation(angle);
             this.scene.physics.moveToObject(bullet, player, bulletSpeed);
 
             // Add spin to boss bullet

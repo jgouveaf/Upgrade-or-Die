@@ -86,11 +86,28 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(0, 3, 12, 6);
         this.graphics.generateTexture('coin', 12, 12);
 
-        // Pixel Enemy Bullet
+        // Pixel Enemy Bullet (Fireball Sprite)
         this.graphics.clear();
-        this.graphics.fillStyle(0xff4400, 1);
-        this.graphics.fillRect(0, 0, 8, 8);
-        this.graphics.generateTexture('enemyBullet', 8, 8);
+        const firePalette = { 'y': 0xffff00, 'r': 0xff4400, 'o': 0xffaa00, 'w': 0xffffff };
+        const fireData = [
+            "  yyyy  ",
+            " yyorrr ",
+            "yyorrrw ",
+            "yyorrrw ",
+            " yyorrr ",
+            "  yyyy  "
+        ];
+
+        for (let y = 0; y < fireData.length; y++) {
+            for (let x = 0; x < fireData[y].length; x++) {
+                const char = fireData[y][x];
+                if (char !== ' ') {
+                    this.graphics.fillStyle(firePalette[char], 1);
+                    this.graphics.fillRect(x * 2, y * 2, 2, 2);
+                }
+            }
+        }
+        this.graphics.generateTexture('enemyBullet', 16, 12);
 
         // Synthwave Pixel Wall - 32x32 (Ultra Neon Version)
         this.graphics.clear();
