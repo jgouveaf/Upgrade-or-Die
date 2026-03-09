@@ -290,11 +290,13 @@ export class GameScene extends Phaser.Scene {
     create() {
         console.log("GameScene: Create starting...");
 
-        // Garantir que o debug de física esteja desligado
+        // FORÇAR debug desligado em todos os níveis possíveis
         this.physics.world.drawDebug = false;
         if (this.physics.world.debugGraphic) {
             this.physics.world.debugGraphic.clear();
+            this.physics.world.debugGraphic.visible = false;
         }
+
         const { width, height } = this.scale;
         this.add.tileSprite(0, 0, width, height, 'floor').setOrigin(0).setScrollFactor(0).setAlpha(0.6);
 
@@ -598,25 +600,27 @@ export class GameScene extends Phaser.Scene {
                     );
                 }
 
-                // Fire Trail effect
+                // Fire Trail effect (Ground embers)
                 if (b.element === 'fire') {
-                    // Partículas de cauda
-                    if (this.fireParticles) this.fireParticles.emitParticleAt(b.x, b.y);
+                    // Partículas de cauda (Fumaça pequena)
+                    if (this.fireParticles) {
+                        this.fireParticles.emitParticleAt(b.x, b.y);
+                    }
 
-                    if (!b.lastTrailTime || this.time.now > b.lastTrailTime + 80) {
+                    if (!b.lastTrailTime || this.time.now > b.lastTrailTime + 150) {
                         b.lastTrailTime = this.time.now;
                         const trail = this.fireTrails.create(b.x, b.y, 'trail_flame');
                         if (trail) {
                             trail.setDepth(5);
-                            trail.setAlpha(0.8);
-                            trail.setScale(Phaser.Math.FloatBetween(1.0, 1.5));
-                            trail.body.setCircle(10, -2, -2);
+                            trail.setAlpha(0.6);
+                            trail.setScale(Phaser.Math.FloatBetween(0.6, 0.9));
+                            trail.body.setSize(8, 8);
 
                             this.tweens.add({
                                 targets: trail,
                                 alpha: 0,
-                                scale: 0.2,
-                                duration: 2000,
+                                scale: 0.1,
+                                duration: 800,
                                 onComplete: () => { if (trail.active) trail.destroy(); }
                             });
                         }
@@ -1351,13 +1355,9 @@ export class GameScene extends Phaser.Scene {
         const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, targetX, targetY);
         const speed = 400;
 
-        // Single ball logic - Only one ball per shot
-        if (specials.length === 0) {
-            spawnBullet(Math.cos(angle) * speed, Math.sin(angle) * speed);
-        } else {
-            // Shoots only one bullet of the first special element
-            spawnBullet(Math.cos(angle) * speed, Math.sin(angle) * speed, specials[0]);
-        }
+        // Unified single shot logic
+        const targetElement = specials.includes('fire') ? 'fire' : (specials[0] || null);
+        spawnBullet(Math.cos(angle) * speed, Math.sin(angle) * speed, targetElement);
     }
 
     generatePixelIcons() {
