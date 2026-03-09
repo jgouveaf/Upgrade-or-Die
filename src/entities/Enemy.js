@@ -19,12 +19,18 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.nextFire = scene.time.now + Phaser.Math.Between(0, 1000);
         this.maxHealth = this.health;
         this.isBoss = false;
-        this.isBat = false;
+        this.isBat = true; // Agora todos os inimigos base são morcegos
+        this.isFireBat = true;
         this.isYellow = (this.texture.key === 'yellowEnemy');
         this.isPoisoned = false;
         this.poisonEvent = null;
 
-        if (!this.isYellow) {
+        if (this.isFireBat) {
+            this.setTexture('fireBat');
+            this.setScale(1.5);
+            // Iniciamos a animação de bater asas
+            this.isFlapping = false;
+        } else if (!this.isYellow) {
             this.setTint(0xff0055);
         }
     }
@@ -90,16 +96,24 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
                 }
             }
 
-            // Bat flapping effect
-            if (this.isBat && !this.isFlapping) {
-                this.isFlapping = true;
-                this.scene.tweens.add({
-                    targets: this,
-                    scaleX: 1.2,
-                    duration: 200,
-                    yoyo: true,
-                    repeat: -1
-                });
+            // Fire Bat flapping and particles
+            if (this.isFireBat) {
+                if (!this.isFlapping) {
+                    this.isFlapping = true;
+                    this.scene.tweens.add({
+                        targets: this,
+                        scaleY: 1.1,
+                        scaleX: 1.8,
+                        duration: 150,
+                        yoyo: true,
+                        repeat: -1
+                    });
+                }
+
+                // Emite partículas de fogo constantes
+                if (this.scene.fireParticles && Phaser.Math.Between(0, 10) > 7) {
+                    this.scene.fireParticles.emitParticleAt(this.x, this.y);
+                }
             }
         } else {
             this.setVelocity(0);
@@ -183,6 +197,32 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     shoot(player) {
         this.nextFire = this.scene.time.now + this.fireRate;
 
+        if (this.isFireBat) {
+            // Ataque de bola de fogo giratória
+            const bullet = this.scene.enemyBullets.get(this.x, this.y, 'fireball_img');
+            if (bullet) {
+                bullet.setActive(true).setVisible(true).setTexture('fireball_img');
+                bullet.setScale(1.2);
+                bullet.setTint(0xffffff);
+
+                const bulletSpeed = 250;
+                this.scene.physics.moveToObject(bullet, player, bulletSpeed);
+
+                // Gira a bola de fogo
+                this.scene.tweens.add({
+                    targets: bullet,
+                    angle: 360,
+                    duration: 400,
+                    repeat: -1
+                });
+
+                this.scene.time.delayedCall(4000, () => {
+                    if (bullet.active) bullet.destroy();
+                });
+            }
+            return;
+        }
+
         const bulletKey = this.isBoss ? 'bossBullet' : 'enemyBullet';
         const bullet = this.scene.enemyBullets.get(this.x, this.y, bulletKey);
 
@@ -260,6 +300,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
                 // Boss has base texture
             } else if (this.isYellow) {
                 this.setTint(0xffff00);
+            } else if (this.isFireBat) {
+                // Default texture is already red
             } else if (!this.isBat) {
                 this.setTint(0xff0055);
             }
@@ -282,7 +324,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
                 if (this.active) {
                     this.clearTint();
                     this.setAlpha(1);
-                    if (!this.isBoss && !this.isBat && !this.isYellow) {
+                    if (this.isFireBat) {
+                        // Keep red bat
+                    } else if (!this.isBoss && !this.isBat && !this.isYellow) {
                         this.setTint(originalTint);
                     } else if (this.isYellow) {
                         this.setTint(0xffff00);

@@ -1447,5 +1447,16 @@ export class GameScene extends Phaser.Scene {
             "w    w",
             " wwww "
         ], { 'w': 0xff00ff });
+
+        drawIcon('fireBat', [
+            "r   r   r",
+            " r r r r ",
+            "  rrrrr  ",
+            " rrrrrrr ",
+            " rwr rwr ",
+            " rrrrrrr ",
+            "  rrrrr  ",
+            "   rrr   "
+        ], { 'r': 0xff0000, 'w': 0xffffff });
     }
 }
