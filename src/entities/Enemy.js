@@ -80,10 +80,12 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.setRotation(angle + Math.PI / 2);
 
             // Try to shoot if in range
-            if (distance < 400 && this.scene.time.now > this.nextFire) {
+            if (distance < 400 && !this._isShooting && this.scene.time.now > this.nextFire) {
                 if (this.isYellow) {
+                    this._isShooting = true;
                     this.placeIndicator(player);
                 } else if (!this.isBat) {
+                    this._isShooting = true;
                     this.shoot(player);
                 }
             }
@@ -105,6 +107,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
 
     placeIndicator(player) {
+        // Lock fire immediately to prevent stacking
         this.nextFire = this.scene.time.now + (this.fireRate * 1.5);
 
         const targetX = player.x;
@@ -158,6 +161,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
                     indicator.destroy();
                 }
+                // Release shoot lock only after full cooldown
+                this.scene.time.delayedCall(this.fireRate * 1.5, () => {
+                    this._isShooting = false;
+                });
             }
         });
     }
@@ -179,6 +186,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
 
     shoot(player) {
+        // Lock the fire timer immediately — no other shot can start until this cooldown ends
         this.nextFire = this.scene.time.now + this.fireRate;
 
         const bulletKey = this.isBoss ? 'bossBullet' : 'enemyBullet';
@@ -191,7 +199,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
             if (this.isBoss) {
                 bullet.body.setSize(20, 20);
-                bullet.setScale(1.2); // Make it look bigger
+                bullet.setScale(1.2);
             } else {
                 bullet.body.setSize(8, 8);
                 bullet.setScale(1);
@@ -210,11 +218,16 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
                 });
             }
 
-            // Auto destroy after life
+            // Auto destroy after lifetime
             this.scene.time.delayedCall(3000, () => {
-                if (bullet.active) bullet.destroy();
+                if (bullet && bullet.active) bullet.destroy();
             });
         }
+
+        // Release the shoot lock after the full cooldown
+        this.scene.time.delayedCall(this.fireRate, () => {
+            this._isShooting = false;
+        });
     }
 
     takeDamage(amount) {
