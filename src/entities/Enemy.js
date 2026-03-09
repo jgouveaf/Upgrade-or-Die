@@ -20,7 +20,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.maxHealth = this.health;
         this.isBoss = false;
         this.isBat = false;
-        this.setTint(0xff0055);
+        this.isYellow = (this.texture.key === 'yellowEnemy');
+
+        if (!this.isYellow) {
+            this.setTint(0xff0055);
+        }
     }
 
     update() {
@@ -32,11 +36,43 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
         const distance = Phaser.Math.Distance.Between(this.x, this.y, player.x, player.y);
 
-        // Move towards player
         if (distance < 2000) {
-            const angle = Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y);
+            let angle = Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y);
 
-            // Set velocity directly
+            // Smarter movement: Obstacle Avoidance
+            const rayLength = 60;
+            const lookAheadX = this.x + Math.cos(angle) * rayLength;
+            const lookAheadY = this.y + Math.sin(angle) * rayLength;
+
+            // Check if there's a wall in the direct path
+            const wallInWay = this.scene.walls.getChildren().some(wall => {
+                return Phaser.Geom.Rectangle.Contains(wall.getBounds(), lookAheadX, lookAheadY);
+            });
+
+            if (wallInWay) {
+                // Try to steer left or right
+                const leftAngle = angle - Math.PI / 4;
+                const rightAngle = angle + Math.PI / 4;
+
+                const leftClear = !this.scene.walls.getChildren().some(wall => {
+                    const lx = this.x + Math.cos(leftAngle) * rayLength;
+                    const ly = this.y + Math.sin(leftAngle) * rayLength;
+                    return Phaser.Geom.Rectangle.Contains(wall.getBounds(), lx, ly);
+                });
+
+                if (leftClear) {
+                    angle = leftAngle;
+                } else {
+                    const rightClear = !this.scene.walls.getChildren().some(wall => {
+                        const rx = this.x + Math.cos(rightAngle) * rayLength;
+                        const ry = this.y + Math.sin(rightAngle) * rayLength;
+                        return Phaser.Geom.Rectangle.Contains(wall.getBounds(), rx, ry);
+                    });
+                    if (rightClear) angle = rightAngle;
+                    // If neither is clear, just keep original angle and let physics handle collision
+                }
+            }
+
             const vx = Math.cos(angle) * this.speed;
             const vy = Math.sin(angle) * this.speed;
             this.setVelocity(vx, vy);
@@ -44,9 +80,14 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.setRotation(angle + Math.PI / 2);
 
             // Try to shoot if in range
-            if (distance < 400 && this.scene.time.now > this.nextFire && !this.isBat) {
-                this.shoot(player);
+            if (distance < 400 && this.scene.time.now > this.nextFire) {
+                if (this.isYellow) {
+                    this.placeIndicator(player);
+                } else if (!this.isBat) {
+                    this.shoot(player);
+                }
             }
+
             // Bat flapping effect
             if (this.isBat && !this.isFlapping) {
                 this.isFlapping = true;
@@ -60,6 +101,80 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             }
         } else {
             this.setVelocity(0);
+        }
+    }
+
+    placeIndicator(player) {
+        this.nextFire = this.scene.time.now + (this.fireRate * 1.5);
+
+        const targetX = player.x;
+        const targetY = player.y;
+
+        const indicator = this.scene.add.sprite(targetX, targetY, 'bombIndicator');
+        indicator.setAlpha(0.6);
+        indicator.setScale(0.1);
+
+        // Color transition: Starts light red, goes to dark red
+        // In Phaser, we can use a tween on a custom object or use tint.
+        // Let's use tint to go from light red (0xffcccc) to dark red (0x880000).
+        indicator.setTint(0xffcccc);
+
+        this.scene.tweens.add({
+            targets: indicator,
+            scale: 2.0,
+            alpha: 1,
+            duration: 2000,
+            ease: 'Power2',
+            onUpdate: (tween, target) => {
+                // Safety check: if target or scene is gone, stop
+                if (!target || !target.scene) {
+                    tween.stop();
+                    return;
+                }
+                const progress = tween.progress;
+                const r = Math.floor(255 - (progress * 119));
+                const g = Math.floor(204 - (progress * 204));
+                const b = Math.floor(204 - (progress * 204));
+                const color = (r << 16) | (g << 8) | b;
+                target.setTint(color);
+            },
+            onComplete: () => {
+                if (indicator && indicator.scene) {
+                    const currentScene = indicator.scene;
+                    this.explode(currentScene, targetX, targetY);
+
+                    // Final explosion visual
+                    const explosion = currentScene.add.graphics();
+                    explosion.fillStyle(0xff4400, 0.8);
+                    explosion.fillCircle(targetX, targetY, 60);
+
+                    currentScene.tweens.add({
+                        targets: explosion,
+                        alpha: 0,
+                        scale: 1.5,
+                        duration: 300,
+                        onComplete: () => explosion.destroy()
+                    });
+
+                    indicator.destroy();
+                }
+            }
+        });
+    }
+
+    explode(scene, x, y) {
+        if (!scene || !scene.player) return;
+
+        const dist = Phaser.Math.Distance.Between(scene.player.x, scene.player.y, x, y);
+        if (dist < 60) {
+            if (!scene.player.isImmortal) {
+                scene.player.health -= 30;
+            }
+            scene.cameras.main.shake(100, 0.01);
+            scene.updateUI();
+            if (scene.player.health <= 0) {
+                scene.scene.start('GameOverScene_v6', { wave: scene.wave });
+            }
         }
     }
 
@@ -108,7 +223,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.die();
         } else {
             // Flash effect
-            const originalTint = this.isBoss ? 0xffffff : 0xff0055;
+            const originalTint = this.isBoss ? 0xffffff : (this.isYellow ? 0xffff00 : 0xff0055);
             this.setTint(0xffffff);
             this.scene.time.delayedCall(100, () => {
                 if (this.active) {

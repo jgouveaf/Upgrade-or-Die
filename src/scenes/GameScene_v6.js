@@ -1,7 +1,8 @@
 import { Player } from '../entities/Player.js';
 import { Enemy } from '../entities/Enemy.js';
 import { settingsManager } from '../utils/SettingsManager.js';
-import { GADGET_TYPES, ELEMENTS } from '../utils/GadgetData.js';
+import * as GadgetData from '../utils/GadgetData.js';
+const { GADGET_TYPES, ELEMENTS, GADGET_DEFINITIONS } = GadgetData;
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -50,11 +51,33 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(20, 8, 4, 4);
         this.graphics.generateTexture('enemy', 32, 32);
 
-        // Pixel Bullet
+        // Pixel Bullet (Realistic Metal Aesthetic) - 16x16
         this.graphics.clear();
-        this.graphics.fillStyle(0xffda00, 1);
-        this.graphics.fillRect(0, 0, 8, 8);
-        this.graphics.generateTexture('bullet', 8, 8);
+
+        // Outline (Dark Brown)
+        this.graphics.fillStyle(0x4a2a00, 1);
+        this.graphics.fillRect(4, 2, 8, 12); // Main body outline
+        this.graphics.fillRect(6, 0, 4, 3); // Tip outline
+
+        // Shell Body (Golden/Brass)
+        this.graphics.fillStyle(0xd4af37, 1);
+        this.graphics.fillRect(5, 3, 6, 10);
+        this.graphics.fillRect(7, 1, 2, 2); // Core tip
+
+        // Red Detail Ring
+        this.graphics.fillStyle(0xff0000, 1);
+        this.graphics.fillRect(4, 9, 8, 2);
+
+        // Highlight/Reflection (White/Light Gold)
+        this.graphics.fillStyle(0xfff5d7, 1);
+        this.graphics.fillRect(6, 4, 1, 5);
+        this.graphics.fillRect(7, 2, 1, 1);
+
+        // Base (Copper)
+        this.graphics.fillStyle(0x8b4513, 1);
+        this.graphics.fillRect(5, 13, 6, 2);
+
+        this.graphics.generateTexture('bullet', 16, 16);
 
         // Pixel Coin
         this.graphics.clear();
@@ -69,11 +92,32 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(0, 0, 8, 8);
         this.graphics.generateTexture('enemyBullet', 8, 8);
 
-        // Pixel Wall
+        // Synthwave Pixel Wall - 32x32
         this.graphics.clear();
-        this.graphics.fillStyle(0x444444, 1);
-        this.graphics.fillRect(0, 0, 32, 32);
+        // Inner Dark (Synthwave Purple)
+        this.graphics.fillStyle(0x1a1a2e, 1);
+        this.graphics.fillRect(2, 2, 28, 28);
+        // Neon Border (Magenta Glow)
+        this.graphics.lineStyle(2, 0xff00ff, 1);
+        this.graphics.strokeRect(1, 1, 30, 30);
+        // Inner Glow / Detail
+        this.graphics.lineStyle(1, 0xff77ff, 0.5);
+        this.graphics.strokeRect(6, 6, 20, 20);
         this.graphics.generateTexture('wall', 32, 32);
+
+        // Synthwave Floor Tile - 64x64
+        this.graphics.clear();
+        // Base Dark
+        this.graphics.fillStyle(0x0a0a0c, 1);
+        this.graphics.fillRect(0, 0, 64, 64);
+        // Grid Lines (Cyan)
+        this.graphics.lineStyle(1, 0x00f2ff, 0.2);
+        this.graphics.strokeRect(0, 0, 64, 64);
+        // Decorative Neon Dots (from user's ref)
+        this.graphics.fillStyle(0x00f2ff, 0.4);
+        this.graphics.fillRect(0, 0, 2, 2);
+        this.graphics.fillRect(62, 62, 2, 2);
+        this.graphics.generateTexture('floor', 64, 64);
 
         // Pixel Portal
         this.graphics.clear();
@@ -168,7 +212,6 @@ export class GameScene extends Phaser.Scene {
 
         // Pixel Poison Bat - 32x32
         this.graphics.clear();
-
         // Wings (Dark Green / Toxic)
         this.graphics.fillStyle(0x004400, 1);
         this.graphics.fillRect(4, 12, 8, 4); // Left wing connection
@@ -204,14 +247,63 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillStyle(0x00ff00, 0.4);
         this.graphics.fillRect(10, 22, 2, 2);
         this.graphics.fillRect(20, 18, 2, 2);
-
         this.graphics.generateTexture('poisonBat', 32, 32);
+
+        // Pixel Yellow Enemy (New variant)
+        this.graphics.clear();
+        this.graphics.fillStyle(0xffff00, 1);
+        this.graphics.fillRect(0, 8, 32, 16);
+        this.graphics.fillRect(8, 0, 16, 32);
+        this.graphics.fillStyle(0x000000, 0.1); // Eyes (faint to be seen better)
+        this.graphics.fillRect(8, 8, 4, 4);
+        this.graphics.fillRect(20, 8, 4, 4);
+        this.graphics.generateTexture('yellowEnemy', 32, 32);
+
+        // Pixel Bomb Indicator
+        this.graphics.clear();
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillCircle(16, 16, 16);
+        this.graphics.generateTexture('bombIndicator', 32, 32);
+
+        // PIXEL BOLT (New Energy Bolt Design) - CYAN CORE, BLUE OUTLINE
+        for (let i = 0; i < 4; i++) {
+            this.graphics.clear();
+            const outlineColor = 0x3b82f6; // Blue
+            const coreColor = 0x67e8f9;    // Cyan
+
+            // Draw a teardrop/bolt shape
+            this.graphics.fillStyle(outlineColor, 1);
+            this.graphics.fillRect(4, 12, 16, 8);  // Main body
+            this.graphics.fillRect(8, 10, 8, 12);  // Vertical thickness
+            this.graphics.fillRect(16, 14, 8, 4);  // Tip
+            this.graphics.fillRect(0, 15, 4, 2);   // Tail
+
+            this.graphics.fillStyle(coreColor, 1);
+            this.graphics.fillRect(6, 13, 12, 6);  // Inner core
+            this.graphics.fillRect(8, 12, 8, 8);   // Center thickness
+
+            // Sparkles/Particles (Randomized per frame)
+            if (i % 2 === 0) {
+                this.graphics.fillRect(2, 6, 2, 2);
+                this.graphics.fillRect(24, 20, 2, 2);
+            } else {
+                this.graphics.fillRect(4, 24, 2, 2);
+                this.graphics.fillRect(20, 4, 2, 2);
+            }
+
+            this.graphics.generateTexture(`bolt_frame_${i}`, 32, 32);
+        }
 
         this.graphics.destroy();
     }
 
     create() {
         console.log("GameScene: Create starting...");
+
+        // Adicionar Chão Synthwave (TileSprite)
+        const { width, height } = this.scale;
+        this.add.tileSprite(0, 0, width, height, 'floor').setOrigin(0).setScrollFactor(0).setAlpha(0.6);
+
         this.player = new Player(this, 400, 300);
 
         if (this.persistedPlayer) {
@@ -280,15 +372,21 @@ export class GameScene extends Phaser.Scene {
 
         this.spawnWave();
 
+        // Debug Shop Setup
+        this.debugShopOpen = false;
+        this.debugShopIndex = 0;
+        this.debugShopContainer = null;
+
         // Collisions
         this.physics.add.overlap(this.bullets, this.enemies, (bullet, enemy) => {
-            enemy.takeDamage(10 * this.player.damageMultiplier);
-            bullet.destroy();
+            this.handleBulletHit(bullet, enemy);
         });
 
         this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
-            player.health -= enemy.damage / 60;
-            if (enemy.isBat) player.applyPoison(this);
+            if (!player.isImmortal) {
+                player.health -= enemy.damage / 60;
+                if (enemy.isBat) player.applyPoison(this);
+            }
             if (player.health <= 0) this.scene.start('GameOverScene_v6', { wave: this.wave });
         });
 
@@ -308,7 +406,10 @@ export class GameScene extends Phaser.Scene {
         });
         this.physics.add.collider(this.player, this.enemyBullets, (player, bullet) => {
             const isBossBullet = bullet.texture.key === 'bossBullet';
-            player.health -= isBossBullet ? 25 : 10;
+
+            if (!player.isImmortal) {
+                player.health -= isBossBullet ? 25 : 10;
+            }
 
             // Visual feedback for boss hit
             if (isBossBullet) {
@@ -324,7 +425,27 @@ export class GameScene extends Phaser.Scene {
         this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
         this.escKey.on('down', () => this.togglePause());
 
+        // DEBUG SHOP / IMMORTALITY TOGGLE
+        this.pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.pKey.on('down', () => {
+            this.toggleDebugShop();
+        });
+
         this.setupUI();
+
+        // ANIMAÇÃO DO RAIO ELÉTRICO
+        this.anims.create({
+            key: 'bolt_anim',
+            frames: [
+                { key: 'bolt_frame_0' },
+                { key: 'bolt_frame_1' },
+                { key: 'bolt_frame_2' },
+                { key: 'bolt_frame_3' }
+            ],
+            frameRate: 20,
+            repeat: -1
+        });
+
         this.setupPauseUIListeners();
         this.events.on('shutdown', this.shutdown, this);
         console.log("GameScene: Create finished.");
@@ -499,11 +620,44 @@ export class GameScene extends Phaser.Scene {
         const portalList = this.spawners.getChildren();
         if (portalList.length === 0) return;
         const portal = portalList[Phaser.Math.Between(0, portalList.length - 1)];
+
+        let texture = 'enemy';
+        let isYellow = false;
+        let isBat = false;
+
+        if (this.wave === 7) {
+            texture = 'yellowEnemy';
+            isYellow = true;
+        } else if (this.wave > 7) {
+            const rand = Math.random();
+            if (rand < 0.3) {
+                texture = 'yellowEnemy';
+                isYellow = true;
+            } else if (rand < 0.6 && this.wave >= 5) {
+                texture = 'poisonBat';
+                isBat = true;
+            }
+        } else if (this.wave >= 5 && Math.random() < 0.3) {
+            texture = 'poisonBat';
+            isBat = true;
+        }
+
         const enemy = new Enemy(this, portal.x, portal.y, this.wave);
-        if (this.wave >= 5 && Math.random() < 0.3) {
+        if (isYellow) {
+            enemy.setTexture('yellowEnemy');
+            enemy.isYellow = true;
+            enemy.speed *= 0.8;
+            enemy.clearTint();
+            console.log("Spawned YELLOW ENEMY at wave", this.wave);
+        } else if (isBat) {
             enemy.setTexture('poisonBat');
             enemy.isBat = true;
+            enemy.clearTint();
+            console.log("Spawned BAT ENEMY at wave", this.wave);
+        } else {
+            console.log("Spawned REGULAR ENEMY at wave", this.wave);
         }
+
         this.enemies.add(enemy);
     }
 
@@ -513,14 +667,154 @@ export class GameScene extends Phaser.Scene {
         coin.coinMult = this.difficultyConfig.coinMult;
     }
 
-    shoot() {
-        if (this.isWavePaused) return;
-        const bullet = this.bullets.get(this.player.x, this.player.y);
-        if (bullet) {
-            bullet.setActive(true).setVisible(true);
-            this.physics.moveTo(bullet, this.input.x + this.cameras.main.scrollX, this.input.y + this.cameras.main.scrollY, 400);
-            this.time.delayedCall(2000, () => { if (bullet.active) bullet.destroy(); });
+    toggleDebugShop() {
+        this.debugShopOpen = !this.debugShopOpen;
+        this.isWavePaused = this.debugShopOpen;
+
+        if (this.debugShopOpen) {
+            this.physics.pause();
+            this.player.isImmortal = true;
+            this.player.setTint(0xffff00);
+            this.createDebugShopUI();
+        } else {
+            this.physics.resume();
+            if (this.debugShopContainer) {
+                this.debugShopContainer.destroy();
+                this.debugShopContainer = null;
+                this.debugShopItemsContainer = null;
+            }
         }
+    }
+
+    createDebugShopUI() {
+        if (this.debugShopContainer) this.debugShopContainer.destroy();
+
+        const { width, height } = this.scale;
+        this.debugShopContainer = this.add.container(0, 0).setScrollFactor(0).setDepth(1000);
+
+        const overlay = this.add.rectangle(0, 0, width, height, 0x000000, 0.8).setOrigin(0);
+        const title = this.add.text(width / 2, 80, "DEBUG SHOP (TEST MODE)", {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '20px',
+            fill: '#00f2ff'
+        }).setOrigin(0.5);
+
+        const hint = this.add.text(width / 2, height - 60, "Press [P] to Resume Game", {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '12px',
+            fill: '#ffffff',
+            alpha: 0.7
+        }).setOrigin(0.5);
+
+        this.debugShopItemsContainer = this.add.container(0, 0);
+        this.debugShopContainer.add([overlay, title, hint, this.debugShopItemsContainer]);
+        this.renderDebugItems();
+    }
+
+    renderDebugItems() {
+        if (!this.debugShopItemsContainer) return;
+        this.debugShopItemsContainer.removeAll(true);
+
+        const { width, height } = this.scale;
+        const startX = width / 2 - 220;
+        const itemWidth = 220;
+
+        for (let i = 0; i < 3; i++) {
+            const itemIdx = (this.debugShopIndex + i) % GADGET_DEFINITIONS.length;
+            const gadget = GADGET_DEFINITIONS[itemIdx];
+            const x = startX + (i * itemWidth);
+            const y = height / 2;
+            const element = ELEMENTS[gadget.element.toUpperCase()];
+
+            const card = this.add.rectangle(x, y, 200, 240, 0x1a1a25).setStrokeStyle(2, element.color);
+            const name = this.add.text(x, y - 80, gadget.name, {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '10px',
+                fill: element.color,
+                align: 'center',
+                wordWrap: { width: 180 }
+            }).setOrigin(0.5);
+
+            const icon = this.add.text(x, y - 40, element.icon, { fontSize: '24px' }).setOrigin(0.5);
+            const desc = this.add.text(x, y + 20, gadget.desc, {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '8px',
+                fill: '#ddd',
+                align: 'center',
+                wordWrap: { width: 170 }
+            }).setOrigin(0.5);
+
+            const btn = this.add.text(x, y + 80, "[ ADD ]", {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '12px',
+                fill: '#00ff00'
+            }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+            btn.on('pointerdown', () => {
+                const typeKey = gadget.type === GADGET_TYPES.TURRET ? 'turrets' :
+                    (gadget.type === GADGET_TYPES.FORCE_FIELD ? 'forceFields' : 'specialShots');
+
+                if (!this.player.gadgets[typeKey][gadget.element]) {
+                    this.player.gadgets[typeKey][gadget.element] = 1;
+                } else {
+                    this.player.gadgets[typeKey][gadget.element]++;
+                }
+                this.cameras.main.flash(200, 0, 255, 0);
+                this.setupGadgets();
+            });
+
+            this.debugShopItemsContainer.add([card, name, icon, desc, btn]);
+        }
+
+        const leftArrow = this.add.text(40, height / 2, "<", { fontSize: '40px', fill: '#fff' })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.debugShopIndex = (this.debugShopIndex - 1 + GADGET_DEFINITIONS.length) % GADGET_DEFINITIONS.length;
+                this.renderDebugItems();
+            });
+
+        const rightArrow = this.add.text(width - 40, height / 2, ">", { fontSize: '40px', fill: '#fff' })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.debugShopIndex = (this.debugShopIndex + 1) % GADGET_DEFINITIONS.length;
+                this.renderDebugItems();
+            });
+
+        this.debugShopItemsContainer.add([leftArrow, rightArrow]);
+    }
+
+
+    handleBulletHit(bullet, enemy) {
+        if (!bullet.active || !enemy.active) return;
+
+        // APLICAR DANO (Estava faltando!)
+        enemy.takeDamage(10 * this.player.damageMultiplier);
+
+        // Lógica de Ricochete Elétrico (Volt Shot)
+        if (bullet.element === 'electric' && (bullet.chainCount || 0) < 2) {
+            bullet.chainCount = (bullet.chainCount || 0) + 1;
+
+            // Encontrar o próximo alvo mais próximo (excluindo este)
+            const nextTarget = this.enemies.getChildren().find(e =>
+                e !== enemy &&
+                e.active &&
+                Phaser.Math.Distance.Between(bullet.x, bullet.y, e.x, e.y) < 250
+            );
+
+            if (nextTarget) {
+                // Pequeno "flash" visual de conexão
+                this.gadgetGraphics.lineStyle(2, 0x00f2ff, 1);
+                this.gadgetGraphics.lineBetween(enemy.x, enemy.y, nextTarget.x, nextTarget.y);
+                this.time.delayedCall(50, () => { if (this.gadgetGraphics) this.gadgetGraphics.clear(); });
+
+                // Mover bala para o novo alvo
+                this.physics.moveToObject(bullet, nextTarget, 400);
+                bullet.setRotation(Phaser.Math.Angle.Between(bullet.x, bullet.y, nextTarget.x, nextTarget.y));
+                return; // Não destrói a bala ainda
+            }
+        }
+
+        bullet.destroy();
     }
 
     completeWave() {
@@ -607,14 +901,60 @@ export class GameScene extends Phaser.Scene {
     }
 
     createMap() {
-        const wallPositions = [{ x: 200, y: 150, w: 4, h: 1 }, { x: 600, y: 150, w: 1, h: 4 }, { x: 200, y: 400, w: 1, h: 4 }, { x: 500, y: 450, w: 4, h: 1 }];
-        wallPositions.forEach(pos => {
-            for (let i = 0; i < pos.w; i++) {
-                for (let j = 0; j < pos.h; j++) {
-                    this.walls.create(pos.x + (i * 32), pos.y + (j * 32), 'wall').refreshBody();
+        // Clear previous walls if any
+        if (this.walls) {
+            this.walls.clear(true, true);
+        } else {
+            this.walls = this.physics.add.staticGroup();
+        }
+
+        const { width, height } = this.scale;
+        const tileSize = 32;
+        const gridW = Math.floor(width / tileSize);
+        const gridH = Math.floor(height / tileSize);
+
+        // Areas to keep clear (Player start and Portals)
+        const clearZones = [
+            { x: 400, y: 300, radius: 100 }, // Player start
+            { x: 100, y: 100, radius: 80 },  // Top-left portal
+            { x: 700, y: 100, radius: 80 },  // Top-right portal
+            { x: 100, y: 500, radius: 80 },  // Bottom-left portal
+            { x: 700, y: 500, radius: 80 }   // Bottom-right portal
+        ];
+
+        const isClear = (x, y) => {
+            return !clearZones.some(zone => {
+                const dist = Phaser.Math.Distance.Between(x, y, zone.x, zone.y);
+                return dist < zone.radius;
+            });
+        };
+
+        // Number of wall clusters scales slightly with wave
+        const numClusters = 5 + Math.min(10, Math.floor(this.wave / 2));
+        for (let i = 0; i < numClusters; i++) {
+            let startX = Phaser.Math.Between(1, gridW - 2) * tileSize;
+            let startY = Phaser.Math.Between(1, gridH - 2) * tileSize;
+
+            if (isClear(startX, startY)) {
+                const clusterSize = Phaser.Math.Between(2, 6);
+                const horizontal = Math.random() > 0.5;
+
+                for (let j = 0; j < clusterSize; j++) {
+                    const wx = horizontal ? startX + (j * tileSize) : startX;
+                    const wy = horizontal ? startY : startY + (j * tileSize);
+
+                    // Check boundaries and clear zones for each block
+                    if (wx > 32 && wx < width - 32 && wy > 32 && wy < height - 32 && isClear(wx, wy)) {
+                        this.walls.create(wx, wy, 'wall').refreshBody();
+                    }
                 }
             }
-        });
+        }
+
+        // Portals (Visuals only, logic is in spawners group)
+        if (this.spawners) this.spawners.clear(true, true);
+        else this.spawners = this.physics.add.staticGroup();
+
         const portalPositions = [{ x: 100, y: 100 }, { x: 700, y: 100 }, { x: 100, y: 500 }, { x: 700, y: 500 }];
         portalPositions.forEach(pos => {
             const portal = this.add.sprite(pos.x, pos.y, 'portal');
@@ -766,9 +1106,35 @@ export class GameScene extends Phaser.Scene {
             if (bullet) {
                 bullet.setActive(true).setVisible(true);
                 bullet.setVelocity(vx, vy);
-                if (element) bullet.setTint(ELEMENTS[element.toUpperCase()].color);
-                else bullet.clearTint();
-                this.time.delayedCall(2000, () => { if (bullet.active) bullet.destroy(); });
+
+                // Reset bullet properties from pool
+                bullet.setTexture('bullet');
+                bullet.clearTint();
+                bullet.setScale(1);
+                bullet.stop(); // Stop any previous animation
+                bullet.element = element;
+                bullet.chainCount = 0;
+
+                // Forçar o tamanho do corpo para a nova textura 16x16
+                if (bullet.body) {
+                    bullet.body.setSize(12, 12);
+                    bullet.body.setOffset(2, 2);
+                }
+
+                if (element === 'electric') {
+                    bullet.play('bolt_anim');
+                    // O raio é horizontal (X), então aponta direto para a velocidade
+                    bullet.setRotation(Math.atan2(vy, vx));
+                    bullet.setScale(1.2);
+                } else {
+                    // A bala metálica é vertical (Y), então precisa de +90 graus (PI/2) para apontar para a frente
+                    bullet.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
+                    if (element) {
+                        bullet.setTint(ELEMENTS[element.toUpperCase()].color);
+                    }
+                }
+
+                this.time.delayedCall(2000, () => { if (bullet && bullet.active) bullet.destroy(); });
                 return bullet;
             }
         };
