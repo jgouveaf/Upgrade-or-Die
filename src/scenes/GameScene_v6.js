@@ -370,6 +370,8 @@ export class GameScene extends Phaser.Scene {
         this.healthBar = this.add.graphics();
         console.log("GameScene: HealthBar initialized:", !!this.healthBar);
 
+        this.generatePixelIcons();
+
         this.spawnWave();
 
         // Debug Shop Setup
@@ -804,12 +806,12 @@ export class GameScene extends Phaser.Scene {
             const name = this.add.text(x, y - 80, gadget.name, {
                 fontFamily: '"Press Start 2P"',
                 fontSize: '10px',
-                fill: element.color,
+                fill: '#ffffff', // changed to white
                 align: 'center',
                 wordWrap: { width: 180 }
             }).setOrigin(0.5);
 
-            const icon = this.add.text(x, y - 40, element.icon, { fontSize: '24px' }).setOrigin(0.5);
+            const icon = this.add.image(x, y - 40, 'icon_' + gadget.element).setScale(2);
             const desc = this.add.text(x, y + 20, gadget.desc, {
                 fontFamily: '"Press Start 2P"',
                 fontSize: '8px',
@@ -1073,9 +1075,7 @@ export class GameScene extends Phaser.Scene {
             const glow3 = this.add.rectangle(22, 4, 4, 3, elementColor);
 
             // 5. Element Icon (Damage Element Indicator)
-            const icon = this.add.text(2, 0, elementData.icon, {
-                fontSize: '10px'
-            }).setOrigin(0.5);
+            const icon = this.add.image(2, 0, 'icon_' + element).setOrigin(0.5);
 
             // Grouping the rotating part (Body + Barrels)
             const gunGroup = this.add.container(0, 0, [
@@ -1304,5 +1304,65 @@ export class GameScene extends Phaser.Scene {
                 }
             });
         }
+    }
+
+    generatePixelIcons() {
+        const drawIcon = (key, data, palette) => {
+            if (this.textures.exists(key)) return;
+            const g = this.add.graphics();
+            for (let y = 0; y < data.length; y++) {
+                for (let x = 0; x < data[y].length; x++) {
+                    const char = data[y][x];
+                    if (char !== ' ') {
+                        g.fillStyle(palette[char], 1);
+                        g.fillRect(x * 2, y * 2, 2, 2); // 2x2 pixels per block
+                    }
+                }
+            }
+            g.generateTexture(key, data[0].length * 2, data.length * 2);
+            g.destroy();
+        };
+
+        drawIcon('icon_electric', [
+            "  w  ",
+            " wcw ",
+            "wwc  ",
+            " wcw ",
+            "  cww",
+            "  w  ",
+            "  w  "
+        ], { 'w': 0xffffff, 'c': 0x00f2ff });
+
+        drawIcon('icon_fire', [
+            "  r  ",
+            " yrr ",
+            " yry ",
+            "rory ",
+            "ryyr ",
+            " yr  "
+        ], { 'y': 0xffff00, 'o': 0xffaa00, 'r': 0xff4400 });
+
+        drawIcon('icon_poison', [
+            " www ",
+            " wgw ",
+            "w   w",
+            "wgggw",
+            "wgggg",
+            "wwwww"
+        ], { 'w': 0xffffff, 'g': 0x00ff00 });
+
+        drawIcon('icon_force', [
+            "  ww ",
+            " www ",
+            " wwww",
+            " www ",
+            "  w  "
+        ], { 'w': 0xffffff });
+
+        drawIcon('icon_push', [
+            " wwww ",
+            "w    w",
+            " wwww "
+        ], { 'w': 0xff00ff });
     }
 }

@@ -60,6 +60,9 @@ export class UpgradeScene extends Phaser.Scene {
             this.showStandardUpgrades(width, height);
         }
 
+        // Generate Pixel Art Icons
+        this.generatePixelIcons();
+
         // Setup ENTER key for confirmation
         this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         this.enterKey.on('down', () => {
@@ -67,6 +70,66 @@ export class UpgradeScene extends Phaser.Scene {
                 this.confirmPurchase();
             }
         });
+    }
+
+    generatePixelIcons() {
+        const drawIcon = (key, data, palette) => {
+            if (this.textures.exists(key)) return;
+            const g = this.add.graphics();
+            for (let y = 0; y < data.length; y++) {
+                for (let x = 0; x < data[y].length; x++) {
+                    const char = data[y][x];
+                    if (char !== ' ') {
+                        g.fillStyle(palette[char], 1);
+                        g.fillRect(x * 2, y * 2, 2, 2); // 2x2 pixels per block
+                    }
+                }
+            }
+            g.generateTexture(key, data[0].length * 2, data.length * 2);
+            g.destroy();
+        };
+
+        drawIcon('icon_electric', [
+            "  w  ",
+            " wcw ",
+            "wwc  ",
+            " wcw ",
+            "  cww",
+            "  w  ",
+            "  w  "
+        ], { 'w': 0xffffff, 'c': 0x00f2ff });
+
+        drawIcon('icon_fire', [
+            "  r  ",
+            " yrr ",
+            " yry ",
+            "rory ",
+            "ryyr ",
+            " yr  "
+        ], { 'y': 0xffff00, 'o': 0xffaa00, 'r': 0xff4400 });
+
+        drawIcon('icon_poison', [
+            " www ",
+            " wgw ",
+            "w   w",
+            "wgggw",
+            "wgggg",
+            "wwwww"
+        ], { 'w': 0xffffff, 'g': 0x00ff00 });
+
+        drawIcon('icon_force', [
+            "  ww ",
+            " www ",
+            " wwww",
+            " www ",
+            "  w  "
+        ], { 'w': 0xffffff });
+
+        drawIcon('icon_push', [
+            " wwww ",
+            "w    w",
+            " wwww "
+        ], { 'w': 0xff00ff });
     }
 
     createConfirmButton(width, height) {
@@ -227,15 +290,14 @@ export class UpgradeScene extends Phaser.Scene {
             this.add.text(x, y - 85, gadget.name, {
                 fontSize: '11px',
                 fontFamily: '"Press Start 2P"',
-                fill: element.color,
+                fill: '#ffffff', // changed to white
                 align: 'center',
                 wordWrap: { width: 160 }
             }).setOrigin(0.5);
 
-            // Icon
-            this.add.text(x, y - 45, element.icon, {
-                fontSize: '32px'
-            }).setOrigin(0.5);
+            // Icon (Pixel Art Sprite Instead of Text)
+            this.add.image(x, y - 45, 'icon_' + gadget.element).setScale(2);
+
 
             // Description
             this.add.text(x, y + 10, gadget.desc, {
