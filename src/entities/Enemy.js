@@ -89,31 +89,28 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
             // Try to shoot if in range
             if (distance < 400 && this.scene.time.now > this.nextFire) {
-                if (this.isYellow) {
-                    this.placeIndicator(player);
-                } else if (!this.isBat) {
-                    this.shoot(player);
-                }
+            } else {
+                this.shoot(player);
+            }
+        }
+
+        // Fire Bat flapping and particles
+        if (this.isFireBat) {
+            if (!this.isFlapping) {
+                this.isFlapping = true;
+                this.scene.tweens.add({
+                    targets: this,
+                    scaleY: 1.1,
+                    scaleX: 1.8,
+                    duration: 150,
+                    yoyo: true,
+                    repeat: -1
+                });
             }
 
-            // Fire Bat flapping and particles
-            if (this.isFireBat) {
-                if (!this.isFlapping) {
-                    this.isFlapping = true;
-                    this.scene.tweens.add({
-                        targets: this,
-                        scaleY: 1.1,
-                        scaleX: 1.8,
-                        duration: 150,
-                        yoyo: true,
-                        repeat: -1
-                    });
-                }
-
-                // Emite partículas de fogo constantes
-                if (this.scene.fireParticles && Phaser.Math.Between(0, 10) > 7) {
-                    this.scene.fireParticles.emitParticleAt(this.x, this.y);
-                }
+            // Emite partículas de fogo constantes
+            if (this.scene.fireParticles && Phaser.Math.Between(0, 10) > 7) {
+                this.scene.fireParticles.emitParticleAt(this.x, this.y);
             }
         } else {
             this.setVelocity(0);

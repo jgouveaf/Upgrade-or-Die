@@ -210,31 +210,27 @@ export class GameScene extends Phaser.Scene {
 
         this.graphics.generateTexture('bossBullet', 32, 32);
 
-        // Pixel Poison Bat - 32x32
+        // Pixel Fire Bat - 32x32 (Replaces poisonBat visuals)
         this.graphics.clear();
-        // Wings (Dark Green / Toxic)
-        this.graphics.fillStyle(0x004400, 1);
-        this.graphics.fillRect(4, 12, 8, 4); // Left wing connection
-        this.graphics.fillRect(0, 8, 8, 4);  // Left wing tip
-        this.graphics.fillRect(20, 12, 8, 4); // Right wing connection
-        this.graphics.fillRect(24, 8, 8, 4);  // Right wing tip
+        // Wings (Dark Red / Maroon)
+        this.graphics.fillStyle(0x440000, 1);
+        this.graphics.fillRect(4, 12, 8, 4); // Left wing
+        this.graphics.fillRect(0, 8, 8, 4);
+        this.graphics.fillRect(20, 12, 8, 4); // Right wing
+        this.graphics.fillRect(24, 8, 8, 4);
 
-        // Wing membranes (Lighter vibrant green)
-        this.graphics.fillStyle(0x00cc00, 1);
+        // Wing membranes (Vibrant Red)
+        this.graphics.fillStyle(0xff0000, 1);
         this.graphics.fillRect(2, 10, 4, 2);
         this.graphics.fillRect(26, 10, 4, 2);
 
-        // Body (Lighter toxic green)
-        this.graphics.fillStyle(0x00ff00, 1);
-        this.graphics.fillRect(12, 8, 8, 12); // Hood/Body
-        this.graphics.fillRect(14, 20, 4, 4);  // Lower body/tail
+        // Body (Fire Red)
+        this.graphics.fillStyle(0xff4400, 1);
+        this.graphics.fillRect(12, 8, 8, 12);
+        this.graphics.fillRect(14, 20, 4, 4);
 
-        // Head detail
-        this.graphics.fillStyle(0x00ff00, 1);
-        this.graphics.fillRect(10, 6, 12, 4);
-
-        // Eyes (Glowing Purple/Red)
-        this.graphics.fillStyle(0xff00ff, 1);
+        // Eyes (White/Yellow Glow)
+        this.graphics.fillStyle(0xffff00, 1);
         this.graphics.fillRect(12, 10, 2, 2);
         this.graphics.fillRect(18, 10, 2, 2);
 
@@ -243,11 +239,8 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(13, 13, 1, 2);
         this.graphics.fillRect(18, 13, 1, 2);
 
-        // Poison Aura/Droplets
-        this.graphics.fillStyle(0x00ff00, 0.4);
-        this.graphics.fillRect(10, 22, 2, 2);
-        this.graphics.fillRect(20, 18, 2, 2);
-        this.graphics.generateTexture('poisonBat', 32, 32);
+        this.graphics.generateTexture('fireBat', 32, 32);
+        this.graphics.generateTexture('poisonBat', 32, 32); // Fallback for legacy code
 
         // Pixel Yellow Enemy (New variant)
         this.graphics.clear();
