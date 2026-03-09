@@ -222,13 +222,22 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         if (this.health <= 0) {
             this.die();
         } else {
-            // Flash effect
+            // Flash effect (brilhando em branco)
             const originalTint = this.isBoss ? 0xffffff : (this.isYellow ? 0xffff00 : 0xff0055);
-            this.setTint(0xffffff);
+            this.setTintFill(0xffffff);
+
+            // Também vamos dar uma ligeira piscada mudando a transparência
+            this.setAlpha(0.6);
+
             this.scene.time.delayedCall(100, () => {
                 if (this.active) {
-                    if (this.isBoss || this.isBat) this.clearTint();
-                    else this.setTint(originalTint);
+                    this.clearTint();
+                    this.setAlpha(1);
+                    if (!this.isBoss && !this.isBat && !this.isYellow) {
+                        this.setTint(originalTint);
+                    } else if (this.isYellow) {
+                        this.setTint(0xffff00);
+                    }
                 }
             });
         }
