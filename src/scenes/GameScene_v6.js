@@ -92,36 +92,34 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(0, 0, 8, 8);
         this.graphics.generateTexture('enemyBullet', 8, 8);
 
-        // Synthwave Pixel Wall - 32x32 (Premium Version)
+        // Synthwave Pixel Wall - 32x32 (Ultra Neon Version)
         this.graphics.clear();
 
-        // 1. Neon Glow (Outer)
-        this.graphics.lineStyle(4, 0xff00ff, 0.4);
+        // 1. Double Neon Glow (Outer)
+        this.graphics.lineStyle(6, 0xff00ff, 0.2); // Faint outer glow
+        this.graphics.strokeRect(0, 0, 32, 32);
+        this.graphics.lineStyle(3, 0xff00ff, 0.6); // Sharp neon glow
         this.graphics.strokeRect(0, 0, 32, 32);
 
         // 2. Main Body (Dark Metal)
-        this.graphics.fillStyle(0x1a1a2e, 1);
+        this.graphics.fillStyle(0x0a0a1e, 1);
         this.graphics.fillRect(2, 2, 28, 28);
 
-        // 3. Bevel effect - Top & Left (Brighter)
-        this.graphics.fillStyle(0x3a3a5e, 1);
-        this.graphics.fillRect(2, 2, 28, 2); // Top
-        this.graphics.fillRect(2, 2, 2, 28); // Left
+        // 3. Neon Grid Details (Cyan Contrast)
+        this.graphics.lineStyle(1, 0x00f2ff, 0.3);
+        this.graphics.lineBetween(16, 4, 16, 28);
+        this.graphics.lineBetween(4, 16, 28, 16);
 
-        // 4. Bevel effect - Bottom & Right (Darker)
-        this.graphics.fillStyle(0x0a0a1e, 1);
-        this.graphics.fillRect(2, 28, 28, 2); // Bottom
-        this.graphics.fillRect(28, 2, 2, 28); // Right
+        // 4. Hot Bevels (Magenta/White)
+        this.graphics.fillStyle(0xff00ff, 1);
+        this.graphics.fillRect(2, 2, 28, 1); // Top
+        this.graphics.fillRect(2, 2, 1, 28); // Left
 
-        // 5. Neon Core Line (Magenta)
-        this.graphics.lineStyle(1, 0xff00ff, 1);
-        this.graphics.strokeRect(4, 4, 24, 24);
-
-        // 6. Center Detail (Core)
-        this.graphics.fillStyle(0xff00ff, 0.6);
+        // 5. Bright Core
+        this.graphics.fillStyle(0xff00ff, 0.8);
         this.graphics.fillRect(12, 12, 8, 8);
-        this.graphics.fillStyle(0xffffff, 0.8);
-        this.graphics.fillRect(15, 15, 2, 2); // Small spark in center
+        this.graphics.fillStyle(0xffffff, 0.9);
+        this.graphics.fillRect(14, 14, 4, 4);
 
         this.graphics.generateTexture('wall', 32, 32);
 
@@ -139,10 +137,25 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(62, 62, 2, 2);
         this.graphics.generateTexture('floor', 64, 64);
 
-        // Pixel Portal
+        // Pixel Portal (Classic Energy Vortex)
         this.graphics.clear();
-        this.graphics.fillStyle(0x00ffff, 0.3);
-        this.graphics.fillRect(4, 4, 40, 40);
+
+        // Outer Glow
+        this.graphics.fillStyle(0x00ffff, 0.2);
+        this.graphics.fillCircle(24, 24, 24);
+
+        // Energy Rings
+        this.graphics.lineStyle(3, 0x00ffff, 1);
+        this.graphics.strokeCircle(24, 24, 20);
+        this.graphics.lineStyle(2, 0xffffff, 0.8);
+        this.graphics.strokeCircle(24, 24, 14);
+        this.graphics.lineStyle(1, 0x00ffff, 1);
+        this.graphics.strokeCircle(24, 24, 8);
+
+        // Core Spark
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillCircle(24, 24, 4);
+
         this.graphics.generateTexture('portal', 48, 48);
 
         // Pixel Boss (Rafael Rosseti) - FINAL VERSION (Bald, Beard, Light Sweater)
