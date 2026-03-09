@@ -267,34 +267,50 @@ export class GameScene extends Phaser.Scene {
 
         this.graphics.generateTexture('bossBullet', 32, 32);
 
-        // Pixel Fire Bat - 32x32 (Replaces poisonBat visuals)
+        // Pixel Fire Bat - 32x32 (On Fire Version)
         this.graphics.clear();
-        // Wings (Dark Red / Maroon)
+
+        // 1. Fire Aura / Glow (Faint Orange)
+        this.graphics.fillStyle(0xff8800, 0.3);
+        this.graphics.fillCircle(16, 14, 14);
+
+        // 2. Wings (Dark Red Base)
         this.graphics.fillStyle(0x440000, 1);
-        this.graphics.fillRect(4, 12, 8, 4); // Left wing
-        this.graphics.fillRect(0, 8, 8, 4);
-        this.graphics.fillRect(20, 12, 8, 4); // Right wing
-        this.graphics.fillRect(24, 8, 8, 4);
+        this.graphics.fillRect(4, 12, 8, 4); // Left base
+        this.graphics.fillRect(20, 12, 8, 4); // Right base
 
-        // Wing membranes (Vibrant Red)
+        // 3. Flame Wings (Red/Orange gradient)
         this.graphics.fillStyle(0xff0000, 1);
-        this.graphics.fillRect(2, 10, 4, 2);
-        this.graphics.fillRect(26, 10, 4, 2);
+        this.graphics.fillRect(2, 6, 6, 6); // Left flame wing top
+        this.graphics.fillRect(24, 6, 6, 6); // Right flame wing top
+        this.graphics.fillStyle(0xff8800, 1);
+        this.graphics.fillRect(0, 4, 4, 4);  // Left wing tip flame
+        this.graphics.fillRect(28, 4, 4, 4); // Right wing tip flame
+        this.graphics.fillStyle(0xffff00, 0.8);
+        this.graphics.fillRect(2, 4, 2, 2);  // Yellow highlights
+        this.graphics.fillRect(28, 4, 2, 2);
 
-        // Body (Fire Red)
+        // 4. Body (Molten Red)
         this.graphics.fillStyle(0xff4400, 1);
         this.graphics.fillRect(12, 8, 8, 12);
         this.graphics.fillRect(14, 20, 4, 4);
 
-        // Eyes (White/Yellow Glow)
+        // 5. Fire Core (Yellow/White)
+        this.graphics.fillStyle(0xffff00, 1);
+        this.graphics.fillRect(14, 10, 4, 6);
+        this.graphics.fillStyle(0xffffff, 0.9);
+        this.graphics.fillRect(15, 12, 2, 2);
+
+        // 6. Eyes (Bright Yellow)
         this.graphics.fillStyle(0xffff00, 1);
         this.graphics.fillRect(12, 10, 2, 2);
         this.graphics.fillRect(18, 10, 2, 2);
 
-        // Fangs
-        this.graphics.fillStyle(0xffffff, 1);
-        this.graphics.fillRect(13, 13, 1, 2);
-        this.graphics.fillRect(18, 13, 1, 2);
+        // 7. Small Sparks
+        this.graphics.fillStyle(0xffaa00, 1);
+        this.graphics.fillRect(8, 2, 2, 2);
+        this.graphics.fillRect(22, 2, 2, 2);
+        this.graphics.fillRect(15, 24, 2, 2);
 
         this.graphics.generateTexture('fireBat', 32, 32);
         this.graphics.generateTexture('poisonBat', 32, 32); // Fallback for legacy code
