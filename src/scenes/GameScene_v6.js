@@ -86,23 +86,37 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(0, 3, 12, 6);
         this.graphics.generateTexture('coin', 12, 12);
 
-        // Pixel Enemy Bullet (Improved Fireball with Tail)
+        // Pixel Enemy Bullet (Exact Fireball from Reference)
         if (this.textures.exists('enemyBullet')) this.textures.remove('enemyBullet');
         this.graphics.clear();
-        // Core of the fireball
-        this.graphics.fillStyle(0xffffff, 1);
-        this.graphics.fillRect(10, 4, 4, 4);
-        this.graphics.fillStyle(0xffff00, 1);
-        this.graphics.fillRect(8, 2, 8, 8);
-        // Outer flame
-        this.graphics.fillStyle(0xff4400, 1);
-        this.graphics.fillRect(6, 0, 10, 12);
-        // Flame tail
-        this.graphics.fillStyle(0xffaa00, 0.8);
-        this.graphics.fillRect(0, 4, 6, 4);
-        this.graphics.fillRect(2, 2, 4, 8);
 
-        this.graphics.generateTexture('enemyBullet', 16, 12);
+        const fp = { r: 0xff0000, o: 0xff8800, y: 0xffff00, w: 0xfffde0 };
+        const fData = [
+            "               rrrrrr   ",
+            "             rroooooorr ",
+            "           rrooyyyyyyoor",
+            "       rrrroyyyyyyyyoor ",
+            "    rrooooyyyywwwwyyoor ",
+            " rroyyyyyywwwwwwwwyyoor ",
+            "royyyyyyyywwwwwwwwyyoor ",
+            " rrooooyyyywwwwyyoorrr  ",
+            "    rrrroyyyyyyyyoor    ",
+            "        rrooyyyyyyoor   ",
+            "          rroooooorr    ",
+            "             rrrrrr     "
+        ];
+
+        const pixelSize = 2; // Scaling the pixel art
+        for (let y = 0; y < fData.length; y++) {
+            for (let x = 0; x < fData[y].length; x++) {
+                const char = fData[y][x];
+                if (fp[char]) {
+                    this.graphics.fillStyle(fp[char], 1);
+                    this.graphics.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                }
+            }
+        }
+        this.graphics.generateTexture('enemyBullet', 48, 24);
 
         // Synthwave Pixel Wall - 32x32 (Ultra Neon Version)
         if (this.textures.exists('wall')) this.textures.remove('wall');
