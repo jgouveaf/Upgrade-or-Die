@@ -321,6 +321,7 @@ export class GameScene extends Phaser.Scene {
         this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true });
         this.bullets = this.physics.add.group({ defaultKey: 'bullet', maxSize: 50 });
         this.enemyBullets = this.physics.add.group({ defaultKey: 'enemyBullet', maxSize: 100 });
+        this.fireTrails = this.physics.add.group(); // grupo de rastro de chamas
         this.coins = this.physics.add.group();
         this.walls = this.physics.add.staticGroup();
         this.spawners = this.physics.add.staticGroup();
@@ -382,6 +383,23 @@ export class GameScene extends Phaser.Scene {
         // Collisions
         this.physics.add.overlap(this.bullets, this.enemies, (bullet, enemy) => {
             this.handleBulletHit(bullet, enemy);
+        });
+
+        // Fire Trails (Overlap contínuo)
+        this.physics.add.overlap(this.enemies, this.fireTrails, (enemy, trail) => {
+            if (enemy.active && trail.active) {
+                // Aplica dano a cada meio segundo para não triturar instataneamente
+                if (!enemy.lastFireTrailHurt || this.time.now > enemy.lastFireTrailHurt + 500) {
+                    enemy.takeDamage(10 * this.player.damageMultiplier);
+                    enemy.lastFireTrailHurt = this.time.now;
+
+                    // Visual feedback
+                    enemy.setTint(0xff4400);
+                    this.time.delayedCall(100, () => {
+                        if (enemy.active && !enemy.isPoisoned) enemy.clearTint();
+                    });
+                }
+            }
         });
 
         this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
@@ -566,32 +584,52 @@ export class GameScene extends Phaser.Scene {
             this.player.update(movement, this.input.activePointer);
         }
 
-        // Emit smoke particles for active poison bullets and poisoned enemies
-        if (this.poisonSmokeParticles) {
-            // Smoke for bullets
-            if (this.bullets) {
-                this.bullets.getChildren().forEach(b => {
-                    if (b.active && b.element === 'poison') {
-                        this.poisonSmokeParticles.emitParticleAt(
-                            b.x + Phaser.Math.Between(-4, 4),
-                            b.y + Phaser.Math.Between(-4, 4)
-                        );
-                    }
-                });
-            }
+        // Bullet effects (Trails and Smoke)
+        if (this.bullets) {
+            this.bullets.getChildren().forEach(b => {
+                if (!b.active) return;
 
-            // Smoke for poisoned enemies
-            if (this.enemies) {
-                this.enemies.getChildren().forEach(enemy => {
-                    if (enemy.active && enemy.isPoisoned) {
-                        // Emit mostly from the top half of the enemy for a cool effect
-                        this.poisonSmokeParticles.emitParticleAt(
-                            enemy.x + Phaser.Math.Between(-10, 10),
-                            enemy.y + Phaser.Math.Between(-15, 5)
-                        );
+                // Poison effect
+                if (b.element === 'poison' && this.poisonSmokeParticles) {
+                    this.poisonSmokeParticles.emitParticleAt(
+                        b.x + Phaser.Math.Between(-4, 4),
+                        b.y + Phaser.Math.Between(-4, 4)
+                    );
+                }
+
+                // Fire Trail effect
+                if (b.element === 'fire') {
+                    if (!b.lastTrailTime || this.time.now > b.lastTrailTime + 100) {
+                        b.lastTrailTime = this.time.now;
+                        const trail = this.fireTrails.create(b.x, b.y, 'fireball');
+                        if (trail) {
+                            trail.setAlpha(0.7);
+                            trail.setScale(Phaser.Math.FloatBetween(0.4, 0.7)); // smaller trail
+                            trail.body.setCircle(8); // colisão circular
+
+                            this.tweens.add({
+                                targets: trail,
+                                alpha: 0,
+                                scale: 0,
+                                duration: 2000,
+                                onComplete: () => { if (trail.active) trail.destroy(); }
+                            });
+                        }
                     }
-                });
-            }
+                }
+            });
+        }
+
+        // Smoke for poisoned enemies
+        if (this.poisonSmokeParticles && this.enemies) {
+            this.enemies.getChildren().forEach(enemy => {
+                if (enemy.active && enemy.isPoisoned) {
+                    this.poisonSmokeParticles.emitParticleAt(
+                        enemy.x + Phaser.Math.Between(-10, 10),
+                        enemy.y + Phaser.Math.Between(-15, 5)
+                    );
+                }
+            });
         }
 
         this.updateGadgets();
@@ -1273,6 +1311,20 @@ export class GameScene extends Phaser.Scene {
                     });
                     // Keep it upright but maybe slightly rotate? Actually upright is better for skulls
                     bullet.setRotation(0);
+                } else if (element === 'fire') {
+                    bullet.setTexture('fireball');
+                    bullet.setTint(0xffffff);
+                    bullet.setScale(1.5);
+                    this.tweens.add({
+                        targets: bullet,
+                        scaleX: 1.8,
+                        scaleY: 1.2,
+                        yoyo: true,
+                        repeat: -1,
+                        duration: 100
+                    });
+                    // Aponta a bola de fogo (baseada no sprite horizontal) para a velocidade
+                    bullet.setRotation(Math.atan2(vy, vx));
                 } else {
                     // A bala metálica é vertical (Y), então precisa de +90 graus (PI/2) para apontar para a frente
                     bullet.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
@@ -1341,6 +1393,14 @@ export class GameScene extends Phaser.Scene {
             "ryyr ",
             " yr  "
         ], { 'y': 0xffff00, 'o': 0xffaa00, 'r': 0xff4400 });
+
+        drawIcon('fireball', [
+            "  o  ",
+            " orr ",
+            "oorrw",
+            "orrr ",
+            " or  "
+        ], { 'w': 0xffffff, 'r': 0xff4400, 'o': 0xffaa00 });
 
         drawIcon('icon_poison', [
             " www ",
