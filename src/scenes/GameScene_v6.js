@@ -92,14 +92,37 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(0, 0, 8, 8);
         this.graphics.generateTexture('enemyBullet', 8, 8);
 
-        // Synthwave Pixel Wall - 32x32
+        // Synthwave Pixel Wall - 32x32 (Premium Version)
         this.graphics.clear();
-        // Inner Dark (Synthwave Purple)
+
+        // 1. Neon Glow (Outer)
+        this.graphics.lineStyle(4, 0xff00ff, 0.4);
+        this.graphics.strokeRect(0, 0, 32, 32);
+
+        // 2. Main Body (Dark Metal)
         this.graphics.fillStyle(0x1a1a2e, 1);
         this.graphics.fillRect(2, 2, 28, 28);
-        // Neon Border (Magenta Glow) - REMOVIDO para visual mais limpo
-        // this.graphics.lineStyle(2, 0xff00ff, 1);
-        // this.graphics.strokeRect(1, 1, 30, 30);
+
+        // 3. Bevel effect - Top & Left (Brighter)
+        this.graphics.fillStyle(0x3a3a5e, 1);
+        this.graphics.fillRect(2, 2, 28, 2); // Top
+        this.graphics.fillRect(2, 2, 2, 28); // Left
+
+        // 4. Bevel effect - Bottom & Right (Darker)
+        this.graphics.fillStyle(0x0a0a1e, 1);
+        this.graphics.fillRect(2, 28, 28, 2); // Bottom
+        this.graphics.fillRect(28, 2, 2, 28); // Right
+
+        // 5. Neon Core Line (Magenta)
+        this.graphics.lineStyle(1, 0xff00ff, 1);
+        this.graphics.strokeRect(4, 4, 24, 24);
+
+        // 6. Center Detail (Core)
+        this.graphics.fillStyle(0xff00ff, 0.6);
+        this.graphics.fillRect(12, 12, 8, 8);
+        this.graphics.fillStyle(0xffffff, 0.8);
+        this.graphics.fillRect(15, 15, 2, 2); // Small spark in center
+
         this.graphics.generateTexture('wall', 32, 32);
 
         // Synthwave Floor Tile - 64x64
