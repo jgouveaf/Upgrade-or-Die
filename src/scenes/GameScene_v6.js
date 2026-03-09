@@ -97,12 +97,9 @@ export class GameScene extends Phaser.Scene {
         // Inner Dark (Synthwave Purple)
         this.graphics.fillStyle(0x1a1a2e, 1);
         this.graphics.fillRect(2, 2, 28, 28);
-        // Neon Border (Magenta Glow)
-        this.graphics.lineStyle(2, 0xff00ff, 1);
-        this.graphics.strokeRect(1, 1, 30, 30);
-        // Inner Glow / Detail
-        this.graphics.lineStyle(1, 0xff77ff, 0.5);
-        this.graphics.strokeRect(6, 6, 20, 20);
+        // Neon Border (Magenta Glow) - REMOVIDO para visual mais limpo
+        // this.graphics.lineStyle(2, 0xff00ff, 1);
+        // this.graphics.strokeRect(1, 1, 30, 30);
         this.graphics.generateTexture('wall', 32, 32);
 
         // Synthwave Floor Tile - 64x64
@@ -121,8 +118,8 @@ export class GameScene extends Phaser.Scene {
 
         // Pixel Portal
         this.graphics.clear();
-        this.graphics.lineStyle(4, 0x00ffff, 1);
-        this.graphics.strokeRect(4, 4, 40, 40);
+        this.graphics.fillStyle(0x00ffff, 0.3);
+        this.graphics.fillRect(4, 4, 40, 40);
         this.graphics.generateTexture('portal', 48, 48);
 
         // Pixel Boss (Rafael Rosseti) - FINAL VERSION (Bald, Beard, Light Sweater)
@@ -293,7 +290,11 @@ export class GameScene extends Phaser.Scene {
     create() {
         console.log("GameScene: Create starting...");
 
-        // Adicionar Chão Synthwave (TileSprite)
+        // Garantir que o debug de física esteja desligado
+        this.physics.world.drawDebug = false;
+        if (this.physics.world.debugGraphic) {
+            this.physics.world.debugGraphic.clear();
+        }
         const { width, height } = this.scale;
         this.add.tileSprite(0, 0, width, height, 'floor').setOrigin(0).setScrollFactor(0).setAlpha(0.6);
 
@@ -1350,18 +1351,12 @@ export class GameScene extends Phaser.Scene {
         const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, targetX, targetY);
         const speed = 400;
 
-        // If no specials, just normal shot
+        // Single ball logic - Only one ball per shot
         if (specials.length === 0) {
             spawnBullet(Math.cos(angle) * speed, Math.sin(angle) * speed);
         } else {
-            // Apply each special effect
-            specials.forEach(element => {
-                const level = this.player.gadgets.specialShots[element];
-                for (let i = 0; i < level; i++) {
-                    const spread = (i - (level - 1) / 2) * 0.1;
-                    spawnBullet(Math.cos(angle + spread) * speed, Math.sin(angle + spread) * speed, element);
-                }
-            });
+            // Shoots only one bullet of the first special element
+            spawnBullet(Math.cos(angle) * speed, Math.sin(angle) * speed, specials[0]);
         }
     }
 
