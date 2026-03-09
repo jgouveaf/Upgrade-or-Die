@@ -1282,82 +1282,73 @@ export class GameScene extends Phaser.Scene {
     shoot() {
         if (this.isWavePaused) return;
 
-        // Custom shot logic
+        // Cooldown para evitar múltiplos disparos por clique
+        const now = this.time.now;
+        if (this.lastShootTime && now - this.lastShootTime < 200) return;
+        this.lastShootTime = now;
+
+        // Determina o elemento do tiro (apenas 1 por vez)
         const specials = Object.keys(this.player.gadgets.specialShots);
+        const element = specials.includes('fire') ? 'fire' : (specials[0] || null);
 
-        const spawnBullet = (vx, vy, element = null) => {
-            const bullet = this.bullets.get(this.player.x, this.player.y);
-            if (bullet) {
-                bullet.setActive(true).setVisible(true);
-                bullet.setVelocity(vx, vy);
+        const bullet = this.bullets.get(this.player.x, this.player.y);
+        if (!bullet) return;
 
-                // Reset bullet properties from pool
-                bullet.setTexture('bullet');
-                bullet.clearTint();
-                bullet.setScale(1);
-                bullet.stop(); // Stop any previous animation
-                bullet.element = element;
-                bullet.chainCount = 0;
+        // Mata todos os tweens anteriores desta bala (resetar pool)
+        this.tweens.killTweensOf(bullet);
 
-                // Forçar o tamanho do corpo para a nova textura 16x16
-                if (bullet.body) {
-                    bullet.body.setSize(12, 12);
-                    bullet.body.setOffset(2, 2);
-                }
-
-                if (element === 'electric') {
-                    bullet.play('bolt_anim');
-                    // O raio é horizontal (X), então aponta direto para a velocidade
-                    bullet.setRotation(Math.atan2(vy, vx));
-                    bullet.setScale(1.2);
-                } else if (element === 'poison') {
-                    bullet.setTexture('poison_skull');
-                    bullet.setTint(0xffffff); // Clear any inherited tint
-                    // Make the skull wobble slightly as it flies
-                    this.tweens.add({
-                        targets: bullet,
-                        scale: { from: 1, to: 1.4 },
-                        alpha: { from: 1, to: 0.8 },
-                        yoyo: true,
-                        repeat: -1,
-                        duration: 300
-                    });
-                    // Keep it upright but maybe slightly rotate? Actually upright is better for skulls
-                    bullet.setRotation(0);
-                } else if (element === 'fire') {
-                    bullet.setTexture('fireball_img');
-                    bullet.setTint(0xffffff);
-                    bullet.setScale(2.0);
-                    this.tweens.add({
-                        targets: bullet,
-                        scaleX: 2.2,
-                        scaleY: 1.6,
-                        yoyo: true,
-                        repeat: -1,
-                        duration: 80
-                    });
-                    bullet.setRotation(Math.atan2(vy, vx));
-                } else {
-                    // A bala metálica é vertical (Y), então precisa de +90 graus (PI/2) para apontar para a frente
-                    bullet.setRotation(Math.atan2(vy, vx) + Math.PI / 2);
-                    if (element) {
-                        bullet.setTint(ELEMENTS[element.toUpperCase()].color);
-                    }
-                }
-
-                this.time.delayedCall(2000, () => { if (bullet && bullet.active) bullet.destroy(); });
-                return bullet;
-            }
-        };
+        bullet.setActive(true).setVisible(true);
+        bullet.setAlpha(1);
+        bullet.element = element;
+        bullet.chainCount = 0;
 
         const targetX = this.input.x + this.cameras.main.scrollX;
         const targetY = this.input.y + this.cameras.main.scrollY;
         const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, targetX, targetY);
         const speed = 400;
+        bullet.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
 
-        // Unified single shot logic
-        const targetElement = specials.includes('fire') ? 'fire' : (specials[0] || null);
-        spawnBullet(Math.cos(angle) * speed, Math.sin(angle) * speed, targetElement);
+        if (bullet.body) {
+            bullet.body.setSize(12, 12);
+            bullet.body.setOffset(2, 2);
+        }
+
+        if (element === 'electric') {
+            bullet.setTexture('bullet');
+            bullet.clearTint();
+            bullet.setScale(1.2);
+            bullet.stop();
+            bullet.play('bolt_anim');
+            bullet.setRotation(angle);
+        } else if (element === 'poison') {
+            bullet.setTexture('poison_skull');
+            bullet.clearTint();
+            bullet.setScale(1);
+            bullet.stop();
+            bullet.setRotation(0);
+            this.tweens.add({
+                targets: bullet,
+                scale: { from: 1, to: 1.3 },
+                yoyo: true,
+                repeat: -1,
+                duration: 300
+            });
+        } else if (element === 'fire') {
+            bullet.setTexture('fireball_img');
+            bullet.clearTint();
+            bullet.setScale(1.8);
+            bullet.stop();
+            bullet.setRotation(angle);
+        } else {
+            // Bala normal metálica
+            bullet.setTexture('bullet');
+            bullet.clearTint();
+            bullet.setScale(1);
+            bullet.stop();
+            bullet.setRotation(angle + Math.PI / 2);
+        }
+
+        this.time.delayedCall(2000, () => { if (bullet && bullet.active) bullet.destroy(); });
     }
 
     generatePixelIcons() {
@@ -1448,3 +1439,4 @@ export class GameScene extends Phaser.Scene {
         ], { 'r': 0xff0000, 'w': 0xffffff });
     }
 }
+
