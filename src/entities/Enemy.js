@@ -1,6 +1,6 @@
 export class Enemy extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y, wave) {
-        super(scene, x, y, 'enemy');
+        super(scene, x, y, 'poisonBat');
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
@@ -20,6 +20,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.isBat = false;
         this.isYellow = (this.texture.key === 'yellowEnemy');
         this._isShooting = false; // Prevents firing multiple bullets at the same time
+        this.isPoisoned = false;
+        this.poisonEvent = null;
 
         if (!this.isYellow) {
             this.setTint(0xff0055);
