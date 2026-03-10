@@ -53,22 +53,26 @@ export class GameScene extends Phaser.Scene {
 
         // Pixel Bullet (Realistic Metal Aesthetic) - 16x16
         this.graphics.clear();
-        // Outline (Dark Brown)
-        this.graphics.fillStyle(0x4a2a00, 1);
-        this.graphics.fillRect(4, 2, 8, 12); // Main body outline
-        this.graphics.fillRect(6, 0, 4, 3); // Tip outline
-        // Shell Body (Golden/Brass)
+        // Outline (Darker for contrast)
+        this.graphics.fillStyle(0x331a00, 1);
+        this.graphics.fillRect(4, 2, 8, 12);
+        this.graphics.fillRect(5, 1, 6, 1); // Tip shadow
+        this.graphics.fillRect(6, 0, 4, 1);
+        // Shell Body (Golden/Brass Gradient feel)
         this.graphics.fillStyle(0xd4af37, 1);
         this.graphics.fillRect(5, 3, 6, 10);
-        this.graphics.fillRect(7, 1, 2, 2); // Core tip
-        // Red Detail Ring
+        this.graphics.fillRect(7, 1, 2, 2);
+        // Lighter Gold highlight
+        this.graphics.fillStyle(0xffd700, 1);
+        this.graphics.fillRect(5, 3, 2, 9);
+        // Red Detail Ring (Lowered slightly like screenshot)
         this.graphics.fillStyle(0xff0000, 1);
-        this.graphics.fillRect(4, 9, 8, 2);
+        this.graphics.fillRect(4, 10, 8, 2);
         // Highlight/Reflection (White/Light Gold)
-        this.graphics.fillStyle(0xfff5d7, 1);
+        this.graphics.fillStyle(0xffffff, 0.7);
         this.graphics.fillRect(6, 4, 1, 5);
         this.graphics.fillRect(7, 2, 1, 1);
-        // Base (Copper)
+        // Base (Copper/Darker)
         this.graphics.fillStyle(0x8b4513, 1);
         this.graphics.fillRect(5, 13, 6, 2);
 
@@ -143,33 +147,40 @@ export class GameScene extends Phaser.Scene {
 
         const generateSmokeBolt = (key, frameIndex) => {
             const pbGraphics = this.add.graphics();
-            const fp = { w: 0xffffff, l: 0xdddddd, d: 0xaaaaaa, c: 0x00ffff }; // w=white, l=light gray, d=dark gray, c=cyan core
+            const fp = { w: 0xffffff, l: 0xeeeeee, d: 0xcccccc, g: 0x999999 }; // shades of white/gray
 
-            // Shape: A puff of thick smoke
+            // Shape: Irregular puffy smoke clouds based on SMOKE 1 image
             let pbData = [
-                "   lll   ",
-                " lllwwll ",
-                "llwwwdwwl",
-                "ldwwwwwwl",
-                "llwwcwwdl",
-                " lwwwdwl ",
-                "  llwll  ",
+                "  wwwww  ",
+                " dwwwwwll",
+                "lwwwwwwwg",
+                "lwwwwwwwl",
+                " dwwwwwl ",
+                "  llll   ",
             ];
 
             if (frameIndex === 1) {
-                // Expanding / shifting puff
                 pbData = [
+                    "   www   ",
+                    "  wwwww  ",
+                    " lwwwwww ",
+                    "lwwwwwwwl",
+                    "lwwwwwwwl",
+                    " dwwwwwd ",
                     "  llll   ",
-                    " llwwlll ",
-                    "llwdwddwl",
-                    "llwwcwwwl",
-                    "ldwwwwdwl",
-                    " llwwll  ",
-                    "   ll    ",
+                ];
+            } else if (frameIndex === 2) {
+                pbData = [
+                    "    ww   ",
+                    "   wwww  ",
+                    "  wwwwww ",
+                    " dwwwwwwl",
+                    " lwwwwwwl",
+                    "  lwwwd  ",
                 ];
             }
 
-            const pSize = 1.5;
+            const pSize = 2; // Slightly larger pixels for smoke
             for (let y = 0; y < pbData.length; y++) {
                 for (let x = 0; x < pbData[y].length; x++) {
                     const char = pbData[y][x];
@@ -179,21 +190,23 @@ export class GameScene extends Phaser.Scene {
                     }
                 }
             }
-            pbGraphics.generateTexture(key, 15, 12);
+            pbGraphics.generateTexture(key, 24, 18);
             pbGraphics.destroy();
         };
 
         generateSmokeBolt('smoke_bolt_1', 0);
         generateSmokeBolt('smoke_bolt_2', 1);
+        generateSmokeBolt('smoke_bolt_3', 2);
 
         if (this.anims.exists('smoke_anim')) this.anims.remove('smoke_anim');
         this.anims.create({
             key: 'smoke_anim',
             frames: [
                 { key: 'smoke_bolt_1' },
-                { key: 'smoke_bolt_2' }
+                { key: 'smoke_bolt_2' },
+                { key: 'smoke_bolt_3' }
             ],
-            frameRate: 10,
+            frameRate: 8,
             repeat: -1
         });
 
