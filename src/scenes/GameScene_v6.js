@@ -51,33 +51,67 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(20, 8, 4, 4);
         this.graphics.generateTexture('enemy', 32, 32);
 
-        // Pixel Bullet (Realistic Metal Aesthetic) - 16x16
-        this.graphics.clear();
+        // Pixel Bullet (Purple Propulsion Aesthetic)
+        ['bullet_1', 'bullet_2'].forEach(key => {
+            if (this.textures.exists(key)) this.textures.remove(key);
+        });
 
-        // Outline (Dark Brown)
-        this.graphics.fillStyle(0x4a2a00, 1);
-        this.graphics.fillRect(4, 2, 8, 12); // Main body outline
-        this.graphics.fillRect(6, 0, 4, 3); // Tip outline
+        const generatePlayerBullet = (key, frameIndex) => {
+            const pbGraphics = this.add.graphics();
+            // m: magenta (main body), c: cyan (core highlight), w: white (tip), d: dark purple (thruster fire)
+            const fp = { m: 0xff00ff, c: 0x00f2ff, w: 0xffffff, d: 0xaa00aa, e: 0xdd00ff };
 
-        // Shell Body (Golden/Brass)
-        this.graphics.fillStyle(0xd4af37, 1);
-        this.graphics.fillRect(5, 3, 6, 10);
-        this.graphics.fillRect(7, 1, 2, 2); // Core tip
+            // Thrust at the back, dense at the front
+            let pbData = [
+                "            ww",
+                "         ccccw",
+                "   eeemmmmmmc ",
+                " ddeeeeemmmmmc",
+                "ddddeeeeemmmmc",
+                " ddeeeeemmmmmc",
+                "   eeemmmmmmc ",
+                "         ccccw",
+                "            ww",
+            ];
 
-        // Red Detail Ring
-        this.graphics.fillStyle(0xff0000, 1);
-        this.graphics.fillRect(4, 9, 8, 2);
+            if (frameIndex === 1) {
+                // Alternating thruster flame
+                pbData[3] = "  ddeeeemmmmmc";
+                pbData[4] = " ddddeeeemmmmc";
+                pbData[5] = "  ddeeeemmmmmc";
+            }
 
-        // Highlight/Reflection (White/Light Gold)
-        this.graphics.fillStyle(0xfff5d7, 1);
-        this.graphics.fillRect(6, 4, 1, 5);
-        this.graphics.fillRect(7, 2, 1, 1);
+            const pSize = 1.5;
+            for (let y = 0; y < pbData.length; y++) {
+                for (let x = 0; x < pbData[y].length; x++) {
+                    const char = pbData[y][x];
+                    if (fp[char]) {
+                        pbGraphics.fillStyle(fp[char], 1);
+                        pbGraphics.fillRect(x * pSize, y * pSize, pSize, pSize);
+                    }
+                }
+            }
+            pbGraphics.generateTexture(key, 24, 14);
+            pbGraphics.destroy();
+        };
 
-        // Base (Copper)
-        this.graphics.fillStyle(0x8b4513, 1);
-        this.graphics.fillRect(5, 13, 6, 2);
+        generatePlayerBullet('bullet_1', 0);
+        generatePlayerBullet('bullet_2', 1);
 
-        this.graphics.generateTexture('bullet', 16, 16);
+        if (this.anims.exists('bullet_anim')) this.anims.remove('bullet_anim');
+        this.anims.create({
+            key: 'bullet_anim',
+            frames: [
+                { key: 'bullet_1' },
+                { key: 'bullet_2' }
+            ],
+            frameRate: 15,
+            repeat: -1
+        });
+
+        // Ensure default 'bullet' texture exists for initial spawn before anim starts
+        if (this.textures.exists('bullet')) this.textures.remove('bullet');
+        generatePlayerBullet('bullet', 0);
 
         // Pixel Coin
         this.graphics.clear();
@@ -617,64 +651,6 @@ export class GameScene extends Phaser.Scene {
         });
 
         this.setupUI();
-
-        // PUSH BULLET (Air Blast Thruster Design)
-        ['push_bullet_1', 'push_bullet_2'].forEach(key => {
-            if (this.textures.exists(key)) this.textures.remove(key);
-        });
-
-        const generatePushFrame = (key, frameIndex) => {
-            const pbGraphics = this.add.graphics();
-            // m: magenta (main body), c: cyan (core highlight), w: white (tip), d: dark purple (thruster fire)
-            const fp = { m: 0xff00ff, c: 0x00f2ff, w: 0xffffff, d: 0xaa00aa, e: 0xdd00ff };
-
-            // Thrust at the back, dense at the front
-            let pbData = [
-                "            ww",
-                "         ccccw",
-                "   eeemmmmmmc ",
-                " ddeeeeemmmmmc",
-                "ddddeeeeemmmmc",
-                " ddeeeeemmmmmc",
-                "   eeemmmmmmc ",
-                "         ccccw",
-                "            ww",
-            ];
-
-            if (frameIndex === 1) {
-                // Alternating thruster flame
-                pbData[3] = "  ddeeeemmmmmc";
-                pbData[4] = " ddddeeeemmmmc";
-                pbData[5] = "  ddeeeemmmmmc";
-            }
-
-            const pSize = 1.5;
-            for (let y = 0; y < pbData.length; y++) {
-                for (let x = 0; x < pbData[y].length; x++) {
-                    const char = pbData[y][x];
-                    if (fp[char]) {
-                        pbGraphics.fillStyle(fp[char], 1);
-                        pbGraphics.fillRect(x * pSize, y * pSize, pSize, pSize);
-                    }
-                }
-            }
-            pbGraphics.generateTexture(key, 24, 14);
-            pbGraphics.destroy();
-        };
-
-        generatePushFrame('push_bullet_1', 0);
-        generatePushFrame('push_bullet_2', 1);
-
-        if (this.anims.exists('push_anim')) this.anims.remove('push_anim');
-        this.anims.create({
-            key: 'push_anim',
-            frames: [
-                { key: 'push_bullet_1' },
-                { key: 'push_bullet_2' }
-            ],
-            frameRate: 15,
-            repeat: -1
-        });
 
         // ANIMAÇÃO DO RAIO ELÉTRICO
         this.anims.create({
@@ -1578,18 +1554,19 @@ export class GameScene extends Phaser.Scene {
             });
 
         } else if (element === 'push') {
-            bullet.setTexture('push_bullet_1');
+            bullet.setTexture('bullet_1');
             bullet.clearTint();
             bullet.setScale(1.2);
             bullet.setRotation(angle);
-            if (bullet.anims) bullet.play('push_anim', true);
+            if (bullet.anims) bullet.play('bullet_anim', true);
 
         } else {
-            // Bala normal metálica
-            bullet.setTexture('bullet');
+            // Bala normal principal com propulsão (Novo Design! Roxo/Magenta)
+            bullet.setTexture('bullet_1');
             bullet.clearTint();
             bullet.setScale(1);
-            bullet.setRotation(angle + Math.PI / 2);
+            bullet.setRotation(angle); // Sprite is horizontally oriented now
+            if (bullet.anims) bullet.play('bullet_anim', true);
         }
 
         this.time.delayedCall(2000, () => { if (bullet && bullet.active) bullet.destroy(); });
