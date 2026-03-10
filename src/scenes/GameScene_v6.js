@@ -51,67 +51,51 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(20, 8, 4, 4);
         this.graphics.generateTexture('enemy', 32, 32);
 
-        // Pixel Bullet (Purple Propulsion Aesthetic)
-        ['bullet_1', 'bullet_2'].forEach(key => {
-            if (this.textures.exists(key)) this.textures.remove(key);
-        });
+        // Pixel Bullet (Realistic Metal Aesthetic) - 16x16
+        this.graphics.clear();
+        // Outline (Dark Brown)
+        this.graphics.fillStyle(0x4a2a00, 1);
+        this.graphics.fillRect(4, 2, 8, 12); // Main body outline
+        this.graphics.fillRect(6, 0, 4, 3); // Tip outline
+        // Shell Body (Golden/Brass)
+        this.graphics.fillStyle(0xd4af37, 1);
+        this.graphics.fillRect(5, 3, 6, 10);
+        this.graphics.fillRect(7, 1, 2, 2); // Core tip
+        // Red Detail Ring
+        this.graphics.fillStyle(0xff0000, 1);
+        this.graphics.fillRect(4, 9, 8, 2);
+        // Highlight/Reflection (White/Light Gold)
+        this.graphics.fillStyle(0xfff5d7, 1);
+        this.graphics.fillRect(6, 4, 1, 5);
+        this.graphics.fillRect(7, 2, 1, 1);
+        // Base (Copper)
+        this.graphics.fillStyle(0x8b4513, 1);
+        this.graphics.fillRect(5, 13, 6, 2);
 
-        const generatePlayerBullet = (key, frameIndex) => {
-            const pbGraphics = this.add.graphics();
-            // m: magenta (main body), c: cyan (core highlight), w: white (tip), d: dark purple (thruster fire)
-            const fp = { m: 0xff00ff, c: 0x00f2ff, w: 0xffffff, d: 0xaa00aa, e: 0xdd00ff };
+        this.graphics.generateTexture('bullet', 16, 16);
 
-            // Thrust at the back, dense at the front
-            let pbData = [
-                "            ww",
-                "         ccccw",
-                "   eeemmmmmmc ",
-                " ddeeeeemmmmmc",
-                "ddddeeeeemmmmc",
-                " ddeeeeemmmmmc",
-                "   eeemmmmmmc ",
-                "         ccccw",
-                "            ww",
-            ];
+        // Pixel Push Bullet (Purple Metal Aesthetic)
+        this.graphics.clear();
+        // Outline (Dark Purple)
+        this.graphics.fillStyle(0x3a003a, 1);
+        this.graphics.fillRect(4, 2, 8, 12);
+        this.graphics.fillRect(6, 0, 4, 3);
+        // Shell Body (Purple/Magenta)
+        this.graphics.fillStyle(0xaa00ff, 1);
+        this.graphics.fillRect(5, 3, 6, 10);
+        this.graphics.fillRect(7, 1, 2, 2);
+        // Cyan Detail Ring
+        this.graphics.fillStyle(0x00ffff, 1);
+        this.graphics.fillRect(4, 9, 8, 2);
+        // Highlight
+        this.graphics.fillStyle(0xffddff, 1);
+        this.graphics.fillRect(6, 4, 1, 5);
+        this.graphics.fillRect(7, 2, 1, 1);
+        // Base (Dark Violet)
+        this.graphics.fillStyle(0x5500aa, 1);
+        this.graphics.fillRect(5, 13, 6, 2);
 
-            if (frameIndex === 1) {
-                // Alternating thruster flame
-                pbData[3] = "  ddeeeemmmmmc";
-                pbData[4] = " ddddeeeemmmmc";
-                pbData[5] = "  ddeeeemmmmmc";
-            }
-
-            const pSize = 1.5;
-            for (let y = 0; y < pbData.length; y++) {
-                for (let x = 0; x < pbData[y].length; x++) {
-                    const char = pbData[y][x];
-                    if (fp[char]) {
-                        pbGraphics.fillStyle(fp[char], 1);
-                        pbGraphics.fillRect(x * pSize, y * pSize, pSize, pSize);
-                    }
-                }
-            }
-            pbGraphics.generateTexture(key, 24, 14);
-            pbGraphics.destroy();
-        };
-
-        generatePlayerBullet('bullet_1', 0);
-        generatePlayerBullet('bullet_2', 1);
-
-        if (this.anims.exists('bullet_anim')) this.anims.remove('bullet_anim');
-        this.anims.create({
-            key: 'bullet_anim',
-            frames: [
-                { key: 'bullet_1' },
-                { key: 'bullet_2' }
-            ],
-            frameRate: 15,
-            repeat: -1
-        });
-
-        // Ensure default 'bullet' texture exists for initial spawn before anim starts
-        if (this.textures.exists('bullet')) this.textures.remove('bullet');
-        generatePlayerBullet('bullet', 0);
+        this.graphics.generateTexture('push_bullet', 16, 16);
 
         // Pixel Coin
         this.graphics.clear();
@@ -1468,8 +1452,9 @@ export class GameScene extends Phaser.Scene {
                 break;
             case 'push':
                 const ang = Phaser.Math.Angle.Between(this.player.x, this.player.y, enemy.x, enemy.y);
-                enemy.x += Math.cos(ang) * (isAura ? 1 : 10);
-                enemy.y += Math.sin(ang) * (isAura ? 1 : 10);
+                const knockback = isAura ? 5 : 50; // Increased massively for the bullet hit
+                enemy.x += Math.cos(ang) * knockback;
+                enemy.y += Math.sin(ang) * knockback;
                 break;
             case 'poison':
                 enemy.applyPoison(this);
@@ -1554,19 +1539,16 @@ export class GameScene extends Phaser.Scene {
             });
 
         } else if (element === 'push') {
-            bullet.setTexture('bullet_1');
-            bullet.clearTint();
-            bullet.setScale(1.2);
-            bullet.setRotation(angle);
-            if (bullet.anims) bullet.play('bullet_anim', true);
-
-        } else {
-            // Bala normal principal com propulsão (Novo Design! Roxo/Magenta)
-            bullet.setTexture('bullet_1');
+            bullet.setTexture('push_bullet');
             bullet.clearTint();
             bullet.setScale(1);
-            bullet.setRotation(angle); // Sprite is horizontally oriented now
-            if (bullet.anims) bullet.play('bullet_anim', true);
+            bullet.setRotation(angle + Math.PI / 2); // Same rotation as normal metal bullet
+        } else {
+            // Bala normal metálica
+            bullet.setTexture('bullet');
+            bullet.clearTint();
+            bullet.setScale(1);
+            bullet.setRotation(angle + Math.PI / 2);
         }
 
         this.time.delayedCall(2000, () => { if (bullet && bullet.active) bullet.destroy(); });
