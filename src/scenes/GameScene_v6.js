@@ -1248,8 +1248,15 @@ export class GameScene extends Phaser.Scene {
                 }
             });
 
-            // Destrói a bala de fumaça imediatamente após a explosão
-            bullet.destroy();
+            // Desativa a física e esconde a bala imediatamente para não "voar" antes de sumir
+            if (bullet.body) bullet.body.enable = false;
+            bullet.setVisible(false);
+            bullet.setActive(false);
+
+            // Destrói a bala de fumaça imediatamente após o processamento da explosão
+            this.time.delayedCall(10, () => {
+                if (bullet && bullet.active) bullet.destroy();
+            });
             return;
         }
 
@@ -1277,6 +1284,9 @@ export class GameScene extends Phaser.Scene {
             }
         }
 
+        if (bullet.body) bullet.body.enable = false;
+        bullet.setVisible(false);
+        bullet.setActive(false);
         bullet.destroy();
     }
 
