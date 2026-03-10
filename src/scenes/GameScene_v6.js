@@ -376,10 +376,30 @@ export class GameScene extends Phaser.Scene {
             repeat: -1
         });
 
-        // Set poisonBat (base enemy texture) to the first frame of the animation
-        // so that it has the correct hitbox/size before playing the animation.
+        // Set poisonBat (base enemy texture) to a proper toxic green graphic
         if (this.textures.exists('poisonBat')) this.textures.remove('poisonBat');
-        generateBatFrame('poisonBat', 0);
+        this.graphics.clear();
+        // Wings (Dark Green Base)
+        this.graphics.fillStyle(0x004400, 1);
+        this.graphics.fillRect(4, 12, 8, 4); // Left base
+        this.graphics.fillRect(20, 12, 8, 4); // Right base
+        // Wing membranes (Neon Green)
+        this.graphics.fillStyle(0x00ff00, 1);
+        this.graphics.fillRect(2, 10, 4, 2);
+        this.graphics.fillRect(26, 10, 4, 2);
+        // Body (Toxic Green)
+        this.graphics.fillStyle(0x00aa00, 1);
+        this.graphics.fillRect(12, 8, 8, 12);
+        this.graphics.fillRect(14, 20, 4, 4);
+        // Eyes (Red Glow)
+        this.graphics.fillStyle(0xff0000, 1);
+        this.graphics.fillRect(12, 10, 2, 2);
+        this.graphics.fillRect(18, 10, 2, 2);
+        // Fangs
+        this.graphics.fillStyle(0xffffff, 1);
+        this.graphics.fillRect(13, 13, 1, 2);
+        this.graphics.fillRect(18, 13, 1, 2);
+        this.graphics.generateTexture('poisonBat', 32, 32);
 
         // Pixel Yellow Enemy (New variant)
         this.graphics.clear();
@@ -920,7 +940,9 @@ export class GameScene extends Phaser.Scene {
             enemy.clearTint();
             console.log("Spawned BAT ENEMY at wave", this.wave);
         } else {
-            console.log("Spawned REGULAR ENEMY at wave", this.wave);
+            // Apply Fire variant (Red Enemy)
+            enemy.play('enemy_burn_anim', true);
+            console.log("Spawned FIRE ENEMY at wave", this.wave);
         }
 
         this.enemies.add(enemy);

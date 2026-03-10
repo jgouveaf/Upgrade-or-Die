@@ -24,8 +24,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.poisonEvent = null;
 
         if (!this.isYellow) {
-            // Animates the bat as a true fire creature instead of a static red sprite
-            this.play('enemy_burn_anim', true);
+            // Appearance is now handled dynamically in GameScene spawn logic
         }
     }
 
