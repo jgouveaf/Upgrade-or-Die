@@ -160,10 +160,14 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
                     indicator.destroy();
                 }
-                // Release shoot lock only after full cooldown
-                this.scene.time.delayedCall(this.fireRate * 1.5, () => {
+                // Release shoot lock only after full cooldown, checking if enemy still exists
+                if (this.scene && this.active) {
+                    this.scene.time.delayedCall(this.fireRate * 1.5, () => {
+                        this._isShooting = false;
+                    });
+                } else {
                     this._isShooting = false;
-                });
+                }
             }
         });
     }
