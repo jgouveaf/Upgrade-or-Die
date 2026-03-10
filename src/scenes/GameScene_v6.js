@@ -1134,9 +1134,12 @@ export class GameScene extends Phaser.Scene {
         // APLICAR DANO (Estava faltando!)
         enemy.takeDamage(10 * this.player.damageMultiplier);
 
-        // Veneno Shot Action
+        // Elemenal Shot Effects on hit
         if (bullet.element === 'poison') {
             enemy.applyPoison(this);
+        } else if (bullet.element === 'push') {
+            // APPLY KNOCKBACK EFFECT - Previously missing!
+            this.applyElementalEffect(enemy, 'push', 1, false);
         }
 
         // Lógica de Ricochete Elétrico (Volt Shot)
