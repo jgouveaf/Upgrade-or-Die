@@ -86,48 +86,57 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(0, 3, 12, 6);
         this.graphics.generateTexture('coin', 12, 12);
 
-        // Pixel Enemy Bullet (Refined Fireball - 3 Frames for Animation)
+        // NEW FIREBALL SPRITE - MUCH SMALLER & ACCURATE TO REFERENCE
         ['enemyFireball_1', 'enemyFireball_2', 'enemyFireball_3'].forEach(key => {
             if (this.textures.exists(key)) this.textures.remove(key);
         });
 
-        const generateFireballFrame = (key, offset) => {
+        const generateFireballFrame = (key, frameIndex) => {
             const fireGraphics = this.add.graphics();
             const fp = { r: 0xff0000, o: 0xff8800, y: 0xffff00, w: 0xffffff };
-            const fData = [
-                "            rrrr    ",
-                "        rrrroooorr  ",
-                "    rrrroooyyyyoor  ",
-                " rrrrooooyyyyyyyoor ",
-                "rooooooyyyyyywwyoorr",
-                "rooyyyyyyyyyywwwoor ",
-                "rooyyyyyyyyyywwwoor ",
-                "rooooooyyyyyywwyoorr",
-                " rrrrooooyyyyyyyoor ",
-                "    rrrroooyyyyoor  ",
-                "        rrrroooorr  ",
-                "            rrrr    "
+
+            // Base frame
+            let fData = [
+                "      rrrr  ",
+                "   rroooorr ",
+                "  rrooyyyyor",
+                " rrooywwwyor",
+                "rrooywwwwyor",
+                "rrooywwwwyor",
+                " rrooywwwyor",
+                "  rrooyyyyor",
+                "   rroooorr ",
+                "      rrrr  "
             ];
 
-            const pSize = 1.0; // Even smaller than before
+            // Animate the tail based on the frame index
+            if (frameIndex === 1) {
+                fData[4] = " rrooywwwwyor";
+                fData[5] = " rrooywwwwyor";
+                fData[3] = "  rooywwwyor";
+                fData[6] = "  rooywwwyor";
+            } else if (frameIndex === 2) {
+                fData[4] = "  rooywwwwyor";
+                fData[5] = "  rooywwwwyor";
+            }
+
+            const pSize = 1; // 1x scale for very small visually tight projectile
             for (let y = 0; y < fData.length; y++) {
                 for (let x = 0; x < fData[y].length; x++) {
                     const char = fData[y][x];
                     if (fp[char]) {
                         fireGraphics.fillStyle(fp[char], 1);
-                        // Pulse effect for animation frames
-                        const jitterX = (x > 10) ? Math.sin(offset + y) * 2 : 0;
-                        fireGraphics.fillRect(x * pSize + jitterX, y * pSize, pSize, pSize);
+                        fireGraphics.fillRect(x * pSize, y * pSize, pSize, pSize);
                     }
                 }
             }
-            fireGraphics.generateTexture(key, 32, 16);
+            fireGraphics.generateTexture(key, 12, 10);
             fireGraphics.destroy();
         };
 
         generateFireballFrame('enemyFireball_1', 0);
-        generateFireballFrame('enemyFireball_2', 120);
-        generateFireballFrame('enemyFireball_3', 240);
+        generateFireballFrame('enemyFireball_2', 1);
+        generateFireballFrame('enemyFireball_3', 2);
 
         // Animation for Fireball
         if (this.anims.exists('fireball_burn')) this.anims.remove('fireball_burn');
@@ -291,47 +300,86 @@ export class GameScene extends Phaser.Scene {
 
         this.graphics.generateTexture('bossBullet', 32, 32);
 
-        // Pixel Fire Bat - 32x32 (Jagged Flame Wings Version)
-        if (this.textures.exists('fireBat')) this.textures.remove('fireBat');
-        this.graphics.clear();
+        // ANIMATED FIRE BAT - 3 Frames
+        ['fireBat_1', 'fireBat_2', 'fireBat_3'].forEach(key => {
+            if (this.textures.exists(key)) this.textures.remove(key);
+        });
 
-        // 1. Wings (True Jagged Flames)
-        const drawFlameWing = (startX, isLeft) => {
-            const dir = isLeft ? -1 : 1;
-            // Outer Fire (Red)
-            this.graphics.fillStyle(0xff0000, 1);
-            this.graphics.fillRect(startX, 10, dir * 12, 4);
-            this.graphics.fillRect(startX + (dir * 4), 6, dir * 8, 4);
-            // Inner Fire (Orange)
-            this.graphics.fillStyle(0xff8800, 1);
-            this.graphics.fillRect(startX + (dir * 2), 8, dir * 8, 4);
-            this.graphics.fillRect(startX + (dir * 6), 4, dir * 4, 4);
-            // Hot Tips (Yellow)
-            this.graphics.fillStyle(0xffff00, 1);
-            this.graphics.fillRect(startX + (dir * 10), 8, dir * 2, 2);
-            this.graphics.fillRect(startX + (dir * 8), 2, dir * 2, 2);
+        const generateBatFrame = (key, frameIndex) => {
+            const mg = this.add.graphics();
+
+            // Core Bat shape
+            mg.fillStyle(0x330000, 1);
+            mg.fillRect(12, 12, 8, 8); // Body
+
+            // Molten Core (Pulses based on frame)
+            mg.fillStyle(0xff4400, 1);
+            mg.fillRect(14, 13, 4, 6);
+
+            const coreColor = frameIndex === 1 ? 0xffffff : 0xffff00;
+            mg.fillStyle(coreColor, 0.9);
+            mg.fillRect(15, 14, 2, 2);
+
+            // Glowing Eyes
+            mg.fillStyle(0xffffff, 1);
+            mg.fillRect(13, 13, 2, 2);
+            mg.fillRect(17, 13, 2, 2);
+
+            // True flame wings, shape changes per frame
+            const drawWing = (xDir, flip) => {
+                const dir = flip ? -1 : 1;
+                mg.fillStyle(0xff0000, 1); // Red base
+                if (frameIndex === 0) {
+                    mg.fillRect(12 + (dir * 2), 10, dir * 10, 4);
+                    mg.fillRect(12 + (dir * 6), 6, dir * 6, 4);
+                    mg.fillStyle(0xff8800, 1); // Orange
+                    mg.fillRect(12 + (dir * 4), 8, dir * 6, 4);
+                    mg.fillStyle(0xffff00, 1); // Yellow
+                    mg.fillRect(12 + (dir * 8), 4, dir * 2, 4);
+                } else if (frameIndex === 1) {
+                    mg.fillRect(12 + (dir * 2), 12, dir * 12, 4);
+                    mg.fillRect(12 + (dir * 8), 8, dir * 4, 4);
+                    mg.fillStyle(0xff8800, 1); // Orange
+                    mg.fillRect(12 + (dir * 6), 10, dir * 6, 4);
+                    mg.fillStyle(0xffff00, 1); // Yellow
+                    mg.fillRect(12 + (dir * 10), 6, dir * 2, 4);
+                } else {
+                    mg.fillRect(12 + (dir * 2), 8, dir * 8, 4);
+                    mg.fillRect(12 + (dir * 4), 4, dir * 4, 4);
+                    mg.fillStyle(0xff8800, 1); // Orange
+                    mg.fillRect(12 + (dir * 2), 6, dir * 6, 4);
+                    mg.fillStyle(0xffff00, 1); // Yellow
+                    mg.fillRect(12 + (dir * 6), 2, dir * 2, 4);
+                }
+            };
+
+            drawWing(0, true);  // Left
+            drawWing(0, false); // Right
+
+            mg.generateTexture(key, 32, 32);
+            mg.destroy();
         };
-        drawFlameWing(12, true);
-        drawFlameWing(20, false);
 
-        // 2. Body (Dark Bat Core)
-        this.graphics.fillStyle(0x220000, 1);
-        this.graphics.fillRect(12, 10, 8, 10);
+        generateBatFrame('fireBat_1', 0);
+        generateBatFrame('fireBat_2', 1);
+        generateBatFrame('fireBat_3', 2);
 
-        // 3. Fever Core (Pulsing Fire Center)
-        this.graphics.fillStyle(0xff4400, 1);
-        this.graphics.fillRect(14, 12, 4, 6);
-        this.graphics.fillStyle(0xffff00, 0.8);
-        this.graphics.fillRect(15, 14, 2, 2);
+        if (this.anims.exists('enemy_burn_anim')) this.anims.remove('enemy_burn_anim');
+        this.anims.create({
+            key: 'enemy_burn_anim',
+            frames: [
+                { key: 'fireBat_1' },
+                { key: 'fireBat_2' },
+                { key: 'fireBat_3' }
+            ],
+            frameRate: 10,
+            repeat: -1
+        });
 
-        // 4. Eyes (Glinting White)
-        this.graphics.fillStyle(0xffffff, 1);
-        this.graphics.fillRect(13, 11, 2, 2);
-        this.graphics.fillRect(17, 11, 2, 2);
-
-        this.graphics.generateTexture('fireBat', 32, 32);
+        // Set poisonBat (base enemy texture) to the first frame of the animation
+        // so that it has the correct hitbox/size before playing the animation.
         if (this.textures.exists('poisonBat')) this.textures.remove('poisonBat');
-        this.graphics.generateTexture('poisonBat', 32, 32);
+        generateBatFrame('poisonBat', 0);
 
         // Pixel Yellow Enemy (New variant)
         this.graphics.clear();
