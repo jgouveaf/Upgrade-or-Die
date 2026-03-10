@@ -618,6 +618,64 @@ export class GameScene extends Phaser.Scene {
 
         this.setupUI();
 
+        // PUSH BULLET (Air Blast Thruster Design)
+        ['push_bullet_1', 'push_bullet_2'].forEach(key => {
+            if (this.textures.exists(key)) this.textures.remove(key);
+        });
+
+        const generatePushFrame = (key, frameIndex) => {
+            const pbGraphics = this.add.graphics();
+            // m: magenta (main body), c: cyan (core highlight), w: white (tip), d: dark purple (thruster fire)
+            const fp = { m: 0xff00ff, c: 0x00f2ff, w: 0xffffff, d: 0xaa00aa, e: 0xdd00ff };
+
+            // Thrust at the back, dense at the front
+            let pbData = [
+                "            ww",
+                "         ccccw",
+                "   eeemmmmmmc ",
+                " ddeeeeemmmmmc",
+                "ddddeeeeemmmmc",
+                " ddeeeeemmmmmc",
+                "   eeemmmmmmc ",
+                "         ccccw",
+                "            ww",
+            ];
+
+            if (frameIndex === 1) {
+                // Alternating thruster flame
+                pbData[3] = "  ddeeeemmmmmc";
+                pbData[4] = " ddddeeeemmmmc";
+                pbData[5] = "  ddeeeemmmmmc";
+            }
+
+            const pSize = 1.5;
+            for (let y = 0; y < pbData.length; y++) {
+                for (let x = 0; x < pbData[y].length; x++) {
+                    const char = pbData[y][x];
+                    if (fp[char]) {
+                        pbGraphics.fillStyle(fp[char], 1);
+                        pbGraphics.fillRect(x * pSize, y * pSize, pSize, pSize);
+                    }
+                }
+            }
+            pbGraphics.generateTexture(key, 24, 14);
+            pbGraphics.destroy();
+        };
+
+        generatePushFrame('push_bullet_1', 0);
+        generatePushFrame('push_bullet_2', 1);
+
+        if (this.anims.exists('push_anim')) this.anims.remove('push_anim');
+        this.anims.create({
+            key: 'push_anim',
+            frames: [
+                { key: 'push_bullet_1' },
+                { key: 'push_bullet_2' }
+            ],
+            frameRate: 15,
+            repeat: -1
+        });
+
         // ANIMAÇÃO DO RAIO ELÉTRICO
         this.anims.create({
             key: 'bolt_anim',
@@ -1518,6 +1576,13 @@ export class GameScene extends Phaser.Scene {
                 duration: 500,
                 repeat: -1
             });
+
+        } else if (element === 'push') {
+            bullet.setTexture('push_bullet_1');
+            bullet.clearTint();
+            bullet.setScale(1.2);
+            bullet.setRotation(angle);
+            if (bullet.anims) bullet.play('push_anim', true);
 
         } else {
             // Bala normal metálica
