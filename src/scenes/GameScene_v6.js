@@ -1203,7 +1203,17 @@ export class GameScene extends Phaser.Scene {
 
 
     handleBulletHit(bullet, enemy) {
-        if (!bullet.active || !enemy.active) return;
+        if (!bullet || !bullet.active || !enemy || !enemy.active) return;
+
+        // Se o tiro não for elétrico (que ricocheteia) ou se o elétrico já bateu no limite,
+        // PARAR e ESCONDER a bala no exato momento do impacto para não voar pra longe.
+        const isElectric = (bullet.element === 'electric');
+        const canChain = isElectric && (bullet.chainCount || 0) < 2;
+
+        if (!canChain) {
+            // Isso mata a velocidade, desliga a física e esconde a bala INSTANTANEAMENTE
+            bullet.disableBody(true, true);
+        }
 
         // APLICAR DANO (Estava faltando!)
         enemy.takeDamage(10 * this.player.damageMultiplier);
@@ -1212,7 +1222,7 @@ export class GameScene extends Phaser.Scene {
         if (bullet.element === 'poison') {
             enemy.applyPoison(this);
         } else if (bullet.element === 'push') {
-            // APPLY KNOCKBACK EFFECT - Previously missing!
+            // APPLY KNOCKBACK EFFECT
             this.applyElementalEffect(enemy, 'push', 1, false);
         } else if (bullet.element === 'force') {
             // AREA OF EFFECT "IMPACT BOLT" EXPLOSION
@@ -1241,52 +1251,38 @@ export class GameScene extends Phaser.Scene {
                     const dist = Phaser.Math.Distance.Between(enemy.x, enemy.y, e.x, e.y);
                     if (dist <= blastRadius) {
                         e.takeDamage(splashDamage);
-                        // Brief white flash for taking splash damage
                         e.setTint(0xffffff);
                         this.time.delayedCall(100, () => { if (e.active && !e.isPoisoned) e.clearTint(); });
                     }
                 }
             });
-
-            // Desativa a física e esconde a bala imediatamente para não "voar" antes de sumir
-            if (bullet.body) bullet.body.enable = false;
-            bullet.setVisible(false);
-            bullet.setActive(false);
-
-            // Destrói a bala de fumaça imediatamente após o processamento da explosão
-            this.time.delayedCall(10, () => {
-                if (bullet && bullet.active) bullet.destroy();
-            });
+            // Bala já foi escondida e parada no topo; vamos destruí-la agora.
+            bullet.destroy();
             return;
         }
 
         // Lógica de Ricochete Elétrico (Volt Shot)
-        if (bullet.element === 'electric' && (bullet.chainCount || 0) < 2) {
+        if (isElectric && canChain) {
             bullet.chainCount = (bullet.chainCount || 0) + 1;
 
-            // Encontrar o próximo alvo mais próximo (excluindo este)
+            // Encontrar o próximo alvo mais próximo
             const nextTarget = this.enemies.getChildren().find(e =>
-                e !== enemy &&
-                e.active &&
+                e !== enemy && e.active &&
                 Phaser.Math.Distance.Between(bullet.x, bullet.y, e.x, e.y) < 250
             );
 
             if (nextTarget) {
-                // Pequeno "flash" visual de conexão
                 this.gadgetGraphics.lineStyle(2, 0x00f2ff, 1);
                 this.gadgetGraphics.lineBetween(enemy.x, enemy.y, nextTarget.x, nextTarget.y);
                 this.time.delayedCall(50, () => { if (this.gadgetGraphics) this.gadgetGraphics.clear(); });
 
-                // Mover bala para o novo alvo
                 this.physics.moveToObject(bullet, nextTarget, 400);
                 bullet.setRotation(Phaser.Math.Angle.Between(bullet.x, bullet.y, nextTarget.x, nextTarget.y));
-                return; // Não destrói a bala ainda
+                return;
             }
         }
 
-        if (bullet.body) bullet.body.enable = false;
-        bullet.setVisible(false);
-        bullet.setActive(false);
+        // Se chegamos aqui e a bala ainda existe (não ricocheteou), mata ela de vez.
         bullet.destroy();
     }
 
