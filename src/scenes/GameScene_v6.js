@@ -136,6 +136,67 @@ export class GameScene extends Phaser.Scene {
         if (this.textures.exists('push_bullet')) this.textures.remove('push_bullet');
         generatePushBullet('push_bullet', 0);
 
+        // Pixel Smoke Bolt (Impact Bolt Aesthetic - Animated White Puff)
+        ['smoke_bolt_1', 'smoke_bolt_2'].forEach(key => {
+            if (this.textures.exists(key)) this.textures.remove(key);
+        });
+
+        const generateSmokeBolt = (key, frameIndex) => {
+            const pbGraphics = this.add.graphics();
+            const fp = { w: 0xffffff, l: 0xdddddd, d: 0xaaaaaa, c: 0x00ffff }; // w=white, l=light gray, d=dark gray, c=cyan core
+
+            // Shape: A puff of thick smoke
+            let pbData = [
+                "   lll   ",
+                " lllwwll ",
+                "llwwwdwwl",
+                "ldwwwwwwl",
+                "llwwcwwdl",
+                " lwwwdwl ",
+                "  llwll  ",
+            ];
+
+            if (frameIndex === 1) {
+                // Expanding / shifting puff
+                pbData = [
+                    "  llll   ",
+                    " llwwlll ",
+                    "llwdwddwl",
+                    "llwwcwwwl",
+                    "ldwwwwdwl",
+                    " llwwll  ",
+                    "   ll    ",
+                ];
+            }
+
+            const pSize = 1.5;
+            for (let y = 0; y < pbData.length; y++) {
+                for (let x = 0; x < pbData[y].length; x++) {
+                    const char = pbData[y][x];
+                    if (fp[char]) {
+                        pbGraphics.fillStyle(fp[char], 1);
+                        pbGraphics.fillRect(x * pSize, y * pSize, pSize, pSize);
+                    }
+                }
+            }
+            pbGraphics.generateTexture(key, 15, 12);
+            pbGraphics.destroy();
+        };
+
+        generateSmokeBolt('smoke_bolt_1', 0);
+        generateSmokeBolt('smoke_bolt_2', 1);
+
+        if (this.anims.exists('smoke_anim')) this.anims.remove('smoke_anim');
+        this.anims.create({
+            key: 'smoke_anim',
+            frames: [
+                { key: 'smoke_bolt_1' },
+                { key: 'smoke_bolt_2' }
+            ],
+            frameRate: 10,
+            repeat: -1
+        });
+
         // Pixel Coin
         this.graphics.clear();
         this.graphics.fillStyle(0xffda00, 1);
@@ -1140,6 +1201,39 @@ export class GameScene extends Phaser.Scene {
         } else if (bullet.element === 'push') {
             // APPLY KNOCKBACK EFFECT - Previously missing!
             this.applyElementalEffect(enemy, 'push', 1, false);
+        } else if (bullet.element === 'force') {
+            // AREA OF EFFECT "IMPACT BOLT" EXPLOSION
+            const blastRadius = 120;
+            const splashDamage = 15 * this.player.damageMultiplier;
+
+            // Visual Blast Indicator
+            const blast = this.add.graphics();
+            blast.fillStyle(0xffffff, 0.8);
+            blast.fillCircle(enemy.x, enemy.y, 10);
+            blast.setDepth(20);
+
+            // Blast expansion animation
+            this.tweens.add({
+                targets: blast,
+                scaleX: blastRadius / 10,
+                scaleY: blastRadius / 10,
+                alpha: 0,
+                duration: 250,
+                onComplete: () => blast.destroy()
+            });
+
+            // Apply Area Damage to nearby enemies
+            this.enemies.getChildren().forEach(e => {
+                if (e.active && e !== enemy) {
+                    const dist = Phaser.Math.Distance.Between(enemy.x, enemy.y, e.x, e.y);
+                    if (dist <= blastRadius) {
+                        e.takeDamage(splashDamage);
+                        // Brief white flash for taking splash damage
+                        e.setTint(0xffffff);
+                        this.time.delayedCall(100, () => { if (e.active && !e.isPoisoned) e.clearTint(); });
+                    }
+                }
+            });
         }
 
         // Lógica de Ricochete Elétrico (Volt Shot)
@@ -1586,6 +1680,13 @@ export class GameScene extends Phaser.Scene {
             bullet.setScale(1.2);
             bullet.setRotation(angle + Math.PI / 2); // Same rotation as normal metal bullet
             if (bullet.anims) bullet.play('push_anim', true);
+        } else if (element === 'force') {
+            // IMPACT BOLT (Smoke puff)
+            bullet.setTexture('smoke_bolt_1');
+            bullet.clearTint();
+            bullet.setScale(2.0); // Make the smoke puff robust and visible
+            bullet.setRotation(angle);
+            if (bullet.anims) bullet.play('smoke_anim', true);
         } else {
             // Bala normal metálica
             bullet.setTexture('bullet');
