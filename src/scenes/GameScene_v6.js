@@ -1247,6 +1247,10 @@ export class GameScene extends Phaser.Scene {
                     }
                 }
             });
+
+            // Destrói a bala de fumaça imediatamente após a explosão
+            bullet.destroy();
+            return;
         }
 
         // Lógica de Ricochete Elétrico (Volt Shot)
