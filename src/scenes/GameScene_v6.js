@@ -74,28 +74,67 @@ export class GameScene extends Phaser.Scene {
 
         this.graphics.generateTexture('bullet', 16, 16);
 
-        // Pixel Push Bullet (Purple Metal Aesthetic)
-        this.graphics.clear();
-        // Outline (Dark Purple)
-        this.graphics.fillStyle(0x3a003a, 1);
-        this.graphics.fillRect(4, 2, 8, 12);
-        this.graphics.fillRect(6, 0, 4, 3);
-        // Shell Body (Purple/Magenta)
-        this.graphics.fillStyle(0xaa00ff, 1);
-        this.graphics.fillRect(5, 3, 6, 10);
-        this.graphics.fillRect(7, 1, 2, 2);
-        // Cyan Detail Ring
-        this.graphics.fillStyle(0x00ffff, 1);
-        this.graphics.fillRect(4, 9, 8, 2);
-        // Highlight
-        this.graphics.fillStyle(0xffddff, 1);
-        this.graphics.fillRect(6, 4, 1, 5);
-        this.graphics.fillRect(7, 2, 1, 1);
-        // Base (Dark Violet)
-        this.graphics.fillStyle(0x5500aa, 1);
-        this.graphics.fillRect(5, 13, 6, 2);
+        // Pixel Push Bullet (Purple Metal Aesthetic - Animated)
+        ['push_bullet_1', 'push_bullet_2'].forEach(key => {
+            if (this.textures.exists(key)) this.textures.remove(key);
+        });
 
-        this.graphics.generateTexture('push_bullet', 16, 16);
+        const generatePushBullet = (key, frameIndex) => {
+            const pbGraphics = this.add.graphics();
+            // Same shape as normal bullet, but purple!
+
+            // Outline (Dark Purple)
+            pbGraphics.fillStyle(0x3a003a, 1);
+            pbGraphics.fillRect(4, 2, 8, 12);
+            pbGraphics.fillRect(6, 0, 4, 3);
+
+            // Shell Body (Vibrant Purple)
+            pbGraphics.fillStyle(0x8a2be2, 1); // Blue Violet
+            pbGraphics.fillRect(5, 3, 6, 10);
+            pbGraphics.fillRect(7, 1, 2, 2);
+
+            // Neon Ring (Cyan/Pink Alternating)
+            if (frameIndex === 0) {
+                pbGraphics.fillStyle(0x00ffff, 1); // Cyan
+            } else {
+                pbGraphics.fillStyle(0xff00ff, 1); // Magenta
+            }
+            pbGraphics.fillRect(4, 9, 8, 2);
+
+            // Highlight
+            pbGraphics.fillStyle(0xffddff, 1);
+            pbGraphics.fillRect(6, 4, 1, 5);
+            pbGraphics.fillRect(7, 2, 1, 1);
+
+            // Base/Thruster (Glows brighter on frame 2)
+            if (frameIndex === 0) {
+                pbGraphics.fillStyle(0x5500aa, 1);
+            } else {
+                pbGraphics.fillStyle(0x9900ff, 1); // Brighter thrust
+            }
+            pbGraphics.fillRect(5, 13, 6, 2);
+
+            pbGraphics.generateTexture(key, 16, 16);
+            pbGraphics.destroy();
+        };
+
+        generatePushBullet('push_bullet_1', 0);
+        generatePushBullet('push_bullet_2', 1);
+
+        if (this.anims.exists('push_anim')) this.anims.remove('push_anim');
+        this.anims.create({
+            key: 'push_anim',
+            frames: [
+                { key: 'push_bullet_1' },
+                { key: 'push_bullet_2' }
+            ],
+            frameRate: 15,
+            repeat: -1
+        });
+
+        // Fallback static texture if needed
+        if (this.textures.exists('push_bullet')) this.textures.remove('push_bullet');
+        generatePushBullet('push_bullet', 0);
 
         // Pixel Coin
         this.graphics.clear();
@@ -1539,10 +1578,11 @@ export class GameScene extends Phaser.Scene {
             });
 
         } else if (element === 'push') {
-            bullet.setTexture('push_bullet');
+            bullet.setTexture('push_bullet_1');
             bullet.clearTint();
-            bullet.setScale(1);
+            bullet.setScale(1.2);
             bullet.setRotation(angle + Math.PI / 2); // Same rotation as normal metal bullet
+            if (bullet.anims) bullet.play('push_anim', true);
         } else {
             // Bala normal metálica
             bullet.setTexture('bullet');
