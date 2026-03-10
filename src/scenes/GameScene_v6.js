@@ -1697,7 +1697,7 @@ export class GameScene extends Phaser.Scene {
             // IMPACT BOLT (Smoke puff)
             bullet.setTexture('smoke_bolt_1');
             bullet.clearTint();
-            bullet.setScale(2.0); // Make the smoke puff robust and visible
+            bullet.setScale(1.5);
             bullet.setRotation(angle);
             if (bullet.anims) bullet.play('smoke_anim', true);
         } else {
