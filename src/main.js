@@ -1,7 +1,7 @@
-import { StartScene } from './scenes/StartScene_v6.js?v=8';
-import { GameScene } from './scenes/GameScene_v6.js?v=8';
-import { UpgradeScene } from './scenes/UpgradeScene_v6.js?v=8';
-import { GameOverScene } from './scenes/GameOverScene_v6.js?v=8';
+import { StartScene } from './scenes/StartScene_v6.js?v=9';
+import { GameScene } from './scenes/GameScene_v6.js?v=9';
+import { UpgradeScene } from './scenes/UpgradeScene_v6.js?v=9';
+import { GameOverScene } from './scenes/GameOverScene_v6.js?v=9';
 
 console.log("Main.js v6 Loaded - Force Refresh");
 

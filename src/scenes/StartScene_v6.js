@@ -1,13 +1,16 @@
-import { settingsManager } from '../utils/SettingsManager.js?v=8';
-import { CHARACTERS } from '../utils/CharacterData.js?v=8';
+import { settingsManager } from '../utils/SettingsManager.js?v=9';
+import { CHARACTERS } from '../utils/CharacterData.js?v=9';
 
 export class StartScene extends Phaser.Scene {
     constructor() {
         super('StartScene_v6');
         this.difficulty = 'normal';
+    }
+
+    init() {
         this.selectedCharacter = localStorage.getItem('upgradeOrDie_selectedCharacter') || 'player';
         this.maxWave = parseInt(localStorage.getItem('upgradeOrDie_maxWave') || '1', 10);
-        console.log("StartScene v6 Constructor - Max Wave:", this.maxWave);
+        console.log("StartScene v6 Init - Max Wave:", this.maxWave);
     }
 
     create() {
