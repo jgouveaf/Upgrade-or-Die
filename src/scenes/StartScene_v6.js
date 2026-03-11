@@ -1,5 +1,5 @@
-import { settingsManager } from '../utils/SettingsManager.js?v=7';
-import { CHARACTERS } from '../utils/CharacterData.js?v=7';
+import { settingsManager } from '../utils/SettingsManager.js?v=8';
+import { CHARACTERS } from '../utils/CharacterData.js?v=8';
 
 export class StartScene extends Phaser.Scene {
     constructor() {
@@ -134,42 +134,49 @@ export class StartScene extends Phaser.Scene {
     }
 
     ensureSettingsUI() {
-        if (document.getElementById('settings-overlay')) return;
-
-        console.log("StartScene: Settings UI missing from DOM, injecting...");
         const uiLayer = document.getElementById('ui-layer') || document.body;
-
-        const globalUIHTML = `
-            <div id="character-overlay" class="settings-overlay" style="display: none; z-index: 1000; align-items:center; justify-content:center; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85);">
-                <div class="settings-menu" style="width: 90%; max-width: 700px; max-height: 90%; overflow-y: auto; text-align: center;">
-                    <h2 style="color: var(--primary); margin-bottom: 2rem; font-family: 'Press Start 2P', cursive; font-size: 16px;">ESCOLHA A SKIN / CLASSE</h2>
-                    <div id="character-list" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;"></div>
-                    <button class="pause-btn" id="close-character" style="margin-top: 2rem;">FECHAR</button>
-                    <p style="margin-top: 20px; font-size: 10px; color: #aaa;">Seu recorde máximo: Wave ${this.maxWave}</p>
-                </div>
-            </div>
-
-            <div id="settings-overlay" class="settings-overlay" style="display: none;">
-                <div class="settings-menu">
-                    <h2 style="color: var(--primary); text-align: center; margin-bottom: 2rem;">CONFIGURAÇÕES</h2>
-                    <div id="bindings-list" class="bindings-list"></div>
-                    <button class="pause-btn" id="close-settings" style="margin-top: 2rem;">FECHAR</button>
-                </div>
-                <div id="rebinding-modal" class="rebinding-modal" style="display: none;">
-                    <div class="rebinding-content">
-                        <p>PRESSIONE UMA TECLA PARA</p>
-                        <h3 id="rebinding-action" style="color: var(--secondary); margin-top: 1rem;">AÇÃO</h3>
-                        <p style="font-size: 0.7rem; margin-top: 2rem; opacity: 0.7;">(Pressione ESC para cancelar)</p>
+        
+        // Inject Character Overlay if missing
+        if (!document.getElementById('character-overlay')) {
+            console.log("StartScene: Character UI missing, injecting...");
+            const characterHTML = `
+                <div id="character-overlay" class="settings-overlay" style="display: none; z-index: 1000; align-items:center; justify-content:center; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85);">
+                    <div class="settings-menu" style="width: 90%; max-width: 700px; max-height: 90%; overflow-y: auto; text-align: center;">
+                        <h2 style="color: var(--primary); margin-bottom: 2rem; font-family: 'Press Start 2P', cursive; font-size: 16px;">ESCOLHA A SKIN / CLASSE</h2>
+                        <div id="character-list" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;"></div>
+                        <button class="pause-btn" id="close-character" style="margin-top: 2rem;">FECHAR</button>
+                        <p style="margin-top: 20px; font-size: 10px; color: #aaa;">Seu recorde máximo: Wave ${this.maxWave}</p>
                     </div>
                 </div>
-            </div>
-        `;
-
-        uiLayer.insertAdjacentHTML('beforeend', globalUIHTML);
-        
-        document.getElementById('close-character').onclick = () => {
-            document.getElementById('character-overlay').style.display = 'none';
+            `;
+            uiLayer.insertAdjacentHTML('beforeend', characterHTML);
+            document.getElementById('close-character').onclick = () => {
+                document.getElementById('character-overlay').style.display = 'none';
+            }
         }
+
+        // Inject Settings Overlay if missing (Fall-back for debug)
+        if (!document.getElementById('settings-overlay')) {
+            console.log("StartScene: Settings UI missing, injecting...");
+            const settingsHTML = `
+                <div id="settings-overlay" class="settings-overlay" style="display: none;">
+                    <div class="settings-menu">
+                        <h2 style="color: var(--primary); text-align: center; margin-bottom: 2rem;">CONFIGURAÇÕES</h2>
+                        <div id="bindings-list" class="bindings-list"></div>
+                        <button class="pause-btn" id="close-settings" style="margin-top: 2rem;">FECHAR</button>
+                    </div>
+                    <div id="rebinding-modal" class="rebinding-modal" style="display: none;">
+                        <div class="rebinding-content">
+                            <p>PRESSIONE UMA TECLA PARA</p>
+                            <h3 id="rebinding-action" style="color: var(--secondary); margin-top: 1rem;">AÇÃO</h3>
+                            <p style="font-size: 0.7rem; margin-top: 2rem; opacity: 0.7;">(Pressione ESC para cancelar)</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            uiLayer.insertAdjacentHTML('beforeend', settingsHTML);
+        }
+        
     }
 
     handleOpenCharacters() {
