@@ -988,6 +988,7 @@ export class GameScene extends Phaser.Scene {
             this.player.damageMultiplier = this.persistedPlayer.damageMultiplier;
             this.player.speedMultiplier = this.persistedPlayer.speedMultiplier;
             this.player.gadgets = this.persistedPlayer.gadgets || this.player.gadgets;
+            this.player.magnetRadius = this.persistedPlayer.magnetRadius || 0;
         } else {
             // Apply Difficulty HP Mutliplier base
             this.player.health *= this.difficultyConfig.hpMult;
@@ -1294,6 +1295,20 @@ export class GameScene extends Phaser.Scene {
                 right: this.keys.RIGHT
             };
             this.player.update(movement, this.input.activePointer);
+
+            // MAGNET: attract nearby coins to player
+            const magnetR = this.player.magnetRadius || 0;
+            if (magnetR > 0 && this.coins) {
+                this.coins.getChildren().forEach(coin => {
+                    if (!coin.active) return;
+                    const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, coin.x, coin.y);
+                    if (dist < magnetR) {
+                        const angle = Phaser.Math.Angle.Between(coin.x, coin.y, this.player.x, this.player.y);
+                        const speed = Math.max(150, 300 * (1 - dist / magnetR));
+                        coin.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
+                    }
+                });
+            }
         }
 
         // Bullet effects (Trails and Smoke)
@@ -1715,7 +1730,8 @@ export class GameScene extends Phaser.Scene {
                 coins: this.player.coins,
                 damageMultiplier: this.player.damageMultiplier,
                 speedMultiplier: this.player.speedMultiplier,
-                gadgets: this.player.gadgets
+                gadgets: this.player.gadgets,
+                magnetRadius: this.player.magnetRadius || 0
             },
             wave: this.wave
         });

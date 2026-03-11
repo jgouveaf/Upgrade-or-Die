@@ -1,5 +1,5 @@
-import { settingsManager } from '../utils/SettingsManager.js?v=13';
-import { CHARACTERS } from '../utils/CharacterData.js?v=13';
+import { settingsManager } from '../utils/SettingsManager.js?v=14';
+import { CHARACTERS } from '../utils/CharacterData.js?v=14';
 
 export class StartScene extends Phaser.Scene {
     constructor() {

@@ -15,6 +15,7 @@ export class UpgradeScene extends Phaser.Scene {
             maxHealth: 100,
             damageMultiplier: 1,
             speedMultiplier: 1,
+            magnetRadius: 0,
             gadgets: { turrets: {}, forceFields: {}, specialShots: {} }
         };
         this.wave = data.wave || 1;
@@ -193,13 +194,20 @@ export class UpgradeScene extends Phaser.Scene {
     }
 
     showStandardUpgrades(width, height) {
+        const magnetLevel = this.playerData.magnetRadius || 0;
+        const magnetName = magnetLevel === 0 ? 'ÍMAGNET' : `ÍMAGNET Lv${Math.ceil(magnetLevel/80)}`;
+        const magnetDesc = magnetLevel === 0
+            ? 'Atrai moedas\npróximas!'
+            : `+Range\n(atual: ${magnetLevel}px)`;
+
         const upgrades = [
             { id: 'health', name: 'NANO-ARMOR', desc: '+20 HP\n& HEAL', cost: 20 * (this.wave + 1) },
             { id: 'damage', name: 'POWER CELLS', desc: '+15%\nDAMAGE', cost: 30 * (this.wave + 1) },
-            { id: 'speed', name: 'ROCKET BOOTS', desc: '+10%\nSPEED', cost: 15 * (this.wave + 1) }
+            { id: 'speed', name: 'ROCKET BOOTS', desc: '+10%\nSPEED', cost: 15 * (this.wave + 1) },
+            { id: 'magnet', name: magnetName, desc: magnetDesc, cost: 25 * (this.wave + 1) }
         ];
 
-        const selected = upgrades.sort(() => 0.5 - Math.random());
+        const selected = upgrades.sort(() => 0.5 - Math.random()).slice(0, 3);
 
         selected.forEach((up, index) => {
             const x = width / 2 - 200 + (index * 200);
@@ -399,6 +407,9 @@ export class UpgradeScene extends Phaser.Scene {
             this.playerData.damageMultiplier += 0.15;
         } else if (id === 'speed') {
             this.playerData.speedMultiplier += 0.10;
+        } else if (id === 'magnet') {
+            if (!this.playerData.magnetRadius) this.playerData.magnetRadius = 0;
+            this.playerData.magnetRadius += 80; // +80px range per upgrade
         }
     }
 }
