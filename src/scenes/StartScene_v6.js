@@ -26,10 +26,11 @@ export class StartScene extends Phaser.Scene {
         // Generate all skin textures so they show in the character selection menu
         this.generateSkinTextures();
 
-
+        const { width, height } = this.scale;
 
         // Background
         this.add.rectangle(0, 0, width, height, 0x0a0a0c).setOrigin(0);
+
 
         // Title
         const title = this.add.text(width / 2, height / 2 - 200, 'UPGRADE OR DIE', {
