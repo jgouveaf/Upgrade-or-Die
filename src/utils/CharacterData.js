@@ -2,7 +2,7 @@ export const CHARACTERS = [
     {
         id: 'player',
         name: 'O CLÁSSICO',
-        desc: 'O herói padrão.\nNenhum bônus.',
+        desc: 'O herói padrão.\nEquilibrado.',
         unlockWave: 1,
         color: '#00f2ff',
         skin: 'player',
@@ -52,32 +52,233 @@ export const CHARACTERS = [
     {
         id: 'gustavo_dino',
         name: 'GUSTAVO DINO',
-        desc: 'O Bom Dinossauro Humano\n+5% de Vida Máxima',
+        desc: 'O Bom Dinossauro Humano\n+25 Vida Máxima.',
         unlockWave: null,
         unlockDeaths: 1,
         color: '#4caf50',
         skin: 'gustavo_dino',
-        buffs: { maxHealthBonus: 5 },
+        buffs: { maxHealthBonus: 25 },
         gadgets: {}
     },
-    { id: 'skin_1', name: 'APRENDIZ', desc: 'Desbloqueado ao matar 100 inimigos totais.', color: '#aaffaa', skin: 'player', unlockTotalKills: 100, buffs: {}, gadgets: {} },
-    { id: 'skin_2', name: 'GLADIADOR', desc: 'Desbloqueado ao matar 500 inimigos totais.', color: '#ffaaaa', skin: 'player', unlockTotalKills: 500, buffs: {}, gadgets: {} },
-    { id: 'skin_3', name: 'EXTERMINADOR', desc: 'Desbloqueado ao matar 1000 inimigos totais.', color: '#ff0000', skin: 'player', unlockTotalKills: 1000, buffs: {}, gadgets: {} },
-    { id: 'skin_4', name: 'MÁQUINA DE MATAR', desc: 'Desbloqueado ao matar 5000 inimigos totais.', color: '#880000', skin: 'player', unlockTotalKills: 5000, buffs: {}, gadgets: {} },
-    { id: 'skin_5', name: 'SOBREVIVENTE', desc: 'Chegue na horda 5 no Difícil.', color: '#ffaa00', skin: 'player', unlockDifficulty: 'hard', unlockWaveCond: 5, buffs: {}, gadgets: {} },
-    { id: 'skin_6', name: 'VETERANO', desc: 'Chegue na horda 10 no Difícil.', color: '#ffaa00', skin: 'player', unlockDifficulty: 'hard', unlockWaveCond: 10, buffs: {}, gadgets: {} },
-    { id: 'skin_7', name: 'IMPARÁVEL', desc: 'Chegue na horda 15 no Difícil.', color: '#ffaa00', skin: 'player', unlockDifficulty: 'hard', unlockWaveCond: 15, buffs: {}, gadgets: {} },
-    { id: 'skin_8', name: 'LENDA VIVA', desc: 'Chegue na horda 20 no Difícil.', color: '#ffaa00', skin: 'player', unlockDifficulty: 'hard', unlockWaveCond: 20, buffs: {}, gadgets: {} },
-    { id: 'skin_9', name: 'KAMIKAZE', desc: 'Morra 10 vezes no total.', color: '#aaaaaa', skin: 'player', unlockDeaths: 10, buffs: {}, gadgets: {} },
-    { id: 'skin_10', name: 'FÊNIX', desc: 'Morra 25 vezes no total.', color: '#ccccaa', skin: 'player', unlockDeaths: 25, buffs: {}, gadgets: {} },
-    { id: 'skin_11', name: 'IMORTAL (?)', desc: 'Morra 50 vezes no total.', color: '#aaaacc', skin: 'player', unlockDeaths: 50, buffs: {}, gadgets: {} },
-    { id: 'skin_12', name: 'MATADOR RÁPIDO', desc: 'Mate 200 inimigos em uma partida.', color: '#00ccff', skin: 'player', unlockMatchKills: 200, buffs: {}, gadgets: {} },
-    { id: 'skin_13', name: 'MATADOR FUROR', desc: 'Mate 500 inimigos em uma partida.', color: '#00aaff', skin: 'player', unlockMatchKills: 500, buffs: {}, gadgets: {} },
-    { id: 'skin_14', name: 'ASSASSINO EM SÉRIE', desc: 'Mate 1000 inimigos em uma partida.', color: '#0055ff', skin: 'player', unlockMatchKills: 1000, buffs: {}, gadgets: {} },
-    { id: 'skin_15', name: 'INICIANTE', desc: 'Chegue na horda 10 no Normal.', color: '#aaffaa', skin: 'player', unlockDifficulty: 'normal', unlockWaveCond: 10, buffs: {}, gadgets: {} },
-    { id: 'skin_16', name: 'EXPERIENTE', desc: 'Chegue na horda 20 no Normal.', color: '#88ff88', skin: 'player', unlockDifficulty: 'normal', unlockWaveCond: 20, buffs: {}, gadgets: {} },
-    { id: 'skin_17', name: 'MUITO FÁCIL', desc: 'Chegue na horda 30 no Fácil.', color: '#ffffff', skin: 'player', unlockDifficulty: 'easy', unlockWaveCond: 30, buffs: {}, gadgets: {} },
-    { id: 'skin_18', name: 'APENAS UM ARRANHÃO', desc: 'Morra 5 vezes no total.', color: '#bbbbbb', skin: 'player', unlockDeaths: 5, buffs: {}, gadgets: {} },
-    { id: 'skin_19', name: 'DORMINHOCO', desc: 'Morra 100 vezes no total.', color: '#444444', skin: 'player', unlockDeaths: 100, buffs: {}, gadgets: {} },
-    { id: 'skin_20', name: 'DEUS DA MORTE', desc: 'Mate 10000 inimigos no total.', color: '#111111', skin: 'player', unlockTotalKills: 10000, buffs: {}, gadgets: {} }
+
+    // --- Skins de Abates Totais ---
+    {
+        id: 'skin_1',
+        name: 'APRENDIZ',
+        desc: 'Primeiros passos.\n+5% de dano.',
+        color: '#aaffaa',
+        skin: 'player',
+        unlockTotalKills: 100,
+        buffs: { damageMult: 1.05 },
+        gadgets: {}
+    },
+    {
+        id: 'skin_2',
+        name: 'GLADIADOR',
+        desc: 'Batalhador nato.\n+10% dano e +10HP.',
+        color: '#ffaaaa',
+        skin: 'player',
+        unlockTotalKills: 500,
+        buffs: { damageMult: 1.10, maxHealthBonus: 10 },
+        gadgets: {}
+    },
+    {
+        id: 'skin_3',
+        name: 'EXTERMINADOR',
+        desc: 'Semeia o caos.\n+15% dano e Torreta de Fogo.',
+        color: '#ff0000',
+        skin: 'player',
+        unlockTotalKills: 1000,
+        buffs: { damageMult: 1.15 },
+        gadgets: { turrets: { fire: 1 } }
+    },
+    {
+        id: 'skin_4',
+        name: 'MÁQUINA DE MATAR',
+        desc: 'Sem misericórdia.\n+20% dano e Campo Elétrico.',
+        color: '#880000',
+        skin: 'player',
+        unlockTotalKills: 5000,
+        buffs: { damageMult: 1.20 },
+        gadgets: { forceFields: { electric: 1 } }
+    },
+
+    // --- Skins de Dificuldade Difícil ---
+    {
+        id: 'skin_5',
+        name: 'SOBREVIVENTE',
+        desc: 'Resistiu ao caos.\n+20HP máximo.',
+        color: '#ffaa00',
+        skin: 'player',
+        unlockDifficulty: 'hard',
+        unlockWaveCond: 5,
+        buffs: { maxHealthBonus: 20 },
+        gadgets: {}
+    },
+    {
+        id: 'skin_6',
+        name: 'VETERANO',
+        desc: 'Guerra é seu lar.\n+30HP e Tiro Elétrico.',
+        color: '#ffaa00',
+        skin: 'player',
+        unlockDifficulty: 'hard',
+        unlockWaveCond: 10,
+        buffs: { maxHealthBonus: 30 },
+        gadgets: { specialShots: { electric: 1 } }
+    },
+    {
+        id: 'skin_7',
+        name: 'IMPARÁVEL',
+        desc: 'Força bruta.\n+15% velocidade e +20% dano.',
+        color: '#ffaa00',
+        skin: 'player',
+        unlockDifficulty: 'hard',
+        unlockWaveCond: 15,
+        buffs: { speedMult: 1.15, damageMult: 1.20 },
+        gadgets: {}
+    },
+    {
+        id: 'skin_8',
+        name: 'LENDA VIVA',
+        desc: 'Atingiu o impossível.\n+25% tudo e Torreta de Veneno.',
+        color: '#ffaa00',
+        skin: 'player',
+        unlockDifficulty: 'hard',
+        unlockWaveCond: 20,
+        buffs: { speedMult: 1.15, damageMult: 1.25, maxHealthBonus: 40 },
+        gadgets: { turrets: { poison: 1 } }
+    },
+
+    // --- Skins de Mortes ---
+    {
+        id: 'skin_9',
+        name: 'KAMIKAZE',
+        desc: 'Vive perigosamente.\n+25% dano, -20HP.',
+        color: '#aaaaaa',
+        skin: 'player',
+        unlockDeaths: 10,
+        buffs: { damageMult: 1.25, maxHealthBonus: -20 },
+        gadgets: {}
+    },
+    {
+        id: 'skin_10',
+        name: 'FÊNIX',
+        desc: 'Renasce das cinzas.\n+30HP e Tiro de Fogo.',
+        color: '#ccccaa',
+        skin: 'player',
+        unlockDeaths: 25,
+        buffs: { maxHealthBonus: 30 },
+        gadgets: { specialShots: { fire: 1 } }
+    },
+    {
+        id: 'skin_11',
+        name: 'IMORTAL (?)',
+        desc: 'Não aprende a morrer.\n+50HP e Campo de Veneno.',
+        color: '#aaaacc',
+        skin: 'player',
+        unlockDeaths: 50,
+        buffs: { maxHealthBonus: 50 },
+        gadgets: { forceFields: { poison: 1 } }
+    },
+
+    // --- Skins de Abates por Partida ---
+    {
+        id: 'skin_12',
+        name: 'MATADOR RÁPIDO',
+        desc: 'Velocidade é poder.\n+20% velocidade.',
+        color: '#00ccff',
+        skin: 'player',
+        unlockMatchKills: 200,
+        buffs: { speedMult: 1.20 },
+        gadgets: {}
+    },
+    {
+        id: 'skin_13',
+        name: 'MATADOR FUROR',
+        desc: 'Implacável.\n+20% velocidade e Tiro Empurrão.',
+        color: '#00aaff',
+        skin: 'player',
+        unlockMatchKills: 500,
+        buffs: { speedMult: 1.20, damageMult: 1.10 },
+        gadgets: { specialShots: { push: 1 } }
+    },
+    {
+        id: 'skin_14',
+        name: 'ASSASSINO EM SÉRIE',
+        desc: 'Lenda da batalha.\n+30% dano e +25% velocidade.',
+        color: '#0055ff',
+        skin: 'player',
+        unlockMatchKills: 1000,
+        buffs: { speedMult: 1.25, damageMult: 1.30 },
+        gadgets: { turrets: { electric: 1 } }
+    },
+
+    // --- Skins de Dificuldade Normal ---
+    {
+        id: 'skin_15',
+        name: 'INICIANTE',
+        desc: 'Está pegando o jeito.\n+10HP e +5% dano.',
+        color: '#aaffaa',
+        skin: 'player',
+        unlockDifficulty: 'normal',
+        unlockWaveCond: 10,
+        buffs: { maxHealthBonus: 10, damageMult: 1.05 },
+        gadgets: {}
+    },
+    {
+        id: 'skin_16',
+        name: 'EXPERIENTE',
+        desc: 'Já viu de tudo.\n+20HP e Torreta Elétrica.',
+        color: '#88ff88',
+        skin: 'player',
+        unlockDifficulty: 'normal',
+        unlockWaveCond: 20,
+        buffs: { maxHealthBonus: 20 },
+        gadgets: { turrets: { electric: 1 } }
+    },
+
+    // --- Skin de Dificuldade Fácil ---
+    {
+        id: 'skin_17',
+        name: 'MUITO FÁCIL',
+        desc: 'Passeio no parque.\n+10% velocidade e +10HP.',
+        color: '#ffffff',
+        skin: 'player',
+        unlockDifficulty: 'easy',
+        unlockWaveCond: 30,
+        buffs: { speedMult: 1.10, maxHealthBonus: 10 },
+        gadgets: {}
+    },
+
+    // --- Mais skins de morte ---
+    {
+        id: 'skin_18',
+        name: 'APENAS UM ARRANHÃO',
+        desc: 'Dói um pouquinho.\n+5% velocidade.',
+        color: '#bbbbbb',
+        skin: 'player',
+        unlockDeaths: 5,
+        buffs: { speedMult: 1.05 },
+        gadgets: {}
+    },
+    {
+        id: 'skin_19',
+        name: 'DORMINHOCO',
+        desc: 'Começa cansado.\n+60HP mas -10% velocidade.',
+        color: '#444444',
+        skin: 'player',
+        unlockDeaths: 100,
+        buffs: { maxHealthBonus: 60, speedMult: 0.90 },
+        gadgets: {}
+    },
+    {
+        id: 'skin_20',
+        name: 'DEUS DA MORTE',
+        desc: 'Onipotente.\n+30% dano, Campo de Fogo e Tiro Elétrico.',
+        color: '#111111',
+        skin: 'player',
+        unlockTotalKills: 10000,
+        buffs: { damageMult: 1.30, maxHealthBonus: 30 },
+        gadgets: { forceFields: { fire: 1 }, specialShots: { electric: 1 } }
+    }
 ];
