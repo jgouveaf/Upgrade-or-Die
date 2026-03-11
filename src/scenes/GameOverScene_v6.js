@@ -115,7 +115,7 @@ export class GameOverScene extends Phaser.Scene {
         });
 
         this.input.on('pointerdown', () => {
-            this.scene.start('GameScene_v6', { wave: 1 });
+            this.scene.start('StartScene_v6');
         });
     }
 }

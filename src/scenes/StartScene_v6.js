@@ -69,7 +69,10 @@ export class StartScene extends Phaser.Scene {
 
         startBtn.on('pointerdown', () => {
             console.log("StartScene: Starting GameScene_v6");
-            this.scene.start('GameScene_v6', { difficulty: this.difficulty, wave: 1 });
+            let skin = 'brotato_rosseti';
+            if (this.difficulty === 'easy') skin = 'brotato_pav';
+            if (this.difficulty === 'hard') skin = 'brotato_porquinho';
+            this.scene.start('GameScene_v6', { difficulty: this.difficulty, wave: 1, skin: skin });
         });
 
         // Settings Button

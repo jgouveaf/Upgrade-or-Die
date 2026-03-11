@@ -28,18 +28,74 @@ export class GameScene extends Phaser.Scene {
         this.difficultyConfig = config[this.difficulty] || config.normal;
         console.log(`GameScene Init: Wave ${this.wave}, Difficulty: ${this.difficulty}`);
         this.persistedPlayer = data.player || null;
+        this.playerSkin = data.skin || 'brotato_rosseti';
     }
 
     preload() {
         this.graphics = this.add.graphics();
 
-        // Pixel Player (Blocky Robot)
+        // Pixel Player (Blocky Robot) - Legacy
         this.graphics.fillStyle(0x00f2ff, 1);
         this.graphics.fillRect(4, 4, 24, 24);
         this.graphics.fillStyle(0xffffff, 1);
         this.graphics.fillRect(8, 8, 4, 4);
         this.graphics.fillRect(20, 8, 4, 4);
         this.graphics.generateTexture('player', 32, 32);
+
+        // BROTATO INSPIRED SKINS
+        // 1. Brotato Rosseti (Normal) - Potato with Goatee and bald shine
+        this.graphics.clear();
+        this.graphics.fillStyle(0xcdae79, 1); // Potato skin body
+        this.graphics.fillRoundedRect(4, 4, 24, 24, 8); 
+        this.graphics.fillStyle(0xffffff, 1); // Eyes
+        this.graphics.fillRect(10, 10, 4, 4);
+        this.graphics.fillRect(18, 10, 4, 4);
+        this.graphics.fillStyle(0x000000, 1); // Pupils
+        this.graphics.fillRect(12, 12, 2, 2);
+        this.graphics.fillRect(18, 12, 2, 2);
+        this.graphics.fillStyle(0x1a1a1a, 1); // Goatee/Beard
+        this.graphics.fillRect(12, 22, 8, 4);
+        this.graphics.fillRect(14, 20, 4, 2); // Mustache
+        this.graphics.generateTexture('brotato_rosseti', 32, 32);
+
+        // 2. Brotato PAV (Easy) - Potato with Greenish accent and relaxed eyes
+        this.graphics.clear();
+        this.graphics.fillStyle(0xcdae79, 1); 
+        this.graphics.fillRoundedRect(4, 4, 24, 24, 8); 
+        this.graphics.fillStyle(0x00ff00, 1); // Green headband or cap!
+        this.graphics.fillRoundedRect(4, 4, 24, 6, 2);
+        this.graphics.fillStyle(0xffffff, 1); // Relaxed Eyes (half closed)
+        this.graphics.fillRect(10, 12, 4, 2);
+        this.graphics.fillRect(18, 12, 4, 2);
+        this.graphics.fillStyle(0x000000, 1);
+        this.graphics.fillRect(12, 12, 2, 2);
+        this.graphics.fillRect(18, 12, 2, 2);
+        this.graphics.fillStyle(0x000000, 1); // Smile
+        this.graphics.fillRect(16, 20, 2, 2);
+        this.graphics.fillRect(14, 18, 2, 2);
+        this.graphics.fillRect(12, 16, 2, 2);
+        this.graphics.generateTexture('brotato_pav', 32, 32);
+
+        // 3. Brotato Porquinho da Sorte (Hard) - Pinkish Potato, angry eyes
+        this.graphics.clear();
+        this.graphics.fillStyle(0xffaaff, 1); // Pinkish potato
+        this.graphics.fillRoundedRect(4, 4, 24, 24, 8); 
+        this.graphics.fillStyle(0xffffff, 1); // Angry Eyes (slanted)
+        this.graphics.fillRect(10, 10, 4, 4);
+        this.graphics.fillRect(18, 10, 4, 4);
+        this.graphics.fillStyle(0x000000, 1); // Pupils
+        this.graphics.fillRect(12, 10, 2, 2);
+        this.graphics.fillRect(18, 10, 2, 2);
+        this.graphics.fillStyle(0xff0055, 1); // Angry eyebrows
+        this.graphics.fillRect(8, 8, 4, 2);
+        this.graphics.fillRect(20, 8, 4, 2);
+        this.graphics.fillStyle(0xff55ff, 1); // Pig Snout
+        this.graphics.fillRect(14, 16, 4, 4);
+        this.graphics.fillStyle(0x000000, 1); // Nostrils
+        this.graphics.fillRect(14, 18, 1, 1);
+        this.graphics.fillRect(17, 18, 1, 1);
+        this.graphics.generateTexture('brotato_porquinho', 32, 32);
+
 
         // Pixel Enemy (Blocky Invader)
         this.graphics.clear();
@@ -1291,6 +1347,7 @@ export class GameScene extends Phaser.Scene {
         console.log("GameScene: Wave complete. Starting UpgradeScene_v6");
         this.scene.start('UpgradeScene_v6', {
             difficulty: this.difficulty,
+            skin: this.playerSkin,
             player: {
                 health: this.player.health,
                 maxHealth: this.player.maxHealth,
