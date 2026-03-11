@@ -48,5 +48,16 @@ export const CHARACTERS = [
         skin: 'brotato_mage',
         buffs: { speedMult: 1.1 },
         gadgets: { turrets: { poison: 1 }, specialShots: { poison: 1 } }
+    },
+    {
+        id: 'gustavo_dino',
+        name: 'GUSTAVO DINO',
+        desc: 'O Bom Dinossauro Humano\n+Super Vida\nComeça c/ Campo de Força\ne Tiro de Fogo.',
+        unlockWave: null,
+        unlockDeaths: 1,
+        color: '#4caf50',
+        skin: 'gustavo_dino',
+        buffs: { maxHealthBonus: 100 },
+        gadgets: { specialShots: { fire: 1 }, forceFields: { fire: 1 } }
     }
 ];

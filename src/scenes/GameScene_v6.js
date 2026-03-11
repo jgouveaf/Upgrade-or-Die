@@ -1,8 +1,8 @@
-import { Player } from '../entities/Player.js?v=9';
-import { Enemy } from '../entities/Enemy.js?v=9';
-import { settingsManager } from '../utils/SettingsManager.js?v=9';
-import * as GadgetData from '../utils/GadgetData.js?v=9';
-import { CHARACTERS } from '../utils/CharacterData.js?v=9';
+import { Player } from '../entities/Player.js?v=11';
+import { Enemy } from '../entities/Enemy.js?v=11';
+import { settingsManager } from '../utils/SettingsManager.js?v=11';
+import * as GadgetData from '../utils/GadgetData.js?v=11';
+import { CHARACTERS } from '../utils/CharacterData.js?v=11';
 const { GADGET_TYPES, ELEMENTS, GADGET_DEFINITIONS } = GadgetData;
 
 export class GameScene extends Phaser.Scene {
@@ -47,19 +47,34 @@ export class GameScene extends Phaser.Scene {
         this.graphics.generateTexture('player', 32, 32);
 
         // BROTATO INSPIRED SKINS
-        // 1. Brotato Rosseti (Normal) - Potato with Goatee and bald shine
+        // 1. Brotato Rosseti (Normal) - Bald and Goatee like the photo
         this.graphics.clear();
-        this.graphics.fillStyle(0xcdae79, 1); // Potato skin body
+        this.graphics.fillStyle(0xffdbac, 1); // Peach skin tone
         this.graphics.fillRoundedRect(4, 4, 24, 24, 8); 
-        this.graphics.fillStyle(0xffffff, 1); // Eyes
-        this.graphics.fillRect(10, 10, 4, 4);
-        this.graphics.fillRect(18, 10, 4, 4);
-        this.graphics.fillStyle(0x000000, 1); // Pupils
-        this.graphics.fillRect(12, 12, 2, 2);
-        this.graphics.fillRect(18, 12, 2, 2);
-        this.graphics.fillStyle(0x1a1a1a, 1); // Goatee/Beard
-        this.graphics.fillRect(12, 22, 8, 4);
-        this.graphics.fillRect(14, 20, 4, 2); // Mustache
+        
+        // Bald shine
+        this.graphics.fillStyle(0xffeedd, 1); 
+        this.graphics.fillRoundedRect(6, 4, 20, 8, 4); 
+
+        // White Eyes
+        this.graphics.fillStyle(0xffffff, 1); 
+        this.graphics.fillRect(10, 12, 4, 4);
+        this.graphics.fillRect(18, 12, 4, 4);
+        // Pupils
+        this.graphics.fillStyle(0x000000, 1); 
+        this.graphics.fillRect(11, 13, 2, 2);
+        this.graphics.fillRect(19, 13, 2, 2);
+        
+        // Dark Eyebrows
+        this.graphics.fillStyle(0x000000, 1); 
+        this.graphics.fillRect(9, 10, 6, 2);
+        this.graphics.fillRect(17, 10, 6, 2);
+        
+        // Thick Goatee/Beard (Full Circle Goatee)
+        this.graphics.fillStyle(0x1a1a1a, 1); 
+        this.graphics.fillRect(10, 18, 12, 2); // Mustache
+        this.graphics.fillRect(14, 20, 4, 2); // Connect to chin
+        this.graphics.fillRect(10, 22, 12, 4); // Chin beard
         this.graphics.generateTexture('brotato_rosseti', 32, 32);
 
         // 2. Brotato PAV (Easy) - Potato with Greenish accent and relaxed eyes
@@ -113,6 +128,33 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillStyle(0x000000, 1); // Mouth
         this.graphics.fillRect(14, 20, 4, 2);
         this.graphics.generateTexture('brotato_mage', 32, 32);
+
+        // 5. Gustavo Dino (O Bom Dinossauro Humano)
+        this.graphics.clear();
+        this.graphics.fillStyle(0x4caf50, 1); // Green Dino skin
+        this.graphics.fillRoundedRect(6, 2, 20, 26, 8); // Taller, thinner face
+        
+        // Lighter green belly/lower face
+        this.graphics.fillStyle(0x8bc34a, 1); 
+        this.graphics.fillRoundedRect(8, 16, 16, 12, 4);
+        
+        // Big Dino Eyes
+        this.graphics.fillStyle(0xffffff, 1); 
+        this.graphics.fillCircle(11, 10, 4);
+        this.graphics.fillCircle(21, 10, 4);
+        // Pupils
+        this.graphics.fillStyle(0x4a2e15, 1); // Brown pupils like Arlo
+        this.graphics.fillCircle(11, 10, 2);
+        this.graphics.fillCircle(21, 10, 2);
+        
+        // Dino Snout/Smile
+        this.graphics.fillStyle(0x2e7d32, 1); 
+        this.graphics.fillRect(10, 22, 12, 2); // Wide smile
+        // Nostrils
+        this.graphics.fillRect(13, 19, 1, 1);
+        this.graphics.fillRect(18, 19, 1, 1);
+        
+        this.graphics.generateTexture('gustavo_dino', 32, 32);
 
 
         // Pixel Enemy (Blocky Invader)

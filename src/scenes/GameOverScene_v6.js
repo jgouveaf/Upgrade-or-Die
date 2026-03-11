@@ -1,4 +1,4 @@
-import { CHARACTERS } from '../utils/CharacterData.js?v=9';
+import { CHARACTERS } from '../utils/CharacterData.js?v=11';
 
 export class GameOverScene extends Phaser.Scene {
     constructor() {
@@ -17,7 +17,19 @@ export class GameOverScene extends Phaser.Scene {
             this.newRecord = false;
         }
 
-        this.unlockedCharacters = CHARACTERS.filter(c => c.unlockWave > cachedMax && c.unlockWave <= this.finalWave);
+        const cachedDeaths = parseInt(localStorage.getItem('upgradeOrDie_deaths') || '0', 10);
+        const newDeaths = cachedDeaths + 1;
+        localStorage.setItem('upgradeOrDie_deaths', newDeaths.toString());
+
+        this.unlockedCharacters = CHARACTERS.filter(c => {
+            if (c.unlockWave !== undefined && c.unlockWave !== null) {
+                return c.unlockWave > cachedMax && c.unlockWave <= this.finalWave;
+            }
+            if (c.unlockDeaths !== undefined && c.unlockDeaths !== null) {
+                return c.unlockDeaths > cachedDeaths && c.unlockDeaths <= newDeaths;
+            }
+            return false;
+        });
     }
 
     preload() {

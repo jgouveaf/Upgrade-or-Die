@@ -1,5 +1,5 @@
-import { settingsManager } from '../utils/SettingsManager.js?v=9';
-import { CHARACTERS } from '../utils/CharacterData.js?v=9';
+import { settingsManager } from '../utils/SettingsManager.js?v=11';
+import { CHARACTERS } from '../utils/CharacterData.js?v=11';
 
 export class StartScene extends Phaser.Scene {
     constructor() {
@@ -10,7 +10,8 @@ export class StartScene extends Phaser.Scene {
     init() {
         this.selectedCharacter = localStorage.getItem('upgradeOrDie_selectedCharacter') || 'player';
         this.maxWave = parseInt(localStorage.getItem('upgradeOrDie_maxWave') || '1', 10);
-        console.log("StartScene v6 Init - Max Wave:", this.maxWave);
+        this.totalDeaths = parseInt(localStorage.getItem('upgradeOrDie_deaths') || '0', 10);
+        console.log("StartScene v6 Init - Max Wave:", this.maxWave, "Deaths:", this.totalDeaths);
     }
 
     create() {
@@ -148,7 +149,7 @@ export class StartScene extends Phaser.Scene {
                         <h2 style="color: var(--primary); margin-bottom: 2rem; font-family: 'Press Start 2P', cursive; font-size: 16px;">ESCOLHA A SKIN / CLASSE</h2>
                         <div id="character-list" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;"></div>
                         <button class="pause-btn" id="close-character" style="margin-top: 2rem;">FECHAR</button>
-                        <p style="margin-top: 20px; font-size: 10px; color: #aaa;">Seu recorde máximo: Wave ${this.maxWave}</p>
+                        <p style="margin-top: 20px; font-size: 10px; color: #aaa;">Recorde: Wave ${this.maxWave} | Mortes Totais: ${this.totalDeaths}</p>
                     </div>
                 </div>
             `;
@@ -189,7 +190,17 @@ export class StartScene extends Phaser.Scene {
         listContainer.innerHTML = '';
         
         CHARACTERS.forEach(char => {
-            const isUnlocked = this.maxWave >= char.unlockWave;
+            let isUnlocked = false;
+            let unlockText = '';
+            
+            if (char.unlockWave !== undefined && char.unlockWave !== null) {
+                isUnlocked = this.maxWave >= char.unlockWave;
+                unlockText = `REQUER WAVE ${char.unlockWave}`;
+            } else if (char.unlockDeaths !== undefined && char.unlockDeaths !== null) {
+                isUnlocked = this.totalDeaths >= char.unlockDeaths;
+                unlockText = `REQUER ${char.unlockDeaths} MORTE(S)`;
+            }
+            
             const isSelected = this.selectedCharacter === char.id;
             
             const card = document.createElement('div');
@@ -209,7 +220,7 @@ export class StartScene extends Phaser.Scene {
                 <h3 style="color: ${char.color}; font-size: 14px; margin-bottom: 10px; min-height: 30px;">${char.name}</h3>
                 <p style="font-size: 10px; color: #ddd; margin-bottom: 15px; min-height: 40px; line-height: 1.4;">${char.desc.replace(/\n/g, '<br>')}</p>
                 <div style="margin-top: auto; font-size: 10px; color: ${isUnlocked ? '#00ff00' : '#ff0055'}">
-                    ${isUnlocked ? (isSelected ? 'SELECIONADO' : 'SELECIONAR') : `REQUER WAVE ${char.unlockWave}`}
+                    ${isUnlocked ? (isSelected ? 'SELECIONADO' : 'SELECIONAR') : unlockText}
                 </div>
             `;
             
