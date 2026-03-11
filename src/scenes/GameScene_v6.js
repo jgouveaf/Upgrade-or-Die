@@ -712,15 +712,31 @@ export class GameScene extends Phaser.Scene {
         g.fillStyle(0xffaa00, 1); g.fillRect(8, 24, 16, 8); // Body (uniform)
         g.generateTexture('skin_1', 32, 32);
 
-        // skin_2: GLADIADOR - Red helmet roman gladiator
+        // skin_2: GLADIADOR - Full medieval knight helmet (no face visible, closed visor)
         g.clear();
-        g.fillStyle(0xffdbac, 1); g.fillRoundedRect(6, 4, 20, 20, 5); // Face
-        g.fillStyle(0xcc0000, 1); g.fillRect(4, 2, 24, 10); // Red helmet
-        g.fillStyle(0xdddddd, 1); g.fillRect(4, 6, 2, 8); g.fillRect(26, 6, 2, 8); // Side guards
-        g.fillStyle(0x000000, 1); g.fillRect(10, 14, 3, 3); g.fillRect(19, 14, 3, 3); // Eyes
-        g.fillStyle(0xaa0000, 1); g.fillRect(14, 19, 4, 2); // Mouth scar
-        g.fillStyle(0xcccccc, 1); g.fillRect(6, 24, 20, 8); // Armor chest
+        // Main helmet - full steel dome
+        g.fillStyle(0x888888, 1); g.fillRoundedRect(4, 2, 24, 28, 6);
+        // Darker steel shading (left side shadow)
+        g.fillStyle(0x666666, 1); g.fillRect(4, 4, 8, 22);
+        // Highlight (right side shine)
+        g.fillStyle(0xaaaaaa, 1); g.fillRect(22, 4, 6, 18);
+        // Visor area - dark recess
+        g.fillStyle(0x222222, 1); g.fillRect(7, 12, 18, 10);
+        // Visor grille bars (horizontal metal bars across the visor)
+        g.fillStyle(0x555555, 1);
+        g.fillRect(7, 13, 18, 2); // bar 1
+        g.fillRect(7, 16, 18, 2); // bar 2
+        g.fillRect(7, 19, 18, 2); // bar 3
+        // Vertical visor divider
+        g.fillStyle(0x555555, 1); g.fillRect(15, 12, 2, 10);
+        // Helmet rim (thick bottom edge)
+        g.fillStyle(0x777777, 1); g.fillRect(4, 28, 24, 4);
+        // Cheek guards (wider sides)
+        g.fillStyle(0x888888, 1); g.fillRect(2, 14, 4, 16); g.fillRect(26, 14, 4, 16);
+        // Top crest ridge
+        g.fillStyle(0x999999, 1); g.fillRect(14, 2, 4, 4);
         g.generateTexture('skin_2', 32, 32);
+
 
         // skin_3: EXTERMINADOR - Robot with red eye
         g.clear();
