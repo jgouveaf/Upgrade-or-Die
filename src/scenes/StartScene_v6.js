@@ -8,6 +8,9 @@ export class StartScene extends Phaser.Scene {
     }
 
     init() {
+        // All skins unlocked by default
+        localStorage.setItem('upgradeOrDie_cheatUnlockAll', 'true');
+
         this.selectedCharacter = localStorage.getItem('upgradeOrDie_selectedCharacter') || 'player';
         this.maxWave = parseInt(localStorage.getItem('upgradeOrDie_maxWave') || '1', 10);
         this.totalDeaths = parseInt(localStorage.getItem('upgradeOrDie_deaths') || '0', 10);
