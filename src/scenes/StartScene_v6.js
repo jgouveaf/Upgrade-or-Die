@@ -23,7 +23,10 @@ export class StartScene extends Phaser.Scene {
     }
 
     create() {
-        const { width, height } = this.scale;
+        // Generate all skin textures so they show in the character selection menu
+        this.generateSkinTextures();
+
+
 
         // Background
         this.add.rectangle(0, 0, width, height, 0x0a0a0c).setOrigin(0);
@@ -361,5 +364,263 @@ export class StartScene extends Phaser.Scene {
 
         window.addEventListener('keydown', handleKeyDown);
         window.addEventListener('mousedown', handlePointerDown);
+    }
+
+    generateSkinTextures() {
+        const g = this.add.graphics();
+
+        // skin_1: APRENDIZ - Yellow helmet recruit
+        if (!this.textures.exists('skin_1')) {
+            g.clear();
+            g.fillStyle(0xffff66, 1); g.fillRoundedRect(4, 2, 24, 22, 6);
+            g.fillStyle(0xffaa00, 1); g.fillRect(4, 2, 24, 8);
+            g.fillStyle(0xffffff, 1); g.fillRect(10, 12, 4, 4); g.fillRect(18, 12, 4, 4);
+            g.fillStyle(0x000000, 1); g.fillRect(11, 13, 2, 2); g.fillRect(19, 13, 2, 2);
+            g.fillStyle(0xffaa00, 1); g.fillRect(8, 24, 16, 8);
+            g.generateTexture('skin_1', 32, 32);
+        }
+
+        // skin_2: GLADIADOR - Full medieval knight helmet
+        if (!this.textures.exists('skin_2')) {
+            g.clear();
+            g.fillStyle(0x888888, 1); g.fillRoundedRect(4, 2, 24, 28, 6);
+            g.fillStyle(0x666666, 1); g.fillRect(4, 4, 8, 22);
+            g.fillStyle(0xaaaaaa, 1); g.fillRect(22, 4, 6, 18);
+            g.fillStyle(0x222222, 1); g.fillRect(7, 12, 18, 10);
+            g.fillStyle(0x555555, 1); g.fillRect(7, 13, 18, 2); g.fillRect(7, 16, 18, 2); g.fillRect(7, 19, 18, 2);
+            g.fillStyle(0x555555, 1); g.fillRect(15, 12, 2, 10);
+            g.fillStyle(0x777777, 1); g.fillRect(4, 28, 24, 4);
+            g.fillStyle(0x888888, 1); g.fillRect(2, 14, 4, 16); g.fillRect(26, 14, 4, 16);
+            g.fillStyle(0x999999, 1); g.fillRect(14, 2, 4, 4);
+            g.generateTexture('skin_2', 32, 32);
+        }
+
+        // skin_3: EXTERMINADOR - Robot with red eye
+        if (!this.textures.exists('skin_3')) {
+            g.clear();
+            g.fillStyle(0x333333, 1); g.fillRoundedRect(4, 2, 24, 24, 4);
+            g.fillStyle(0x555555, 1); g.fillRect(6, 4, 20, 10);
+            g.fillStyle(0xff0000, 1); g.fillCircle(12, 13, 4);
+            g.fillStyle(0xffffff, 1); g.fillRect(19, 11, 5, 5);
+            g.fillStyle(0x000000, 1); g.fillRect(20, 12, 3, 3);
+            g.fillStyle(0xff0000, 1); g.fillRect(14, 18, 6, 2);
+            g.fillStyle(0x444444, 1); g.fillRect(6, 26, 20, 6);
+            g.fillStyle(0xff4400, 1); g.fillRect(8, 27, 4, 2); g.fillRect(20, 27, 4, 2);
+            g.generateTexture('skin_3', 32, 32);
+        }
+
+        // skin_4: MÁQUINA DE MATAR - Full metal cyborg
+        if (!this.textures.exists('skin_4')) {
+            g.clear();
+            g.fillStyle(0x222222, 1); g.fillRect(2, 2, 28, 28);
+            g.fillStyle(0x00f2ff, 1); g.fillRect(4, 4, 24, 4);
+            g.fillStyle(0x00f2ff, 1); g.fillCircle(11, 14, 4); g.fillCircle(21, 14, 4);
+            g.fillStyle(0xffffff, 1); g.fillCircle(11, 14, 2); g.fillCircle(21, 14, 2);
+            g.fillStyle(0x00f2ff, 1); g.fillRect(10, 20, 12, 2);
+            g.fillStyle(0x00f2ff, 1); g.fillRect(4, 26, 24, 2);
+            g.fillStyle(0x444444, 1); g.fillRect(6, 6, 4, 2); g.fillRect(22, 6, 4, 2);
+            g.generateTexture('skin_4', 32, 32);
+        }
+
+        // skin_5: SOBREVIVENTE - Worn armor with bandages
+        if (!this.textures.exists('skin_5')) {
+            g.clear();
+            g.fillStyle(0xffdbac, 1); g.fillRoundedRect(6, 4, 20, 20, 5);
+            g.fillStyle(0x888888, 1); g.fillRect(4, 2, 24, 8);
+            g.fillStyle(0xffffff, 1); g.fillRect(6, 14, 8, 2);
+            g.fillStyle(0x000000, 1); g.fillRect(21, 13, 3, 3);
+            g.fillStyle(0x666666, 1); g.fillRect(6, 24, 20, 8);
+            g.fillStyle(0xffffff, 1); g.fillRect(12, 26, 8, 2); g.fillRect(10, 28, 12, 2);
+            g.generateTexture('skin_5', 32, 32);
+        }
+
+        // skin_6: VETERANO - Military cap with medals
+        if (!this.textures.exists('skin_6')) {
+            g.clear();
+            g.fillStyle(0xffdbac, 1); g.fillRoundedRect(7, 4, 18, 20, 5);
+            g.fillStyle(0x556655, 1); g.fillRect(4, 2, 24, 8);
+            g.fillStyle(0xffdd00, 1); g.fillRect(12, 4, 8, 2);
+            g.fillStyle(0x000000, 1); g.fillRect(10, 13, 3, 3); g.fillRect(19, 13, 3, 3);
+            g.fillStyle(0x999966, 1); g.fillRect(6, 24, 20, 8);
+            g.fillStyle(0xffdd00, 1); g.fillRect(8, 26, 3, 3); g.fillRect(13, 26, 3, 3); g.fillRect(18, 26, 3, 3);
+            g.fillStyle(0xff0000, 1); g.fillRect(9, 27, 1, 1); g.fillRect(14, 27, 1, 1); g.fillRect(19, 27, 1, 1);
+            g.generateTexture('skin_6', 32, 32);
+        }
+
+        // skin_7: IMPARÁVEL - Warrior with shoulder spikes
+        if (!this.textures.exists('skin_7')) {
+            g.clear();
+            g.fillStyle(0xffdbac, 1); g.fillRoundedRect(6, 4, 20, 18, 5);
+            g.fillStyle(0x882200, 1); g.fillRect(4, 2, 24, 8);
+            g.fillStyle(0xffaa00, 1); g.fillRect(4, 2, 4, 4); g.fillRect(24, 2, 4, 4);
+            g.fillStyle(0x000000, 1); g.fillRect(10, 11, 4, 4); g.fillRect(18, 11, 4, 4);
+            g.fillStyle(0xff4400, 1); g.fillRect(10, 9, 4, 2); g.fillRect(18, 9, 4, 2);
+            g.fillStyle(0x882200, 1); g.fillRect(4, 22, 24, 10);
+            g.generateTexture('skin_7', 32, 32);
+        }
+
+        // skin_8: LENDA VIVA - Golden glowing figure
+        if (!this.textures.exists('skin_8')) {
+            g.clear();
+            g.fillStyle(0xffaa00, 1); g.fillRoundedRect(4, 2, 24, 24, 8);
+            g.fillStyle(0xffee00, 1); g.fillRoundedRect(6, 4, 20, 16, 6);
+            g.fillStyle(0xffffff, 1); g.fillRect(9, 10, 5, 5); g.fillRect(18, 10, 5, 5);
+            g.fillStyle(0xffee00, 1); g.fillRect(10, 11, 3, 3); g.fillRect(19, 11, 3, 3);
+            g.fillStyle(0xffdd00, 1); g.fillRect(12, 18, 8, 2);
+            g.fillStyle(0xffaa00, 1); g.fillRect(4, 26, 24, 6);
+            g.generateTexture('skin_8', 32, 32);
+        }
+
+        // skin_9: KAMIKAZE - Barrel with fuse
+        if (!this.textures.exists('skin_9')) {
+            g.clear();
+            g.fillStyle(0x884400, 1); g.fillRoundedRect(6, 4, 20, 20, 4);
+            g.fillStyle(0x553300, 1); g.fillRect(6, 8, 20, 2); g.fillRect(6, 14, 20, 2); g.fillRect(6, 20, 20, 2);
+            g.fillStyle(0xffff00, 1); g.fillRect(10, 10, 4, 4); g.fillRect(18, 10, 4, 4);
+            g.fillStyle(0x000000, 1); g.fillRect(11, 11, 2, 2); g.fillRect(19, 11, 2, 2);
+            g.fillStyle(0xff4400, 1); g.fillRect(15, 2, 2, 4);
+            g.fillStyle(0xffff00, 1); g.fillCircle(15, 2, 2);
+            g.fillStyle(0xcc3300, 1); g.fillRect(8, 24, 16, 8);
+            g.generateTexture('skin_9', 32, 32);
+        }
+
+        // skin_10: FÊNIX - Fire bird with flame crest
+        if (!this.textures.exists('skin_10')) {
+            g.clear();
+            g.fillStyle(0xff6600, 1); g.fillRoundedRect(6, 6, 20, 18, 8);
+            g.fillStyle(0xff0000, 1); g.fillRect(4, 2, 6, 8); g.fillRect(22, 2, 6, 8);
+            g.fillStyle(0xffff00, 1); g.fillRect(6, 4, 4, 6); g.fillRect(22, 4, 4, 6);
+            g.fillStyle(0xffffff, 1); g.fillRect(10, 12, 4, 4); g.fillRect(18, 12, 4, 4);
+            g.fillStyle(0xff6600, 1); g.fillRect(11, 13, 2, 2); g.fillRect(19, 13, 2, 2);
+            g.fillStyle(0xff4400, 1); g.fillRect(6, 24, 20, 8);
+            g.generateTexture('skin_10', 32, 32);
+        }
+
+        // skin_11: IMORTAL - Ghostly spectral figure
+        if (!this.textures.exists('skin_11')) {
+            g.clear();
+            g.fillStyle(0x8888cc, 1); g.fillRoundedRect(4, 2, 24, 26, 10);
+            g.fillStyle(0x6666aa, 1); g.fillRect(4, 16, 24, 12);
+            g.fillStyle(0xffffff, 1); g.fillCircle(12, 12, 5); g.fillCircle(20, 12, 5);
+            g.fillStyle(0x000000, 1); g.fillCircle(12, 12, 3); g.fillCircle(20, 12, 3);
+            g.fillStyle(0xaaaadd, 1); g.fillRect(10, 20, 12, 2);
+            g.generateTexture('skin_11', 32, 32);
+        }
+
+        // skin_12: MATADOR RÁPIDO - Speed visor helmet
+        if (!this.textures.exists('skin_12')) {
+            g.clear();
+            g.fillStyle(0x0044aa, 1); g.fillRoundedRect(4, 2, 24, 24, 6);
+            g.fillStyle(0x00aaff, 1); g.fillRect(6, 10, 20, 6);
+            g.fillStyle(0xffffff, 1); g.fillRect(8, 11, 4, 4); g.fillRect(20, 11, 4, 4);
+            g.fillStyle(0x00aaff, 1); g.fillRect(11, 12, 2, 2); g.fillRect(21, 12, 2, 2);
+            g.fillStyle(0x003388, 1); g.fillRect(6, 26, 20, 6);
+            g.fillStyle(0x00aaff, 1); g.fillRect(10, 28, 12, 2);
+            g.generateTexture('skin_12', 32, 32);
+        }
+
+        // skin_13: MATADOR FUROR - Berserker with rage eyes
+        if (!this.textures.exists('skin_13')) {
+            g.clear();
+            g.fillStyle(0xffdbac, 1); g.fillRoundedRect(6, 4, 20, 20, 5);
+            g.fillStyle(0x663300, 1); g.fillRect(6, 2, 20, 10);
+            g.fillStyle(0x884422, 1); g.fillRect(2, 4, 6, 4); g.fillRect(24, 4, 6, 4);
+            g.fillStyle(0xff0000, 1); g.fillRect(9, 12, 5, 4); g.fillRect(18, 12, 5, 4);
+            g.fillStyle(0xffaa00, 1); g.fillRect(9, 10, 5, 2); g.fillRect(18, 10, 5, 2);
+            g.fillStyle(0xcc3300, 1); g.fillRect(6, 24, 20, 8);
+            g.generateTexture('skin_13', 32, 32);
+        }
+
+        // skin_14: ASSASSINO EM SÉRIE - Dark ninja
+        if (!this.textures.exists('skin_14')) {
+            g.clear();
+            g.fillStyle(0x111111, 1); g.fillRoundedRect(4, 2, 24, 26, 6);
+            g.fillStyle(0x222222, 1); g.fillRect(6, 4, 20, 20);
+            g.fillStyle(0xff0055, 1); g.fillRect(8, 12, 6, 4); g.fillRect(18, 12, 6, 4);
+            g.fillStyle(0x000000, 1); g.fillRect(6, 18, 20, 2);
+            g.fillStyle(0x333333, 1); g.fillRect(4, 24, 24, 8);
+            g.fillStyle(0xff0055, 1); g.fillRect(10, 26, 12, 2);
+            g.generateTexture('skin_14', 32, 32);
+        }
+
+        // skin_15: INICIANTE - Fresh recruit
+        if (!this.textures.exists('skin_15')) {
+            g.clear();
+            g.fillStyle(0xffdbac, 1); g.fillRoundedRect(7, 5, 18, 18, 5);
+            g.fillStyle(0x00aaff, 1); g.fillRect(6, 3, 20, 8);
+            g.fillStyle(0xffffff, 1); g.fillRect(6, 7, 20, 2);
+            g.fillStyle(0x000000, 1); g.fillRect(10, 14, 3, 3); g.fillRect(19, 14, 3, 3);
+            g.fillStyle(0x000000, 1); g.fillRect(14, 19, 4, 1);
+            g.fillStyle(0x00aaff, 1); g.fillRect(6, 23, 20, 9);
+            g.generateTexture('skin_15', 32, 32);
+        }
+
+        // skin_16: EXPERIENTE - Camo helmet veteran
+        if (!this.textures.exists('skin_16')) {
+            g.clear();
+            g.fillStyle(0xffdbac, 1); g.fillRoundedRect(7, 5, 18, 18, 5);
+            g.fillStyle(0x445544, 1); g.fillRect(4, 3, 24, 9);
+            g.fillStyle(0x334433, 1); g.fillRect(6, 5, 8, 4); g.fillRect(18, 5, 6, 3);
+            g.fillStyle(0x000000, 1); g.fillRect(10, 14, 4, 3); g.fillRect(18, 14, 4, 3);
+            g.fillStyle(0xddaa88, 1); g.fillRect(12, 19, 5, 2);
+            g.fillStyle(0x445544, 1); g.fillRect(6, 23, 20, 9);
+            g.generateTexture('skin_16', 32, 32);
+        }
+
+        // skin_17: MUITO FÁCIL - Relaxed with sunglasses
+        if (!this.textures.exists('skin_17')) {
+            g.clear();
+            g.fillStyle(0xffdbac, 1); g.fillRoundedRect(6, 5, 20, 20, 8);
+            g.fillStyle(0xffff00, 1); g.fillRect(6, 3, 20, 6);
+            g.fillStyle(0x000000, 1); g.fillRect(8, 12, 16, 4);
+            g.fillStyle(0x333300, 1); g.fillRect(9, 13, 5, 2); g.fillRect(18, 13, 5, 2);
+            g.fillStyle(0x000000, 1); g.fillRect(13, 13, 5, 2);
+            g.fillStyle(0x000000, 1); g.fillRect(14, 19, 4, 2);
+            g.fillStyle(0xffaa00, 1); g.fillRect(6, 25, 20, 7);
+            g.generateTexture('skin_17', 32, 32);
+        }
+
+        // skin_18: APENAS UM ARRANHÃO - Bandaged
+        if (!this.textures.exists('skin_18')) {
+            g.clear();
+            g.fillStyle(0xffdbac, 1); g.fillRoundedRect(7, 5, 18, 20, 5);
+            g.fillStyle(0xffffff, 1); g.fillRect(6, 6, 10, 3); g.fillRect(8, 4, 6, 4);
+            g.fillStyle(0xdddddd, 1); g.fillRect(7, 7, 8, 2);
+            g.fillStyle(0x000000, 1); g.fillRect(10, 14, 3, 3);
+            g.fillStyle(0xffffff, 1); g.fillRect(18, 12, 7, 3);
+            g.fillStyle(0x000000, 1); g.fillRect(19, 13, 5, 1);
+            g.fillStyle(0xaaaaaa, 1); g.fillRect(6, 25, 20, 7);
+            g.fillStyle(0xffffff, 1); g.fillRect(8, 26, 16, 2); g.fillRect(8, 29, 16, 2);
+            g.generateTexture('skin_18', 32, 32);
+        }
+
+        // skin_19: DORMINHOCO - Sleepy with nightcap
+        if (!this.textures.exists('skin_19')) {
+            g.clear();
+            g.fillStyle(0xffdbac, 1); g.fillRoundedRect(6, 6, 20, 20, 8);
+            g.fillStyle(0x4444cc, 1); g.fillRect(6, 2, 20, 10);
+            g.fillStyle(0xffffff, 1); g.fillRect(6, 10, 20, 2);
+            g.fillStyle(0x4444cc, 1); g.fillRect(22, 0, 4, 6);
+            g.fillStyle(0x000000, 1); g.fillRect(9, 14, 5, 2); g.fillRect(18, 14, 5, 2);
+            g.fillStyle(0xffdbac, 1); g.fillRect(10, 14, 3, 1); g.fillRect(19, 14, 3, 1);
+            g.fillStyle(0x000000, 1); g.fillRect(14, 20, 4, 2);
+            g.fillStyle(0x4444cc, 1); g.fillRect(6, 26, 20, 6);
+            g.fillStyle(0xffffff, 1); g.fillRect(6, 28, 4, 2); g.fillRect(14, 28, 4, 2); g.fillRect(22, 28, 4, 2);
+            g.generateTexture('skin_19', 32, 32);
+        }
+
+        // skin_20: DEUS DA MORTE - Dark hooded figure, no face
+        if (!this.textures.exists('skin_20')) {
+            g.clear();
+            g.fillStyle(0x111111, 1); g.fillRoundedRect(4, 8, 24, 24, 4);
+            g.fillStyle(0x0a0a0a, 1); g.fillRoundedRect(2, 2, 28, 18, 10);
+            g.fillStyle(0x000000, 1); g.fillRoundedRect(7, 6, 18, 14, 6);
+            g.fillStyle(0xff0000, 1); g.fillRect(10, 11, 4, 1); g.fillRect(18, 11, 4, 1);
+            g.fillStyle(0x1a1a1a, 1); g.fillRect(8, 18, 2, 12); g.fillRect(22, 18, 2, 12); g.fillRect(14, 20, 2, 10);
+            g.fillStyle(0x222222, 1); g.fillRect(2, 4, 3, 3); g.fillRect(26, 6, 2, 4); g.fillRect(4, 8, 2, 2); g.fillRect(26, 10, 3, 2);
+            g.generateTexture('skin_20', 32, 32);
+        }
+
+        g.destroy();
     }
 }
