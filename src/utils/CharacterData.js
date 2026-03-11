@@ -52,12 +52,12 @@ export const CHARACTERS = [
     {
         id: 'gustavo_dino',
         name: 'GUSTAVO DINO',
-        desc: 'O Bom Dinossauro Humano\n+Super Vida\nComeça c/ Campo de Força\ne Tiro de Fogo.',
+        desc: 'O Bom Dinossauro Humano\n+5% de Vida Máxima\nComeça c/ Campo de Força\ne Tiro de Fogo.',
         unlockWave: null,
         unlockDeaths: 1,
         color: '#4caf50',
         skin: 'gustavo_dino',
-        buffs: { maxHealthBonus: 100 },
+        buffs: { maxHealthBonus: 5 },
         gadgets: { specialShots: { fire: 1 }, forceFields: { fire: 1 } }
     }
 ];

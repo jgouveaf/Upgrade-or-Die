@@ -1,4 +1,4 @@
-import { CHARACTERS } from '../utils/CharacterData.js?v=11';
+import { CHARACTERS } from '../utils/CharacterData.js?v=12';
 
 export class GameOverScene extends Phaser.Scene {
     constructor() {
