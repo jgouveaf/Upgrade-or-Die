@@ -52,12 +52,32 @@ export const CHARACTERS = [
     {
         id: 'gustavo_dino',
         name: 'GUSTAVO DINO',
-        desc: 'O Bom Dinossauro Humano\n+5% de Vida Máxima\nComeça c/ Campo de Força\ne Tiro de Fogo.',
+        desc: 'O Bom Dinossauro Humano\n+5% de Vida Máxima',
         unlockWave: null,
         unlockDeaths: 1,
         color: '#4caf50',
         skin: 'gustavo_dino',
         buffs: { maxHealthBonus: 5 },
-        gadgets: { specialShots: { fire: 1 }, forceFields: { fire: 1 } }
-    }
+        gadgets: {}
+    },
+    { id: 'skin_1', name: 'APRENDIZ', desc: 'Desbloqueado ao matar 100 inimigos totais.', color: '#aaffaa', skin: 'player', unlockTotalKills: 100, buffs: {}, gadgets: {} },
+    { id: 'skin_2', name: 'GLADIADOR', desc: 'Desbloqueado ao matar 500 inimigos totais.', color: '#ffaaaa', skin: 'player', unlockTotalKills: 500, buffs: {}, gadgets: {} },
+    { id: 'skin_3', name: 'EXTERMINADOR', desc: 'Desbloqueado ao matar 1000 inimigos totais.', color: '#ff0000', skin: 'player', unlockTotalKills: 1000, buffs: {}, gadgets: {} },
+    { id: 'skin_4', name: 'MÁQUINA DE MATAR', desc: 'Desbloqueado ao matar 5000 inimigos totais.', color: '#880000', skin: 'player', unlockTotalKills: 5000, buffs: {}, gadgets: {} },
+    { id: 'skin_5', name: 'SOBREVIVENTE', desc: 'Chegue na horda 5 no Difícil.', color: '#ffaa00', skin: 'player', unlockDifficulty: 'hard', unlockWaveCond: 5, buffs: {}, gadgets: {} },
+    { id: 'skin_6', name: 'VETERANO', desc: 'Chegue na horda 10 no Difícil.', color: '#ffaa00', skin: 'player', unlockDifficulty: 'hard', unlockWaveCond: 10, buffs: {}, gadgets: {} },
+    { id: 'skin_7', name: 'IMPARÁVEL', desc: 'Chegue na horda 15 no Difícil.', color: '#ffaa00', skin: 'player', unlockDifficulty: 'hard', unlockWaveCond: 15, buffs: {}, gadgets: {} },
+    { id: 'skin_8', name: 'LENDA VIVA', desc: 'Chegue na horda 20 no Difícil.', color: '#ffaa00', skin: 'player', unlockDifficulty: 'hard', unlockWaveCond: 20, buffs: {}, gadgets: {} },
+    { id: 'skin_9', name: 'KAMIKAZE', desc: 'Morra 10 vezes no total.', color: '#aaaaaa', skin: 'player', unlockDeaths: 10, buffs: {}, gadgets: {} },
+    { id: 'skin_10', name: 'FÊNIX', desc: 'Morra 25 vezes no total.', color: '#ccccaa', skin: 'player', unlockDeaths: 25, buffs: {}, gadgets: {} },
+    { id: 'skin_11', name: 'IMORTAL (?)', desc: 'Morra 50 vezes no total.', color: '#aaaacc', skin: 'player', unlockDeaths: 50, buffs: {}, gadgets: {} },
+    { id: 'skin_12', name: 'MATADOR RÁPIDO', desc: 'Mate 200 inimigos em uma partida.', color: '#00ccff', skin: 'player', unlockMatchKills: 200, buffs: {}, gadgets: {} },
+    { id: 'skin_13', name: 'MATADOR FUROR', desc: 'Mate 500 inimigos em uma partida.', color: '#00aaff', skin: 'player', unlockMatchKills: 500, buffs: {}, gadgets: {} },
+    { id: 'skin_14', name: 'ASSASSINO EM SÉRIE', desc: 'Mate 1000 inimigos em uma partida.', color: '#0055ff', skin: 'player', unlockMatchKills: 1000, buffs: {}, gadgets: {} },
+    { id: 'skin_15', name: 'INICIANTE', desc: 'Chegue na horda 10 no Normal.', color: '#aaffaa', skin: 'player', unlockDifficulty: 'normal', unlockWaveCond: 10, buffs: {}, gadgets: {} },
+    { id: 'skin_16', name: 'EXPERIENTE', desc: 'Chegue na horda 20 no Normal.', color: '#88ff88', skin: 'player', unlockDifficulty: 'normal', unlockWaveCond: 20, buffs: {}, gadgets: {} },
+    { id: 'skin_17', name: 'MUITO FÁCIL', desc: 'Chegue na horda 30 no Fácil.', color: '#ffffff', skin: 'player', unlockDifficulty: 'easy', unlockWaveCond: 30, buffs: {}, gadgets: {} },
+    { id: 'skin_18', name: 'APENAS UM ARRANHÃO', desc: 'Morra 5 vezes no total.', color: '#bbbbbb', skin: 'player', unlockDeaths: 5, buffs: {}, gadgets: {} },
+    { id: 'skin_19', name: 'DORMINHOCO', desc: 'Morra 100 vezes no total.', color: '#444444', skin: 'player', unlockDeaths: 100, buffs: {}, gadgets: {} },
+    { id: 'skin_20', name: 'DEUS DA MORTE', desc: 'Mate 10000 inimigos no total.', color: '#111111', skin: 'player', unlockTotalKills: 10000, buffs: {}, gadgets: {} }
 ];

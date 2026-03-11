@@ -849,7 +849,7 @@ export class GameScene extends Phaser.Scene {
                 player.health -= enemy.damage / 60;
                 if (enemy.isBat) player.applyPoison(this);
             }
-            if (player.health <= 0) this.scene.start('GameOverScene_v6', { wave: this.wave });
+            if (player.health <= 0) this.scene.start('GameOverScene_v6', { wave: this.wave, difficulty: this.difficulty, enemiesKilled: this.enemiesKilled });
         });
 
         this.physics.add.overlap(this.player, this.coins, (player, coin) => {
@@ -880,7 +880,7 @@ export class GameScene extends Phaser.Scene {
 
             bullet.destroy();
             this.updateUI();
-            if (player.health <= 0) this.scene.start('GameOverScene_v6', { wave: this.wave });
+            if (player.health <= 0) this.scene.start('GameOverScene_v6', { wave: this.wave, difficulty: this.difficulty, enemiesKilled: this.enemiesKilled });
         });
         this.physics.add.collider(this.enemies, this.enemies);
 

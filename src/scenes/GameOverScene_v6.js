@@ -8,6 +8,8 @@ export class GameOverScene extends Phaser.Scene {
 
     init(data) {
         this.finalWave = data.wave || 1;
+        this.difficulty = data.difficulty || 'normal';
+        this.matchKills = data.enemiesKilled || 0;
         
         const cachedMax = parseInt(localStorage.getItem('upgradeOrDie_maxWave') || '1', 10);
         if (this.finalWave > cachedMax) {
@@ -17,9 +19,23 @@ export class GameOverScene extends Phaser.Scene {
             this.newRecord = false;
         }
 
+        const cachedDifficultyMaxInfo = parseInt(localStorage.getItem(`upgradeOrDie_maxWave_${this.difficulty}`) || '1', 10);
+        if (this.finalWave > cachedDifficultyMaxInfo) {
+            localStorage.setItem(`upgradeOrDie_maxWave_${this.difficulty}`, this.finalWave.toString());
+        }
+
         const cachedDeaths = parseInt(localStorage.getItem('upgradeOrDie_deaths') || '0', 10);
         const newDeaths = cachedDeaths + 1;
         localStorage.setItem('upgradeOrDie_deaths', newDeaths.toString());
+
+        const cachedTotalKills = parseInt(localStorage.getItem('upgradeOrDie_totalKills') || '0', 10);
+        const newTotalKills = cachedTotalKills + this.matchKills;
+        localStorage.setItem('upgradeOrDie_totalKills', newTotalKills.toString());
+
+        const bestMatchKills = parseInt(localStorage.getItem('upgradeOrDie_bestMatchKills') || '0', 10);
+        if (this.matchKills > bestMatchKills) {
+            localStorage.setItem('upgradeOrDie_bestMatchKills', this.matchKills.toString());
+        }
 
         this.unlockedCharacters = CHARACTERS.filter(c => {
             if (c.unlockWave !== undefined && c.unlockWave !== null) {
@@ -27,6 +43,17 @@ export class GameOverScene extends Phaser.Scene {
             }
             if (c.unlockDeaths !== undefined && c.unlockDeaths !== null) {
                 return c.unlockDeaths > cachedDeaths && c.unlockDeaths <= newDeaths;
+            }
+            if (c.unlockTotalKills !== undefined && c.unlockTotalKills !== null) {
+                return c.unlockTotalKills > cachedTotalKills && c.unlockTotalKills <= newTotalKills;
+            }
+            if (c.unlockMatchKills !== undefined && c.unlockMatchKills !== null) {
+                return c.unlockMatchKills > bestMatchKills && c.unlockMatchKills <= this.matchKills;
+            }
+            if (c.unlockDifficulty !== undefined && c.unlockWaveCond !== null) {
+                if (this.difficulty === c.unlockDifficulty) {
+                    return c.unlockWaveCond > cachedDifficultyMaxInfo && c.unlockWaveCond <= this.finalWave;
+                }
             }
             return false;
         });

@@ -183,7 +183,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             scene.cameras.main.shake(100, 0.01);
             scene.updateUI();
             if (scene.player.health <= 0) {
-                scene.scene.start('GameOverScene_v6', { wave: scene.wave });
+                scene.scene.start('GameOverScene_v6', { wave: scene.wave, difficulty: scene.difficulty, enemiesKilled: scene.enemiesKilled });
             }
         }
     }

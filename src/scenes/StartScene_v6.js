@@ -11,7 +11,12 @@ export class StartScene extends Phaser.Scene {
         this.selectedCharacter = localStorage.getItem('upgradeOrDie_selectedCharacter') || 'player';
         this.maxWave = parseInt(localStorage.getItem('upgradeOrDie_maxWave') || '1', 10);
         this.totalDeaths = parseInt(localStorage.getItem('upgradeOrDie_deaths') || '0', 10);
-        console.log("StartScene v6 Init - Max Wave:", this.maxWave, "Deaths:", this.totalDeaths);
+        this.totalKills = parseInt(localStorage.getItem('upgradeOrDie_totalKills') || '0', 10);
+        this.bestMatchKills = parseInt(localStorage.getItem('upgradeOrDie_bestMatchKills') || '0', 10);
+        this.maxWaveEasy = parseInt(localStorage.getItem('upgradeOrDie_maxWave_easy') || '1', 10);
+        this.maxWaveNormal = parseInt(localStorage.getItem('upgradeOrDie_maxWave_normal') || '1', 10);
+        this.maxWaveHard = parseInt(localStorage.getItem('upgradeOrDie_maxWave_hard') || '1', 10);
+        console.log("StartScene v6 Init - Max Wave:", this.maxWave, "Deaths:", this.totalDeaths, "Total Kills:", this.totalKills);
     }
 
     create() {
@@ -199,6 +204,22 @@ export class StartScene extends Phaser.Scene {
             } else if (char.unlockDeaths !== undefined && char.unlockDeaths !== null) {
                 isUnlocked = this.totalDeaths >= char.unlockDeaths;
                 unlockText = `REQUER ${char.unlockDeaths} MORTE(S)`;
+            } else if (char.unlockTotalKills !== undefined && char.unlockTotalKills !== null) {
+                isUnlocked = this.totalKills >= char.unlockTotalKills;
+                unlockText = `REQUER ${char.unlockTotalKills} ABATES TOTAIS`;
+            } else if (char.unlockMatchKills !== undefined && char.unlockMatchKills !== null) {
+                isUnlocked = this.bestMatchKills >= char.unlockMatchKills;
+                unlockText = `REQUER ${char.unlockMatchKills} ABATES (PARTIDA)`;
+            } else if (char.unlockDifficulty !== undefined && char.unlockWaveCond !== null) {
+                let diffMaxWave = this.maxWaveNormal;
+                let diffName = "NORMAL";
+                if (char.unlockDifficulty === 'hard') { diffMaxWave = this.maxWaveHard; diffName = "DIFÍCIL"; }
+                if (char.unlockDifficulty === 'easy') { diffMaxWave = this.maxWaveEasy; diffName = "FÁCIL"; }
+                isUnlocked = diffMaxWave >= char.unlockWaveCond;
+                unlockText = `REQUER WAVE ${char.unlockWaveCond} NO ${diffName}`;
+            } else {
+                isUnlocked = true; // Default unlocked
+                unlockText = `DESBLOQUEADO`;
             }
             
             const isSelected = this.selectedCharacter === char.id;

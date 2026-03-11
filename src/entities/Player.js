@@ -57,7 +57,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
                 }
 
                 if (this.health <= 0) {
-                    scene.scene.start('GameOverScene_v6', { wave: scene.wave });
+                    scene.scene.start('GameOverScene_v6', { wave: scene.wave, difficulty: scene.difficulty, enemiesKilled: scene.enemiesKilled });
                 }
 
                 poisonTicks++;
