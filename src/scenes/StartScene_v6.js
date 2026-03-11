@@ -107,6 +107,17 @@ export class StartScene extends Phaser.Scene {
 
         settingsBtn.on('pointerdown', () => this.handleOpenSettings());
 
+        // Cheat: Unlock all skins with 'Q'
+        this.input.keyboard.on('keydown-Q', () => {
+            console.log("Cheat activated: Unlocking all skins...");
+            localStorage.setItem('upgradeOrDie_cheatUnlockAll', 'true');
+            if (document.getElementById('character-overlay') && document.getElementById('character-overlay').style.display === 'flex') {
+                this.handleOpenCharacters(); // Refresh the menu if it's open
+            }
+            // Optional: flash screen or play sound to indicate success
+            this.cameras.main.flash(500, 255, 255, 255);
+        });
+
         // Blink animation
         this.tweens.add({
             targets: startBtn,
@@ -198,7 +209,10 @@ export class StartScene extends Phaser.Scene {
             let isUnlocked = false;
             let unlockText = '';
             
-            if (char.unlockWave !== undefined && char.unlockWave !== null) {
+            if (localStorage.getItem('upgradeOrDie_cheatUnlockAll') === 'true') {
+                isUnlocked = true;
+                unlockText = `Mestre dos Cheats`;
+            } else if (char.unlockWave !== undefined && char.unlockWave !== null) {
                 isUnlocked = this.maxWave >= char.unlockWave;
                 unlockText = `REQUER WAVE ${char.unlockWave}`;
             } else if (char.unlockDeaths !== undefined && char.unlockDeaths !== null) {
@@ -237,8 +251,20 @@ export class StartScene extends Phaser.Scene {
             card.style.alignItems = 'center';
             card.style.textAlign = 'center';
             
+            let iconHtml = '';
+            if (this.game && this.game.textures.exists(char.skin)) {
+                // To display Phaser canvas textures in DOM, we get the base64 URL
+                const canvas = this.game.textures.get(char.skin).getSourceImage();
+                if (canvas && canvas.toDataURL) {
+                    const dataURL = canvas.toDataURL();
+                    // scale icon rendering style to mimic simple pixel art scaled up
+                    iconHtml = `<img src="${dataURL}" style="width: 32px; height: 32px; image-rendering: pixelated; margin-bottom: 5px;">`;
+                }
+            }
+
             card.innerHTML = `
-                <h3 style="color: ${char.color}; font-size: 14px; margin-bottom: 10px; min-height: 30px;">${char.name}</h3>
+                <h3 style="color: ${char.color}; font-size: 14px; margin-bottom: 5px; min-height: 30px;">${char.name}</h3>
+                ${iconHtml}
                 <p style="font-size: 10px; color: #ddd; margin-bottom: 15px; min-height: 40px; line-height: 1.4;">${char.desc.replace(/\n/g, '<br>')}</p>
                 <div style="margin-top: auto; font-size: 10px; color: ${isUnlocked ? '#00ff00' : '#ff0055'}">
                     ${isUnlocked ? (isSelected ? 'SELECIONADO' : 'SELECIONAR') : unlockText}
