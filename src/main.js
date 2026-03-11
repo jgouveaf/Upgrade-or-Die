@@ -1,9 +1,9 @@
-import { StartScene } from './scenes/StartScene_v6.js?v=12';
-import { GameScene } from './scenes/GameScene_v6.js?v=12';
-import { UpgradeScene } from './scenes/UpgradeScene_v6.js?v=12';
-import { GameOverScene } from './scenes/GameOverScene_v6.js?v=12';
+import { StartScene } from './scenes/StartScene_v6.js?v=13';
+import { GameScene } from './scenes/GameScene_v6.js?v=13';
+import { UpgradeScene } from './scenes/UpgradeScene_v6.js?v=13';
+import { GameOverScene } from './scenes/GameOverScene_v6.js?v=13';
 
-console.log("Main.js v6 Loaded - Force Refresh");
+console.log("Main.js v6 Loaded - Force Refresh v13");
 
 const config = {
     type: Phaser.AUTO,
