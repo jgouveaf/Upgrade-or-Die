@@ -1,7 +1,7 @@
-import { Player } from '../entities/Player.js';
-import { Enemy } from '../entities/Enemy.js';
-import { settingsManager } from '../utils/SettingsManager.js';
-import * as GadgetData from '../utils/GadgetData.js';
+import { Player } from '../entities/Player.js?v=7';
+import { Enemy } from '../entities/Enemy.js?v=7';
+import { settingsManager } from '../utils/SettingsManager.js?v=7';
+import * as GadgetData from '../utils/GadgetData.js?v=7';
 const { GADGET_TYPES, ELEMENTS, GADGET_DEFINITIONS } = GadgetData;
 
 export class GameScene extends Phaser.Scene {
