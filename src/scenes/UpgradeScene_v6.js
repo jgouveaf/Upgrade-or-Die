@@ -20,7 +20,8 @@ export class UpgradeScene extends Phaser.Scene {
         this.wave = data.wave || 1;
         this.difficulty = data.difficulty || 'normal';
         this.isSpecialPhase = data.isSpecialPhase || false;
-        this.playerSkin = data.skin || 'brotato_rosseti';
+        this.playerSkin = data.skin || 'player';
+        this.characterId = data.character || 'player';
 
         // Ensure gadgets object exists
         if (!this.playerData.gadgets) {
@@ -181,6 +182,7 @@ export class UpgradeScene extends Phaser.Scene {
                 wave: this.wave,
                 difficulty: this.difficulty,
                 skin: this.playerSkin,
+                character: this.characterId,
                 isSpecialPhase: true
             });
         }
@@ -360,6 +362,7 @@ export class UpgradeScene extends Phaser.Scene {
                 wave: this.wave,
                 difficulty: this.difficulty,
                 skin: this.playerSkin,
+                character: this.characterId,
                 isSpecialPhase: true
             });
         });
@@ -382,7 +385,8 @@ export class UpgradeScene extends Phaser.Scene {
             player: this.playerData,
             wave: this.wave + 1,
             difficulty: this.difficulty,
-            skin: this.playerSkin
+            skin: this.playerSkin,
+            character: this.characterId
         });
     }
 

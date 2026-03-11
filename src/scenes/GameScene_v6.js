@@ -2,6 +2,7 @@ import { Player } from '../entities/Player.js?v=7';
 import { Enemy } from '../entities/Enemy.js?v=7';
 import { settingsManager } from '../utils/SettingsManager.js?v=7';
 import * as GadgetData from '../utils/GadgetData.js?v=7';
+import { CHARACTERS } from '../utils/CharacterData.js?v=7';
 const { GADGET_TYPES, ELEMENTS, GADGET_DEFINITIONS } = GadgetData;
 
 export class GameScene extends Phaser.Scene {
@@ -26,9 +27,12 @@ export class GameScene extends Phaser.Scene {
         };
 
         this.difficultyConfig = config[this.difficulty] || config.normal;
-        console.log(`GameScene Init: Wave ${this.wave}, Difficulty: ${this.difficulty}`);
+        this.characterId = data.character || 'player';
+        this.characterTemplate = CHARACTERS.find(c => c.id === this.characterId) || CHARACTERS[0];
+        
+        console.log(`GameScene Init: Wave ${this.wave}, Difficulty: ${this.difficulty}, Character: ${this.characterTemplate.name}`);
         this.persistedPlayer = data.player || null;
-        this.playerSkin = data.skin || 'brotato_rosseti';
+        this.playerSkin = this.characterTemplate.skin;
     }
 
     preload() {
@@ -95,6 +99,20 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(14, 18, 1, 1);
         this.graphics.fillRect(17, 18, 1, 1);
         this.graphics.generateTexture('brotato_porquinho', 32, 32);
+
+        // 4. Brotato Mage (Toxic)
+        this.graphics.clear();
+        this.graphics.fillStyle(0x8a2be2, 1); // Purple potato
+        this.graphics.fillRoundedRect(4, 4, 24, 24, 8); 
+        this.graphics.fillStyle(0x00ff00, 1); // Toxic eyes
+        this.graphics.fillRect(10, 10, 4, 4);
+        this.graphics.fillRect(18, 10, 4, 4);
+        this.graphics.fillStyle(0x000000, 1); // Pupils
+        this.graphics.fillRect(12, 12, 2, 2);
+        this.graphics.fillRect(18, 12, 2, 2);
+        this.graphics.fillStyle(0x000000, 1); // Mouth
+        this.graphics.fillRect(14, 20, 4, 2);
+        this.graphics.generateTexture('brotato_mage', 32, 32);
 
 
         // Pixel Enemy (Blocky Invader)
@@ -659,8 +677,38 @@ export class GameScene extends Phaser.Scene {
             this.player.speedMultiplier = this.persistedPlayer.speedMultiplier;
             this.player.gadgets = this.persistedPlayer.gadgets || this.player.gadgets;
         } else {
+            // Apply Difficulty HP Mutliplier base
             this.player.health *= this.difficultyConfig.hpMult;
             this.player.maxHealth *= this.difficultyConfig.hpMult;
+
+            // Apply Character Specific Buffs
+            if (this.characterTemplate.buffs.damageMult) {
+                this.player.damageMultiplier *= this.characterTemplate.buffs.damageMult;
+            }
+            if (this.characterTemplate.buffs.speedMult) {
+                this.player.speedMultiplier *= this.characterTemplate.buffs.speedMult;
+            }
+            if (this.characterTemplate.buffs.maxHealthBonus) {
+                this.player.maxHealth += this.characterTemplate.buffs.maxHealthBonus;
+                this.player.health = this.player.maxHealth;
+            }
+
+            // Apply Character Gadgets
+            if (this.characterTemplate.gadgets.turrets) {
+                for (let el in this.characterTemplate.gadgets.turrets) {
+                    this.player.gadgets.turrets[el] = this.characterTemplate.gadgets.turrets[el];
+                }
+            }
+            if (this.characterTemplate.gadgets.forceFields) {
+                for (let el in this.characterTemplate.gadgets.forceFields) {
+                    this.player.gadgets.forceFields[el] = this.characterTemplate.gadgets.forceFields[el];
+                }
+            }
+            if (this.characterTemplate.gadgets.specialShots) {
+                for (let el in this.characterTemplate.gadgets.specialShots) {
+                    this.player.gadgets.specialShots[el] = this.characterTemplate.gadgets.specialShots[el];
+                }
+            }
         }
 
         this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true });
@@ -1347,6 +1395,7 @@ export class GameScene extends Phaser.Scene {
         console.log("GameScene: Wave complete. Starting UpgradeScene_v6");
         this.scene.start('UpgradeScene_v6', {
             difficulty: this.difficulty,
+            character: this.characterId,
             skin: this.playerSkin,
             player: {
                 health: this.player.health,

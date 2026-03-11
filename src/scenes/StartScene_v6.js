@@ -1,10 +1,13 @@
-import { settingsManager } from '../utils/SettingsManager.js';
+import { settingsManager } from '../utils/SettingsManager.js?v=7';
+import { CHARACTERS } from '../utils/CharacterData.js?v=7';
 
 export class StartScene extends Phaser.Scene {
     constructor() {
         super('StartScene_v6');
         this.difficulty = 'normal';
-        console.log("StartScene v6 Constructor");
+        this.selectedCharacter = localStorage.getItem('upgradeOrDie_selectedCharacter') || 'player';
+        this.maxWave = parseInt(localStorage.getItem('upgradeOrDie_maxWave') || '1', 10);
+        console.log("StartScene v6 Constructor - Max Wave:", this.maxWave);
     }
 
     create() {
@@ -55,8 +58,21 @@ export class StartScene extends Phaser.Scene {
                 this.updateButtons(diffs);
             });
 
-            this.diffButtons.push({ btn, id: d.id, color: d.color });
+        this.diffButtons.push({ btn, id: d.id, color: d.color });
         });
+
+        // Character Selection Button
+        const currentCharacter = CHARACTERS.find(c => c.id === this.selectedCharacter) || CHARACTERS[0];
+        const characterBtnText = 'SKIN: ' + currentCharacter.name;
+        
+        this.characterBtn = this.add.text(width / 2, height - 120, characterBtnText, {
+            fontSize: '14px',
+            fontFamily: '"Press Start 2P"',
+            fill: currentCharacter.color,
+            padding: { x: 10, y: 10 }
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        
+        this.characterBtn.on('pointerdown', () => this.handleOpenCharacters());
 
         // Click to Start
         const startBtn = this.add.text(width / 2, height - 70, 'START GAME', {
@@ -69,14 +85,11 @@ export class StartScene extends Phaser.Scene {
 
         startBtn.on('pointerdown', () => {
             console.log("StartScene: Starting GameScene_v6");
-            let skin = 'brotato_rosseti';
-            if (this.difficulty === 'easy') skin = 'brotato_pav';
-            if (this.difficulty === 'hard') skin = 'brotato_porquinho';
-            this.scene.start('GameScene_v6', { difficulty: this.difficulty, wave: 1, skin: skin });
+            this.scene.start('GameScene_v6', { difficulty: this.difficulty, wave: 1, character: this.selectedCharacter });
         });
 
         // Settings Button
-        const settingsBtn = this.add.text(width / 2, height - 160, 'CONFIGURAÇÕES', {
+        const settingsBtn = this.add.text(width / 2, height - 170, 'CONFIGURAÇÕES', {
             fontSize: '14px',
             fontFamily: '"Press Start 2P"',
             fill: '#00f2ff',
@@ -126,7 +139,16 @@ export class StartScene extends Phaser.Scene {
         console.log("StartScene: Settings UI missing from DOM, injecting...");
         const uiLayer = document.getElementById('ui-layer') || document.body;
 
-        const settingsHTML = `
+        const globalUIHTML = `
+            <div id="character-overlay" class="settings-overlay" style="display: none; z-index: 1000; align-items:center; justify-content:center; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85);">
+                <div class="settings-menu" style="width: 90%; max-width: 700px; max-height: 90%; overflow-y: auto; text-align: center;">
+                    <h2 style="color: var(--primary); margin-bottom: 2rem; font-family: 'Press Start 2P', cursive; font-size: 16px;">ESCOLHA A SKIN / CLASSE</h2>
+                    <div id="character-list" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;"></div>
+                    <button class="pause-btn" id="close-character" style="margin-top: 2rem;">FECHAR</button>
+                    <p style="margin-top: 20px; font-size: 10px; color: #aaa;">Seu recorde máximo: Wave ${this.maxWave}</p>
+                </div>
+            </div>
+
             <div id="settings-overlay" class="settings-overlay" style="display: none;">
                 <div class="settings-menu">
                     <h2 style="color: var(--primary); text-align: center; margin-bottom: 2rem;">CONFIGURAÇÕES</h2>
@@ -143,7 +165,59 @@ export class StartScene extends Phaser.Scene {
             </div>
         `;
 
-        uiLayer.insertAdjacentHTML('beforeend', settingsHTML);
+        uiLayer.insertAdjacentHTML('beforeend', globalUIHTML);
+        
+        document.getElementById('close-character').onclick = () => {
+            document.getElementById('character-overlay').style.display = 'none';
+        }
+    }
+
+    handleOpenCharacters() {
+        this.ensureSettingsUI();
+        const overlay = document.getElementById('character-overlay');
+        const listContainer = document.getElementById('character-list');
+        listContainer.innerHTML = '';
+        
+        CHARACTERS.forEach(char => {
+            const isUnlocked = this.maxWave >= char.unlockWave;
+            const isSelected = this.selectedCharacter === char.id;
+            
+            const card = document.createElement('div');
+            card.style.border = `2px solid ${isSelected ? char.color : '#333'}`;
+            card.style.borderRadius = '8px';
+            card.style.padding = '15px';
+            card.style.width = '160px';
+            card.style.backgroundColor = isUnlocked ? '#1a1a25' : '#0a0a0c';
+            card.style.cursor = isUnlocked ? 'pointer' : 'not-allowed';
+            card.style.opacity = isUnlocked ? '1' : '0.5';
+            card.style.display = 'flex';
+            card.style.flexDirection = 'column';
+            card.style.alignItems = 'center';
+            card.style.textAlign = 'center';
+            
+            card.innerHTML = `
+                <h3 style="color: ${char.color}; font-size: 14px; margin-bottom: 10px; min-height: 30px;">${char.name}</h3>
+                <p style="font-size: 10px; color: #ddd; margin-bottom: 15px; min-height: 40px; line-height: 1.4;">${char.desc.replace(/\n/g, '<br>')}</p>
+                <div style="margin-top: auto; font-size: 10px; color: ${isUnlocked ? '#00ff00' : '#ff0055'}">
+                    ${isUnlocked ? (isSelected ? 'SELECIONADO' : 'SELECIONAR') : `REQUER WAVE ${char.unlockWave}`}
+                </div>
+            `;
+            
+            if (isUnlocked) {
+                card.onmouseover = () => card.style.transform = 'scale(1.05)';
+                card.onmouseout = () => card.style.transform = 'scale(1)';
+                card.onclick = () => {
+                    this.selectedCharacter = char.id;
+                    localStorage.setItem('upgradeOrDie_selectedCharacter', char.id);
+                    this.characterBtn.setText('SKIN: ' + char.name);
+                    this.characterBtn.setFill(char.color);
+                    overlay.style.display = 'none';
+                };
+            }
+            listContainer.appendChild(card);
+        });
+
+        overlay.style.display = 'flex';
     }
 
     renderBindings() {

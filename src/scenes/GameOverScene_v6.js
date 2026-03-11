@@ -1,3 +1,5 @@
+import { CHARACTERS } from '../utils/CharacterData.js?v=7';
+
 export class GameOverScene extends Phaser.Scene {
     constructor() {
         super('GameOverScene_v6');
@@ -6,6 +8,16 @@ export class GameOverScene extends Phaser.Scene {
 
     init(data) {
         this.finalWave = data.wave || 1;
+        
+        const cachedMax = parseInt(localStorage.getItem('upgradeOrDie_maxWave') || '1', 10);
+        if (this.finalWave > cachedMax) {
+            localStorage.setItem('upgradeOrDie_maxWave', this.finalWave.toString());
+            this.newRecord = true;
+        } else {
+            this.newRecord = false;
+        }
+
+        this.unlockedCharacters = CHARACTERS.filter(c => c.unlockWave > cachedMax && c.unlockWave <= this.finalWave);
     }
 
     preload() {
@@ -75,6 +87,23 @@ export class GameOverScene extends Phaser.Scene {
             fontFamily: '"Press Start 2P"',
             fill: '#ffffff'
         }).setOrigin(0.5);
+
+        if (this.newRecord) {
+            this.add.text(width / 2, 160, 'NOVO RECORDE MÁXIMO!', {
+                fontSize: '10px',
+                fontFamily: '"Press Start 2P"',
+                fill: '#ffda00'
+            }).setOrigin(0.5);
+        }
+
+        if (this.unlockedCharacters && this.unlockedCharacters.length > 0) {
+            const unlocksText = this.unlockedCharacters.map(c => c.name).join(', ');
+            this.add.text(width / 2, 180, `DESBLOQUEADO: ${unlocksText}`, {
+                fontSize: '12px',
+                fontFamily: '"Press Start 2P"',
+                fill: '#00ff00'
+            }).setOrigin(0.5);
+        }
 
         // Rafael Rosseti Image
         const character = this.add.image(width / 2, height - 150, 'rossetiGameOver').setScale(1.5);
