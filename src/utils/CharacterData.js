@@ -67,7 +67,7 @@ export const CHARACTERS = [
         name: 'APRENDIZ',
         desc: 'Primeiros passos.\n+5% de dano.',
         color: '#aaffaa',
-        skin: 'player',
+        skin: 'skin_1',
         unlockTotalKills: 100,
         buffs: { damageMult: 1.05 },
         gadgets: {}
@@ -77,7 +77,7 @@ export const CHARACTERS = [
         name: 'GLADIADOR',
         desc: 'Batalhador nato.\n+10% dano e +10HP.',
         color: '#ffaaaa',
-        skin: 'player',
+        skin: 'skin_2',
         unlockTotalKills: 500,
         buffs: { damageMult: 1.10, maxHealthBonus: 10 },
         gadgets: {}
