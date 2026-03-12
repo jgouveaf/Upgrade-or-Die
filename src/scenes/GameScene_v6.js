@@ -15,9 +15,6 @@ export class GameScene extends Phaser.Scene {
         this.wave = data.wave || 1;
         this.difficulty = data.difficulty || 'normal';
         
-        // Multiplicador de 12.5x para waves normais
-        // Progressão de inimigos: começa baixo e cresce exponencialmente
-        this.enemiesPerWave = Math.round(10 + (this.wave * 5) + (this.wave * this.wave * 1.5));
         this.waveTimeLimit = 105000; // 1 minuto e 45 segundos em ms
         this.timeRemaining = this.waveTimeLimit;
         
@@ -28,12 +25,17 @@ export class GameScene extends Phaser.Scene {
 
         // Difficulty Settings
         const config = {
-            easy: { hpMult: 0.8, coinMult: 2.0 },
-            normal: { hpMult: 1.0, coinMult: 1.0 },
-            hard: { hpMult: 1.5, coinMult: 0.5 }
+            easy: { hpMult: 0.8, coinMult: 2.0, enemyMult: 0.7 },
+            normal: { hpMult: 1.0, coinMult: 1.0, enemyMult: 1.0 },
+            hard: { hpMult: 1.5, coinMult: 0.5, enemyMult: 1.6 }
         };
 
         this.difficultyConfig = config[this.difficulty] || config.normal;
+        
+        // Progressão de inimigos baseada na dificuldade:
+        // PAV (Easy) = 70% | Rosseti (Normal) = 100% | Porquinho (Hard) = 160%
+        const baseEnemies = 10 + (this.wave * 5) + (this.wave * this.wave * 1.5);
+        this.enemiesPerWave = Math.round(baseEnemies * this.difficultyConfig.enemyMult);
         this.characterId = data.character || 'player';
         this.characterTemplate = CHARACTERS.find(c => c.id === this.characterId) || CHARACTERS[0];
         
