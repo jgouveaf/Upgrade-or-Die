@@ -14,10 +14,15 @@ export class GameScene extends Phaser.Scene {
     init(data) {
         this.wave = data.wave || 1;
         this.difficulty = data.difficulty || 'normal';
-        this.enemiesPerWave = 3 + (this.wave - 1) * 5;
+        
+        // Multiplicador de 12.5x para waves normais
+        this.enemiesPerWave = Math.round((3 + (this.wave - 1) * 5) * 12.5);
+        this.waveTimeLimit = 105000; // 1 minuto e 45 segundos em ms
+        
         this.enemiesSpawned = 0;
         this.enemiesKilled = 0;
         this.isWavePaused = false;
+        this.waveCompleted = false;
 
         // Difficulty Settings
         const config = {
@@ -1286,7 +1291,11 @@ export class GameScene extends Phaser.Scene {
             if (this.healthBar) this.healthBar.clear();
             return;
         }
-
+        
+        this.player.update(this.keys, this.input.activePointer);
+        this.updateHealthBar();
+        this.updateGadgets();
+        
         if (this.player) {
             const movement = {
                 up: this.keys.UP,
@@ -1368,7 +1377,7 @@ export class GameScene extends Phaser.Scene {
         this.updateGadgets();
         this.updateHealthBar();
 
-        if (this.enemiesKilled >= this.enemiesPerWave && !this.isWavePaused) {
+        if (!this.waveCompleted && this.enemiesKilled >= this.enemiesPerWave && !this.isWavePaused) {
             this.completeWave();
         }
     }
@@ -1408,25 +1417,34 @@ export class GameScene extends Phaser.Scene {
 
     spawnWave() {
         this.enemiesKilled = 0;
+        this.enemiesSpawned = 0;
+        this.waveCompleted = false;
+
+        // Timer de 1 minuto e 45 segundos — encerra a wave se ainda não terminou
+        this.time.delayedCall(this.waveTimeLimit, () => {
+            if (!this.waveCompleted) {
+                console.log('Wave encerrada pelo timer de 1m45s!');
+                this.completeWave();
+            }
+        });
+
         this.isBossWave = (this.wave % 4 === 0);
         if (this.isBossWave) {
             this.enemiesPerWave = 1;
             this.time.delayedCall(1000, () => this.spawnBoss());
         } else {
-            this.enemiesPerWave = 3 + (this.wave - 1) * 5;
-            this.enemiesSpawned = 0;
-            this.spawnEnemy();
-            this.enemiesSpawned++;
+            // Re-garante o multiplicador para waves normais
+            this.enemiesPerWave = Math.round((3 + (this.wave - 1) * 5) * 12.5);
             this.time.addEvent({
-                delay: 1500,
+                delay: 300, // spawn mais rápido
                 callback: () => {
-                    if (this.enemiesSpawned < this.enemiesPerWave) {
+                    if (this.enemiesSpawned < this.enemiesPerWave && !this.waveCompleted) {
                         this.spawnEnemy();
                         this.enemiesSpawned++;
                     }
                 },
                 callbackScope: this,
-                repeat: this.enemiesPerWave - 2
+                repeat: this.enemiesPerWave - 1
             });
         }
     }
@@ -1718,6 +1736,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     completeWave() {
+        if (this.waveCompleted) return;
+        this.waveCompleted = true;
+        
         this.player.coins += 50;
         console.log("GameScene: Wave complete. Starting UpgradeScene_v6");
         this.scene.start('UpgradeScene_v6', {
