@@ -1292,7 +1292,6 @@ export class GameScene extends Phaser.Scene {
             return;
         }
         
-        this.player.update(this.keys, this.input.activePointer);
         this.updateHealthBar();
         this.updateGadgets();
         
