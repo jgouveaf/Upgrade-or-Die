@@ -16,8 +16,10 @@ export class GameScene extends Phaser.Scene {
         this.difficulty = data.difficulty || 'normal';
         
         // Multiplicador de 12.5x para waves normais
-        this.enemiesPerWave = Math.round((3 + (this.wave - 1) * 5) * 12.5);
+        // Progressão de inimigos: começa baixo e cresce exponencialmente
+        this.enemiesPerWave = Math.round(10 + (this.wave * 5) + (this.wave * this.wave * 1.5));
         this.waveTimeLimit = 105000; // 1 minuto e 45 segundos em ms
+        this.timeRemaining = this.waveTimeLimit;
         
         this.enemiesSpawned = 0;
         this.enemiesKilled = 0;
@@ -1295,6 +1297,16 @@ export class GameScene extends Phaser.Scene {
         this.updateHealthBar();
         this.updateGadgets();
         
+        // Atualiza cronômetro
+        if (!this.waveCompleted && !this.isWavePaused) {
+            this.timeRemaining -= this.game.loop.delta;
+            if (this.timeRemaining <= 0) {
+                this.timeRemaining = 0;
+                this.completeWave();
+            }
+            this.updateUI();
+        }
+        
         if (this.player) {
             const movement = {
                 up: this.keys.UP,
@@ -1418,24 +1430,18 @@ export class GameScene extends Phaser.Scene {
         this.enemiesKilled = 0;
         this.enemiesSpawned = 0;
         this.waveCompleted = false;
-
-        // Timer de 1 minuto e 45 segundos — encerra a wave se ainda não terminou
-        this.time.delayedCall(this.waveTimeLimit, () => {
-            if (!this.waveCompleted) {
-                console.log('Wave encerrada pelo timer de 1m45s!');
-                this.completeWave();
-            }
-        });
+        this.timeRemaining = this.waveTimeLimit;
 
         this.isBossWave = (this.wave % 4 === 0);
         if (this.isBossWave) {
             this.enemiesPerWave = 1;
             this.time.delayedCall(1000, () => this.spawnBoss());
         } else {
-            // Re-garante o multiplicador para waves normais
-            this.enemiesPerWave = Math.round((3 + (this.wave - 1) * 5) * 12.5);
+            // Delay diminui conforme a wave (fica mais rápido)
+            const spawnDelay = Math.max(200, 1200 - (this.wave * 100));
+            
             this.time.addEvent({
-                delay: 300, // spawn mais rápido
+                delay: spawnDelay,
                 callback: () => {
                     if (this.enemiesSpawned < this.enemiesPerWave && !this.waveCompleted) {
                         this.spawnEnemy();
@@ -1807,7 +1813,8 @@ export class GameScene extends Phaser.Scene {
         if (!document.getElementById('wave-container')) {
             ui.insertAdjacentHTML('beforeend', `
                 <div id="wave-container" style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none;">
-                    <div style="font-family: 'Press Start 2P', cursive; font-size: 18px; color: var(--secondary);">WAVE <span id="wave-count">1</span></div>
+                    <div style="font-family: 'Press Start 2P', cursive; font-size: 18px; color: var(--secondary); text-shadow: 2px 2px #000;">WAVE <span id="wave-count">1</span></div>
+                    <div style="font-family: 'Press Start 2P', cursive; font-size: 12px; color: #fff; margin-top: 5px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px;">TIME: <span id="wave-timer">01:45</span></div>
                 </div>
                 <div id="game-stats" style="position: absolute; top: 20px; right: 20px; font-family: 'Press Start 2P', cursive; font-size: 14px; color: #ffda00;">
                     <div>$ <span id="coin-count">0</span></div>
@@ -1819,8 +1826,25 @@ export class GameScene extends Phaser.Scene {
     updateUI() {
         const waveCount = document.getElementById('wave-count');
         const coinCount = document.getElementById('coin-count');
+        const waveTimer = document.getElementById('wave-timer');
+        
         if (waveCount) waveCount.innerText = this.wave;
         if (coinCount) coinCount.innerText = this.player.coins;
+        
+        if (waveTimer) {
+            const totalSeconds = Math.ceil(this.timeRemaining / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            waveTimer.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Efeito visual quando o tempo está acabando (menos de 10s)
+            if (totalSeconds <= 10) {
+                waveTimer.style.color = '#ff0055';
+                waveTimer.style.fontWeight = 'bold';
+            } else {
+                waveTimer.style.color = '#fff';
+            }
+        }
     }
 
     createMap() {
