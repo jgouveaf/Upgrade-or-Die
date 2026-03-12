@@ -122,18 +122,37 @@ export class GameScene extends Phaser.Scene {
         this.graphics.fillRect(17, 18, 1, 1);
         this.graphics.generateTexture('brotato_porquinho', 32, 32);
 
-        // 4. Brotato Mage (Toxic)
+        // 4. Brotato Mage (Toxic) - Green body with a cape
         this.graphics.clear();
-        this.graphics.fillStyle(0x8a2be2, 1); // Purple potato
+        
+        // Dark Purple Cape (Behind)
+        this.graphics.fillStyle(0x4b0082, 1); 
+        this.graphics.fillRect(2, 10, 28, 20); // main cape body
+        this.graphics.fillRect(0, 14, 2, 14); // left wing of cape
+        this.graphics.fillRect(30, 14, 2, 14); // right wing of cape
+        
+        // Green Body (Potato shape)
+        this.graphics.fillStyle(0x2ecc71, 1); 
         this.graphics.fillRoundedRect(4, 4, 24, 24, 8); 
-        this.graphics.fillStyle(0x00ff00, 1); // Toxic eyes
+
+        // Toxic Glowing Eyes
+        this.graphics.fillStyle(0xeaff00, 1); // Neon Yellow/Green
         this.graphics.fillRect(10, 10, 4, 4);
         this.graphics.fillRect(18, 10, 4, 4);
-        this.graphics.fillStyle(0x000000, 1); // Pupils
+        
+        // Pupils
+        this.graphics.fillStyle(0x000000, 1); 
         this.graphics.fillRect(12, 12, 2, 2);
         this.graphics.fillRect(18, 12, 2, 2);
-        this.graphics.fillStyle(0x000000, 1); // Mouth
-        this.graphics.fillRect(14, 20, 4, 2);
+        
+        // Mouth (Grimace)
+        this.graphics.fillStyle(0x1a1a1a, 1); 
+        this.graphics.fillRect(14, 20, 6, 2);
+        
+        // Cape Collar (Top of cape)
+        this.graphics.fillStyle(0x310054, 1);
+        this.graphics.fillRect(4, 4, 24, 4);
+        
         this.graphics.generateTexture('brotato_mage', 32, 32);
 
         // 5. Gustavo Dino (O Bom Dinossauro Humano)
